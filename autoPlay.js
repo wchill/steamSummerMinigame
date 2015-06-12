@@ -165,10 +165,10 @@ function findHighestGoldPotentialLane() {
 	var potential = 0;
 	var potentialBaddie = null;
 	
-	for (int i=0; i<3; i++) {
-		if (g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities.17) {
-			var stacks = g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities.17;
-			for(int e=0; e<g_Minigame.m_CurrentScene.m_rgEnemies.length; e++) {
+	for (var i=0; i<3; i++) {
+		if (g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[17]) {
+			var stacks = g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[17];
+			for(var e=0; e<g_Minigame.m_CurrentScene.m_rgEnemies.length; e++) {
 				var enemyGold = g_Minigame.m_CurrentScene.m_rgEnemies[e].m_data.gold;
 				if (stacks * enemyGold > potential) {
 					potential = stacks * enemyGold;
