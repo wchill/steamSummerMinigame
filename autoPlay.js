@@ -150,7 +150,38 @@ function goToLaneWithBestTarget() {
 			//console.log('switching targets');
 			g_Minigame.CurrentScene().TryChangeTarget(lowTarget);
 		}
+	} 
+	else {
+		//Check to see if any lanes have high gold potential
+		baddie = findHighestGoldPotentialLane();
+		if (baddie) {
+			console.log('Thar\'s gold in them thar lane');
+			g_Minigame.CurrentScene().TryChangeLane(baddie.m_nLane);
+			g_Minigame.CurrentScene().TryChangeTarget(baddie.m_nID);
+		}
 	}
+}
+
+function findHighestGoldPotentialLane() {
+	// look for lane with ability 17 - raining gold
+
+	var potential = 0;
+	var potentialBaddie = null;
+	
+	for (var i=0; i<3; i++) {
+		if (g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[17]) {
+			var stacks = g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[17];
+			for(var e=0; e<g_Minigame.m_CurrentScene.m_rgEnemies.length; e++) {
+				var enemyGold = g_Minigame.m_CurrentScene.m_rgEnemies[e].m_data.gold;
+				if (stacks * enemyGold > potential) {
+					potential = stacks * enemyGold;
+					potentialBaddie = g_Minigame.m_CurrentScene.m_rgEnemies[e];
+				}
+			}
+		}
+	}
+	
+	return potentialBaddie;
 }
 
 function useMedicsIfRelevant() {
