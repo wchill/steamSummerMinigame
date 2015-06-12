@@ -152,6 +152,7 @@ function goToLaneWithBestTarget() {
 		//Check to see if any lanes have high gold potential
 		baddie = findHighestGoldPotentialLane();
 		if (baddie) {
+			console.log('Thar\'s gold in them thar lane');
 			g_Minigame.CurrentScene().TryChangeLane(baddie.m_nLane);
 			g_Minigame.CurrentScene().TryChangeTarget(baddie.m_nID);
 		}
