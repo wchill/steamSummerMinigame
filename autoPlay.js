@@ -122,6 +122,9 @@ function firstRun() {
         "<br>Flinching effect: " + (disableFlinching?"disabled":"enabled") +
         "<br>Crit effect: " + (disableCritText?"disabled":"enabled") +
         "<br>Text: " + (disableText?"disabled":"enabled")
+		
+	var oldHTML = document.getElementsByClassName("title_activity")[0].innerHTML;
+	document.getElementsByClassName("title_activity")[0].innerHTML = "<span id=\"players_in_game\">0/1500</span>&nbsp;Players in game<br />" + oldHTML;
 }
 
 function initAutoClicker() {
@@ -196,6 +199,13 @@ function toggleText() {
 	}
 }
 
+function updatePlayersInGame() {
+	var totalPlayers = 	g_Minigame.m_CurrentScene.m_rgLaneData[ 0 ].players +
+						g_Minigame.m_CurrentScene.m_rgLaneData[ 1 ].players +
+						g_Minigame.m_CurrentScene.m_rgLaneData[ 2 ].players;
+	document.getElementById("players_in_game").innerHTML = totalPlayers + "/1500";
+}
+
 function doTheThing() {
 	if (!isAlreadyRunning){
 		isAlreadyRunning = true;
@@ -211,6 +221,7 @@ function doTheThing() {
 		if(g_Minigame.m_CurrentScene.m_rgGameData.level < 1000 || g_Minigame.m_CurrentScene.m_rgGameData.level % 200 == 0)
 			useGoldRainIfRelevant();
 		attemptRespawn();
+		updatePlayersInGame();
 
 		if(enableAutoClicker) {
 			g_msTickRate = 1000;
