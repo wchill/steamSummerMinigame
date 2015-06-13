@@ -1,0 +1,14 @@
+language: node_js
+
+branches:
+  only:
+    - master
+
+notifications:
+  email: false
+
+before_script:
+  - npm install -g codeclimate-test-reporter
+
+after_script:
+  - codeclimate < lcov.info
