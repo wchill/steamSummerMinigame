@@ -1,10 +1,12 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements. /u/wchill and contributors on his repo for MSG2015-specific improvements.
-// @version 1.95
+// @version 2.01
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match http://steamcommunity.com/minigame/towerattack*
+// @match http://steamcommunity.com//minigame/towerattack*
+// @grant none
 // @updateURL https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.js
 // @downloadURL https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.js
 // ==/UserScript==
@@ -22,6 +24,9 @@ var disableFlinching = false; // Set to true to disable flinching animation for 
 var disableCritText = false; // Set to true to disable the crit text.
 var disableText = false; // Remove all animated text. This includes damage, crits and gold gain. 
                          // This OVERRIDES all text related options.
+                         
+var lockElements = true; // Set to false to allow upgrading all elements
+var slowStartMode = false; // Set to false to run script from beginning instead of lv11
 
 var isAlreadyRunning = false;
 
@@ -84,25 +89,30 @@ function firstRun() {
 	}
 
 	// Crit toggle.
-	trt_oldCrit = window.g_Minigame.CurrentScene().DoCritEffect;
+	trt_oldCrit = g_Minigame.CurrentScene().DoCritEffect;
 	if (disableCritText) {
 		toggleCritText();
 	}
 
 	// Text toggle.
-	trt_oldPush = window.g_Minigame.m_CurrentScene.m_rgClickNumbers.push
+	trt_oldPush = g_Minigame.m_CurrentScene.m_rgClickNumbers.push
 	if (disableText) {
 		toggleText();
 	}
+	
+	if(lockElements) {
+		lockElementToSteamID();
+	}
 
-	if(enableAutoClicker) {
-		if(setClickVariable) {
-			clickTimer = setInterval( function(){
-				g_Minigame.m_CurrentScene.m_nClicks = clickRate;
-			}, 1000);
-		} else {
-			clickTimer = window.setInterval(clickTheThing, 1000/clickRate);
-		}
+	if(slowStartMode && g_Minigame.m_CurrentScene.m_rgGameData.level < 11) {
+		var t = setInterval(function() {
+			if(g_Minigame.m_CurrentScene.m_rgGameData.level >= 11) {
+				clearInterval(t);
+				initAutoClicker();
+			}
+		}, 1000);
+	} else {
+		initAutoClicker();
 	}
 
     var box = document.getElementsByClassName("leave_game_helper")[0];
@@ -112,6 +122,18 @@ function firstRun() {
         "<br>Flinching effect: " + (disableFlinching?"disabled":"enabled") +
         "<br>Crit effect: " + (disableCritText?"disabled":"enabled") +
         "<br>Text: " + (disableText?"disabled":"enabled")
+}
+
+function initAutoClicker() {
+	if(enableAutoClicker) {
+		if(setClickVariable) {
+			clickTimer = setInterval( function(){
+				g_Minigame.m_CurrentScene.m_nClicks = clickRate;
+			}, 1000);
+		} else {
+			clickTimer = window.setInterval(clickTheThing, 1000/clickRate);
+		}
+	}
 }
 
 // Remove most effects from the game. Most of these are irreversible.
@@ -126,9 +148,9 @@ function trt_destroyAllEffects() {
 
 // Callable function to remove particles.
 function disableParticles() {
-	if (window.g_Minigame) {
-		window.g_Minigame.CurrentScene().DoClickEffect = function() {};
-		window.g_Minigame.CurrentScene().SpawnEmitter = function(emitter) {
+	if (g_Minigame) {
+		g_Minigame.CurrentScene().DoClickEffect = function() {};
+		g_Minigame.CurrentScene().SpawnEmitter = function(emitter) {
 			emitter.emit = false;
 			return emitter;
 		}
@@ -137,24 +159,24 @@ function disableParticles() {
 
 // Callable function to stop the flinching animation.
 function stopFlinching() {
-	if (window.CEnemy) {
-		window.CEnemy.prototype.TakeDamage = function(){};
+	if (CEnemy) {
+		CEnemy.prototype.TakeDamage = function(){};
 	}
-	if (window.CEnemySpawner) {
-		window.CEnemySpawner.prototype.TakeDamage = function(){};
+	if (CEnemySpawner) {
+		CEnemySpawner.prototype.TakeDamage = function(){};
 	}
-	if (window.CEnemyBoss) {
-		window.CEnemyBoss.prototype.TakeDamage = function(){};
+	if (CEnemyBoss) {
+		CEnemyBoss.prototype.TakeDamage = function(){};
 	}
 }
 
 function toggleCritText() {
 	if (!trt_critToggle) {
 		// Replaces the entire crit display function.
-		window.g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
+		g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
 		trt_critToggle = true;
 	} else {
-		window.g_Minigame.CurrentScene().DoCritEffect = trt_oldCrit;
+		g_Minigame.CurrentScene().DoCritEffect = trt_oldCrit;
 		trt_critToggle = false;
 	}
 }
@@ -164,12 +186,12 @@ function toggleCritText() {
 function toggleText() {
 	if (!trt_textToggle) {
 		// Replaces the entire text function.
-		window.g_Minigame.m_CurrentScene.m_rgClickNumbers.push = function(elem){
+		g_Minigame.m_CurrentScene.m_rgClickNumbers.push = function(elem){
 			elem.container.removeChild(elem);
 		};
 		trt_textToggle = true;
 	} else {
-		window.g_Minigame.m_CurrentScene.m_rgClickNumbers.push = trt_oldPush;
+		g_Minigame.m_CurrentScene.m_rgClickNumbers.push = trt_oldPush;
 		trt_textToggle = false;
 	}
 }
@@ -620,7 +642,7 @@ function useGoldRainIfRelevant() {
 
 		var enemy = g_Minigame.m_CurrentScene.GetEnemy(g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane, g_Minigame.m_CurrentScene.m_rgPlayerData.target);
 		// check if current target is a boss, otherwise its not worth using the gold rain
-		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {	
+		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS && g_Minigame.m_CurrentScene.m_rgGameData.level % 100 == 0) {	
 			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 
 		  if (enemyBossHealthPercent >= 0.6) { // We want sufficient time for the gold rain to be applicable
@@ -722,11 +744,35 @@ function isAbilityItemEnabled(abilityId) {
 	return false;
 }
 
+function lockElementToSteamID() {
+	String.prototype.hashCode=function(){
+		var t=0;
+		if(0==this.length)
+			return t;
+		for(i=0;i<this.length;i++)
+			char=this.charCodeAt(i),t=(t<<5)-t+char,t&=t;
+		return t;
+	}
+	var elem = Math.abs(g_steamID.hashCode()%4);
+	var fire = document.querySelector("a.link.element_upgrade_btn[data-type=\"3\"]")
+	var water = document.querySelector("a.link.element_upgrade_btn[data-type=\"4\"]")
+	var earth = document.querySelector("a.link.element_upgrade_btn[data-type=\"6\"]")
+	var air = document.querySelector("a.link.element_upgrade_btn[data-type=\"5\"]")
+	var elems = [fire, water, earth, air];
+	for(i=0; i< elems.length; i++) {
+		if(i == elem) {
+			continue;
+		}
+		elems[i].style.visibility = "hidden";
+		console.log('hidden');
+	}
+}
+
 var thingTimer = window.setInterval(function(){
 	if (g_Minigame && g_Minigame.CurrentScene().m_bRunning && g_Minigame.CurrentScene().m_rgPlayerTechTree) {
 		window.clearInterval(thingTimer);
 		firstRun();
-		thingTimer = window.setInterval(doTheThing, 1000);
+		thingTimer = window.setInterval(doTheThing, 100);
 	}
 }, 1000);
 function clickTheThing() {
