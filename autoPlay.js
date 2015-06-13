@@ -1,7 +1,7 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements. /u/wchill and contributors on his repo for MSG2015-specific improvements.
-// @version 2.03
+// @version 2.04
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match http://steamcommunity.com/minigame/towerattack*
@@ -28,7 +28,11 @@ var disableText = false; // Remove all animated text. This includes damage, crit
 var lockElements = true; // Set to false to allow upgrading all elements
 var slowStartMode = false; // Set to false to run script from beginning instead of lv11
 
-var isAlreadyRunning = false;
+var autoPurchaseUpgrades = true; // Set to false to purchase upgrades yourself
+
+var rainingGold = false; // Leave on false. Allows for abilities to be temporarily disabled while Raining Gold is active, to maximise Raining Gold's benefit.
+
+var survivalTime = 30; // Estimated time we want to be able to last on any particular lane (To base armor purchases off of)
 
 var ABILITIES = {
 	"MORALE_BOOSTER": 5,
@@ -43,14 +47,17 @@ var ABILITIES = {
 
 var ITEMS = {
 	"REVIVE": 13,
+	"CRIPPLE_SPAWNER": 14,
+	"CRIPPLE_MONSTER": 15,
+	"MAXIMIZE_ELEMENT": 16,
 	"GOLD_RAIN": 17,
-	"GOD_MODE": 21,
-	"REFLECT_DAMAGE":24,
 	"CRIT": 18,
 	"PUMPED_UP": 19,
-	"CRIPPLE_MONSTER": 15,
-	"CRIPPLE_SPAWNER": 14,
-	"MAXIMIZE_ELEMENT": 16
+	"THROW_MONEY": 20,
+	"GOD_MODE": 21,
+	"TREASURE": 22,
+	"STEAL_HEALTH": 23,
+	"REFLECT_DAMAGE": 24
 };
 
 var ENEMY_TYPE = {
@@ -61,7 +68,32 @@ var ENEMY_TYPE = {
 	"TREASURE":4
 };
 
-var rainingGold = false; // Leave on false. Allows for abilities to be temporarily disabled while Raining Gold is active, to maximise Raining Gold's benefit.
+var UPGRADEABLES = {
+	"ARMOR": [ 0, 8, 20 ],
+	"AUTO_FIRE": [ 1, 9, 21 ],
+	"DAMAGE": [ 2, 10, 22 ],
+	"ELEMENTAL": [ 3, 4, 6, 5 ],
+	"LUCKY_SHOT": 7,
+	"MEDICS": 11,
+	"MORALE_BOOSTER": 12,
+	"GOOD_LUCK": 13,
+	"METAL_DETECTOR": 14,
+	"COOLDOWN": 15,
+	"NUKE": 16,
+	"CLUSTER_BOMB": 17,
+	"NAPALM": 18,
+	"BOSS_LOOT": 19
+}
+
+var next = { id: -1, cost: 0 };
+var baseUpgrades = [
+	{ id: UPGRADEABLES.ARMOR[0], level: 1 },
+	{ id: UPGRADEABLES.DAMAGE[0], level: 10 },
+	{ id: UPGRADEABLES.AUTO_FIRE[0], level: 10 },
+	{ id: ABILITIES.MEDIC, level: 1 }
+];
+var purchasedNext = false;
+var isAlreadyRunning = false;
 
 // Save old functions for toggles.
 var trt_oldCrit;
@@ -208,10 +240,12 @@ function doTheThing() {
 		useNapalmIfRelevant();
 		useTacticalNukeIfRelevant();
 		useCrippleSpawnerIfRelevant();
+		useTreasureIfRelevant();
 		if(g_Minigame.m_CurrentScene.m_rgGameData.level < 1000 || g_Minigame.m_CurrentScene.m_rgGameData.level % 200 == 0)
 			useGoldRainIfRelevant();
 		attemptRespawn();
 
+ 		autoUpgrade();
 		if(enableAutoClicker) {
 			g_msTickRate = 1000;
 		}
@@ -654,6 +688,17 @@ function useGoldRainIfRelevant() {
 	}
 }
 
+function useTreasureIfRelevant() {
+	// Check if treasure is purchased
+	if (hasItem(ITEMS.TREASURE)) {
+		if (isAbilityCoolingDown(ITEMS.TREASURE)) {
+			return;
+		}
+		console.log('Treasure is acquired and cooled down, Triggering it');
+		triggerItem(ITEMS.TREASURE);
+	}
+}
+
 //If player is dead, call respawn method
 function attemptRespawn() {
 	if ((g_Minigame.CurrentScene().m_bIsDead) && 
@@ -742,6 +787,194 @@ function isAbilityItemEnabled(abilityId) {
 		return elem.childElements()[0].style.visibility == "visible";
 	}
 	return false;
+}
+
+function canUpgrade(upgradeId) {
+	if (!g_Minigame.CurrentScene().bHaveUpgrade(upgradeId)) { return false; }
+	var data = g_Minigame.CurrentScene().m_rgTuningData.upgrades[upgradeId];
+	var required = data.required_upgrade;
+	if (required !== undefined) {
+		var level = data.required_upgrade_level || 1;
+		return (level <= g_Minigame.CurrentScene().GetUpgradeLevel(required));
+	}
+	return true;
+}
+
+function getUpgrade(upgradeId) {
+	var result = null;
+	if (g_Minigame.CurrentScene().m_rgPlayerUpgrades) {
+		g_Minigame.CurrentScene().m_rgPlayerUpgrades.some(function(upgrade) {
+			if (upgrade.upgrade == upgradeId) {
+				result = upgrade;
+				return true;
+			}
+		});
+	}
+	return result;
+}
+
+function getElementalSpecializationId() {
+	var elem = Math.abs(g_steamID.hashCode()%4);
+	return UPGRADEABLES.ELEMENTAL[elem];
+}
+
+function getNextBasicUpgrade() {
+  var best = { id: -1, cost: 0 };
+  var upgrade, id;
+  while (baseUpgrades.length > 0) {
+    upgrade = baseUpgrades[0];
+    id = upgrade.id;
+    if (getUpgrade(id).level < upgrade.level) {
+      best = { id: id, cost: g_Minigame.CurrentScene().m_rgTuningData.upgrades[id].cost };
+      break;
+    }
+    baseUpgrades.shift();
+  }
+  return best;
+}
+
+function getNextAbilityUpgrade() {
+	var best = { id: -1, cost: 0 };
+	for (var name in ABILITIES) {
+		if (canUpgrade(ABILITIES[name]) && getUpgrade(ABILITIES[name]).level < 1) {
+			best = { id: ABILITIES[name], cost: g_Minigame.CurrentScene().m_rgTuningData.upgrades[ABILITIES[name]].cost };
+			break;
+		}
+	}
+	return best;
+}
+
+function getNextHealthUpgrade() {
+  var best = { id: -1, cost: 0, hpg: 0 };
+  UPGRADEABLES.ARMOR.forEach(function(id) {
+    if (!canUpgrade(id)) return;
+    var data = g_Minigame.CurrentScene().m_rgTuningData.upgrades[id];
+    var upgrade = getUpgrade(id);
+    var cost = data.cost * Math.pow(data.cost_exponential_base, upgrade.level);
+    var hpg = g_Minigame.CurrentScene().m_rgTuningData.player.hp * data.multiplier / cost;
+    if (hpg >= best.hpg) {
+      best = { id: id, cost: cost, hpg: hpg };
+    }
+  });
+  return best;
+}
+
+function getNextDamageUpgrade() {
+  var best = { id: -1, cost: 0, dpg: 0 };
+  var dpc = g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_per_click;
+  var data, cost, dpg;
+
+  // check auto damage upgrades
+  UPGRADEABLES.AUTO_FIRE.forEach(function(id) {
+    if (!canUpgrade(id)) return;
+    data = g_Minigame.CurrentScene().m_rgTuningData.upgrades[id];
+    cost = data.cost * Math.pow(data.cost_exponential_base, getUpgrade(id).level);
+    dpg = (g_Minigame.CurrentScene().m_rgPlayerTechTree.base_dps / clickRate) * data.multiplier / cost;
+    if (dpg >= best.dpg) {
+      best = { id: id, cost: cost, dpg: dpg };
+    }
+  });
+
+  // check click damage direct upgrades
+  UPGRADEABLES.DAMAGE.forEach(function(id) {
+    if (!canUpgrade(id)) return;
+    data = g_Minigame.CurrentScene().m_rgTuningData.upgrades[id];
+    cost = data.cost * Math.pow(data.cost_exponential_base, getUpgrade(id).level);
+    dpg = g_Minigame.CurrentScene().m_rgTuningData.player.damage_per_click * data.multiplier / cost;
+    if (dpg >= best.dpg) {
+      best = { id: id, cost: cost, dpg: dpg };
+    }
+  });
+
+  // check Lucky Shot
+  if (canUpgrade(UPGRADEABLES.LUCKY_SHOT)) {
+    data = g_Minigame.CurrentScene().m_rgTuningData.upgrades[UPGRADEABLES.LUCKY_SHOT];
+    cost = data.cost * Math.pow(data.cost_exponential_base, getUpgrade(UPGRADEABLES.LUCKY_SHOT).level);
+    dpg = (g_Minigame.CurrentScene().m_rgPlayerTechTree.crit_percentage * dpc) * data.multiplier / cost;
+    if (dpg > best.dpg) {
+      best = { id: UPGRADEABLES.LUCKY_SHOT, cost: cost, dpg: dpg };
+    }
+  }
+
+  // check elementals
+	if (lockElements) {
+		// Upgrade single element
+		var id = getElementalSpecializationId();
+    data = g_Minigame.CurrentScene().m_rgTuningData.upgrades[id];
+    cost = data.cost * Math.pow(data.cost_exponential_base, getUpgrade(id).level);
+    dpg = (g_Minigame.CurrentScene().m_rgPlayerTechTree.crit_percentage * dpc) * data.multiplier / cost;
+    if (dpg > best.dpg) {
+      best = { id: id, cost: cost, dpg: dpg };
+    }
+	} else {
+		// Equally distribute elements
+    data = g_Minigame.CurrentScene().m_rgTuningData.upgrades[4];
+    var elementalLevels = UPGRADEABLES.ELEMENTAL.reduce(function(sum, id) {
+      return sum + getUpgrade(id).level;
+    }, 1);
+    cost = data.cost * Math.pow(data.cost_exponential_base, elementalLevels);
+    dpg = (0.25 * dpc) * data.multiplier / cost;
+    if (dpg >= best.dpg) {
+      var level = UPGRADEABLES.ELEMENTAL
+        .map(function(id) { return getUpgrade(id).level; })
+        .sort(function(a, b) { return b - a; })[3];
+      var match = UPGRADEABLES.ELEMENTAL
+        .filter(function(id) { return getUpgrade(id).level == level; });
+      match = match[Math.floor(Math.random() * match.length)];
+
+      best = { id: match, cost: cost, dpg: dpg };
+    }
+  }
+  return best;
+}
+
+function getTimeUntilDeath() {
+  var maxHp = g_Minigame.CurrentScene().m_rgPlayerTechTree.max_hp;
+  var enemyDps = g_Minigame.CurrentScene().m_rgGameData.lanes.reduce(function(max, lane) {
+    return Math.max(max, lane.enemies.reduce(function(sum, enemy) {
+      return sum + enemy.dps;
+    }, 0));
+  }, 0);
+  return maxHp / (enemyDps || g_Minigame.CurrentScene().m_rgGameData.level * 4 || 1);
+}
+
+function updateNextUpgradeable() {
+  next = getNextBasicUpgrade();
+  if (next.id === -1) {
+    if (getTimeUntilDeath() < survivalTime) {
+      next = getNextHealthUpgrade();
+    } else {
+      var damage = getNextDamageUpgrade();
+      var ability = getNextAbilityUpgrade();
+      next = (damage.cost < ability.cost || ability.id === -1) ? damage : ability;
+    }
+  }
+  if (next.id !== -1 && purchasedNext) {
+    console.log(
+      'next buy:',
+      g_Minigame.CurrentScene().m_rgTuningData.upgrades[next.id].name,
+      '(' + FormatNumberForDisplay(next.cost) + ')'
+    );
+    purchasedNext = false;
+  }
+}
+
+function autoUpgrade() {
+	if (autoPurchaseUpgrades && !g_Minigame.m_CurrentScene.m_bUpgradesBusy) {
+	  if (next.id === -1 || getTimeUntilDeath() < survivalTime) updateNextUpgradeable();
+	  if (next.id !== -1) {
+	    if (next.cost <= g_Minigame.m_CurrentScene.m_rgPlayerData.gold) {
+	      $J('.link').each(function() {
+	        if ($J(this).data('type') === next.id) {
+	          g_Minigame.m_CurrentScene.TryUpgrade(this);
+	          next.id = -1;
+	          purchasedNext = true;
+	          return false;
+	        }
+	      });
+	    }
+	  }
+	}
 }
 
 function lockElementToSteamID() {
