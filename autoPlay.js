@@ -1,10 +1,12 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements. /u/wchill and contributors on his repo for MSG2015-specific improvements.
-// @version 1.94
+// @version 2.03
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match http://steamcommunity.com/minigame/towerattack*
+// @match http://steamcommunity.com//minigame/towerattack*
+// @grant none
 // @updateURL https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.js
 // @downloadURL https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.js
 // ==/UserScript==
@@ -22,6 +24,9 @@ var disableFlinching = false; // Set to true to disable flinching animation for 
 var disableCritText = false; // Set to true to disable the crit text.
 var disableText = false; // Remove all animated text. This includes damage, crits and gold gain. 
                          // This OVERRIDES all text related options.
+                         
+var lockElements = true; // Set to false to allow upgrading all elements
+var slowStartMode = false; // Set to false to run script from beginning instead of lv11
 
 var isAlreadyRunning = false;
 
@@ -47,7 +52,7 @@ var ITEMS = {
 	"CRIPPLE_SPAWNER": 14,
 	"MAXIMIZE_ELEMENT": 16
 };
-	
+
 var ENEMY_TYPE = {
 	"SPAWNER":0,
 	"CREEP":1,
@@ -56,21 +61,26 @@ var ENEMY_TYPE = {
 	"TREASURE":4
 };
 
+var rainingGold = false; // Leave on false. Allows for abilities to be temporarily disabled while Raining Gold is active, to maximise Raining Gold's benefit.
+
 // Save old functions for toggles.
-var trt_oldCrit = window.g_Minigame.CurrentScene().DoCritEffect;
-var trt_oldPush = window.g_Minigame.m_CurrentScene.m_rgClickNumbers.push;
+var trt_oldCrit;
+var trt_oldPush;
 var trt_critToggle = false;
 var trt_textToggle = false;
 
 if (thingTimer){
 	window.clearInterval(thingTimer);
 }
+if (clickTimer){
+	window.clearInterval(clickTimer);
+}
+var clickTimer;
 
 function firstRun() {
 	// disable particle effects - this drastically reduces the game's memory leak
 	if (disableParticleEffects) {
 		disableParticles();
-		g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
 	}
 
 	// disable enemy flinching animation when they get hit
@@ -79,31 +89,68 @@ function firstRun() {
 	}
 
 	// Crit toggle.
+	trt_oldCrit = g_Minigame.CurrentScene().DoCritEffect;
 	if (disableCritText) {
 		toggleCritText();
 	}
 
 	// Text toggle.
+	trt_oldPush = g_Minigame.m_CurrentScene.m_rgClickNumbers.push
 	if (disableText) {
 		toggleText();
+	}
+	
+	if(lockElements) {
+		lockElementToSteamID();
+	}
+
+	if(slowStartMode && g_Minigame.m_CurrentScene.m_rgGameData.level < 11) {
+		var t = setInterval(function() {
+			if(g_Minigame.m_CurrentScene.m_rgGameData.level >= 11) {
+				clearInterval(t);
+				initAutoClicker();
+			}
+		}, 1000);
+	} else {
+		initAutoClicker();
+	}
+
+    var box = document.getElementsByClassName("leave_game_helper")[0];
+    box.innerHTML = "Autoscript now enabled - your game ID is " + g_GameID +
+        "<br>Autoclicker: " + (enableAutoClicker?"enabled - "+clickRate+"cps, "+(setClickVariable?"variable":"clicks"):"disabled") +
+        "<br>Particle effects: " + (disableParticleEffects?"disabled":"enabled") +
+        "<br>Flinching effect: " + (disableFlinching?"disabled":"enabled") +
+        "<br>Crit effect: " + (disableCritText?"disabled":"enabled") +
+        "<br>Text: " + (disableText?"disabled":"enabled")
+}
+
+function initAutoClicker() {
+	if(enableAutoClicker) {
+		if(setClickVariable) {
+			clickTimer = setInterval( function(){
+				g_Minigame.m_CurrentScene.m_nClicks = clickRate;
+			}, 1000);
+		} else {
+			clickTimer = window.setInterval(clickTheThing, 1000/clickRate);
+		}
 	}
 }
 
 // Remove most effects from the game. Most of these are irreversible.
 // Currently invoked only if specifically called.
-function trt_destroyAllEffects(){
+function trt_destroyAllEffects() {
 	stopFlinching();
 	disableParticles();
-	if (!trt_textToggle){
+	if (!trt_textToggle) {
 		toggleText();
 	}
 }
 
 // Callable function to remove particles.
 function disableParticles() {
-	if (window.g_Minigame) {
-		window.g_Minigame.CurrentScene().DoClickEffect = function() {};
-		window.g_Minigame.CurrentScene().SpawnEmitter = function(emitter) {
+	if (g_Minigame) {
+		g_Minigame.CurrentScene().DoClickEffect = function() {};
+		g_Minigame.CurrentScene().SpawnEmitter = function(emitter) {
 			emitter.emit = false;
 			return emitter;
 		}
@@ -111,71 +158,65 @@ function disableParticles() {
 }
 
 // Callable function to stop the flinching animation.
-function stopFlinching(){
-	if (window.CEnemy) {
-		window.CEnemy.prototype.TakeDamage = function() {};
+function stopFlinching() {
+	if (CEnemy) {
+		CEnemy.prototype.TakeDamage = function(){};
 	}
-	if (window.CEnemySpawner) {
-		window.CEnemySpawner.prototype.TakeDamage = function() {};
+	if (CEnemySpawner) {
+		CEnemySpawner.prototype.TakeDamage = function(){};
 	}
-	if (window.CEnemyBoss) {
-		window.CEnemyBoss.prototype.TakeDamage = function() {};
+	if (CEnemyBoss) {
+		CEnemyBoss.prototype.TakeDamage = function(){};
 	}
 }
 
-function toggleCritText(){
+function toggleCritText() {
 	if (!trt_critToggle) {
 		// Replaces the entire crit display function.
-		window.g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
+		g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
 		trt_critToggle = true;
 	} else {
-		window.g_Minigame.CurrentScene().DoCritEffect = trt_oldCrit;
+		g_Minigame.CurrentScene().DoCritEffect = trt_oldCrit;
 		trt_critToggle = false;
 	}
 }
 
+
 // Toggles text on and off. We can't explicitly call disable/enable since we need to save the old function.
-function toggleText(){
+function toggleText() {
 	if (!trt_textToggle) {
 		// Replaces the entire text function.
-		window.g_Minigame.m_CurrentScene.m_rgClickNumbers.push = function(elem){
+		g_Minigame.m_CurrentScene.m_rgClickNumbers.push = function(elem){
 			elem.container.removeChild(elem);
 		};
 		trt_textToggle = true;
 	} else {
-		window.g_Minigame.m_CurrentScene.m_rgClickNumbers.push = trt_oldPush;
+		g_Minigame.m_CurrentScene.m_rgClickNumbers.push = trt_oldPush;
 		trt_textToggle = false;
 	}
 }
 
 function doTheThing() {
-	if (isAlreadyRunning || g_Minigame === undefined || !g_Minigame.CurrentScene().m_bRunning || !g_Minigame.CurrentScene().m_rgPlayerTechTree) {
-		return;
+	if (!isAlreadyRunning){
+		isAlreadyRunning = true;
+
+		goToLaneWithBestTarget();
+		useGoodLuckCharmIfRelevant();
+		useMedicsIfRelevant();
+		useMoraleBoosterIfRelevant();
+		useClusterBombIfRelevant();
+		useNapalmIfRelevant();
+		useTacticalNukeIfRelevant();
+		useCrippleSpawnerIfRelevant();
+		if(g_Minigame.m_CurrentScene.m_rgGameData.level < 1000 || g_Minigame.m_CurrentScene.m_rgGameData.level % 200 == 0)
+			useGoldRainIfRelevant();
+		attemptRespawn();
+
+		if(enableAutoClicker) {
+			g_msTickRate = 1000;
+		}
+		isAlreadyRunning = false;
 	}
-	isAlreadyRunning = true;
-	
-	goToLaneWithBestTarget();
-	
-	useGoodLuckCharmIfRelevant();
-	useMedicsIfRelevant();
-	useMoraleBoosterIfRelevant();
-	useClusterBombIfRelevant();
-	useNapalmIfRelevant();
-	
-	// TODO use abilities if available and a suitable target exists
-	// - Tactical Nuke on a Spawner if below 50% and above 25% of its health
-	// - Metal Detector if a boss, miniboss, or spawner death is imminent (predicted in > 2 and < 7 seconds)
-	// - Morale Booster if available and lane has > 2 live enemies
-	// - Decrease Cooldowns right before using another long-cooldown item.
-	//       (Decrease Cooldown affects abilities triggered while it is active, not night before it's used)
-	
-	// TODO purchase abilities and upgrades intelligently
-	
-	attemptRespawn();
-	
-	
-	
-	isAlreadyRunning = false;
 }
 
 function goToLaneWithBestTarget() {
@@ -228,6 +269,7 @@ function goToLaneWithBestTarget() {
 		//Prefer lane with raining gold, unless current enemy target is a treasure or boss.
 		if(lowTarget != ENEMY_TYPE.TREASURE && lowTarget != ENEMY_TYPE.BOSS ){
 			var potential = 0;
+			rainingGold = false;
 			for(var i = 0; i < g_Minigame.CurrentScene().m_rgGameData.lanes.length; i++){
 				// ignore if lane is empty
 				if(g_Minigame.CurrentScene().m_rgGameData.lanes[i].dps == 0)
@@ -235,6 +277,7 @@ function goToLaneWithBestTarget() {
 				var stacks = 0;
 				if(typeof g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[17] != 'undefined')
 					stacks = g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[17];
+					rainingGold = true; 
 					//console.log('stacks: ' + stacks);
 				for(var m = 0; m < g_Minigame.m_CurrentScene.m_rgEnemies.length; m++) {
 					var enemyGold = g_Minigame.m_CurrentScene.m_rgEnemies[m].m_data.gold;
@@ -259,11 +302,10 @@ function goToLaneWithBestTarget() {
 							g_Minigame.CurrentScene().m_rgPlayerTechTree.dps,
 							element
 						);
-					if(mostHPDone < dmg)
-					{
-						mostHPDone = dmg;
+					if(mostHPDone >= dmg){
+						continue;
 					}
-					else continue;
+					mostHPDone = dmg;
 
 					targetFound = true;
 					lowHP = enemies[i].m_flDisplayedHP;
@@ -284,7 +326,7 @@ function goToLaneWithBestTarget() {
 		}
 		
 		// If we just finished looking at spawners, 
-		// AND none of them were below our threshold,  
+		// AND none of them were below our threshold,
 		// remember them and look for low creeps (so don't quit now)
 		// Don't skip spawner if lane has raining gold
 		if ((enemyTypePriority[k] == ENEMY_TYPE.SPAWNER && lowPercentageHP > spawnerOKThreshold) && preferredLane == -1) {
@@ -318,8 +360,8 @@ function goToLaneWithBestTarget() {
 		}
 		
 		
-		// Prevent attack abilities and items if up against a boss or treasure minion
-		if (targetIsTreasureOrBoss) {
+		// Prevent attack abilities and items if up against a boss or treasure minion, or Raining Gold is active.
+		if ((targetIsTreasureOrBoss) || (rainingGold == true)) {
 			// Morale
 			disableAbility(ABILITIES.MORALE_BOOSTER);
 			// Luck
@@ -511,13 +553,33 @@ function useMoraleBoosterIfRelevant() {
 	}
 }
 
+// Use Moral Booster if doable
+function useMoraleBoosterIfRelevant() {
+	// check if Good Luck Charms is purchased and cooled down
+	if (hasPurchasedAbility(5)) {
+		if (isAbilityCoolingDown(5)) {
+			return;
+		}
+		var numberOfWorthwhileEnemies = 0;
+		for(i = 0; i < g_Minigame.CurrentScene().m_rgGameData.lanes[g_Minigame.CurrentScene().m_nExpectedLane].enemies.length; i++){
+			//Worthwhile enemy is when an enamy has a current hp value of at least 1,000,000
+			if(g_Minigame.CurrentScene().m_rgGameData.lanes[g_Minigame.CurrentScene().m_nExpectedLane].enemies[i].hp > 1000000)
+				numberOfWorthwhileEnemies++;
+		}
+		if(numberOfWorthwhileEnemies >= 2){
+			// Moral Booster is purchased, cooled down, and needed. Trigger it.
+			console.log('Moral Booster is purchased, cooled down, and needed. Trigger it.');
+			triggerAbility(5);
+		}
+	}
+}
+
 function useTacticalNukeIfRelevant() {
 	// Check if Tactical Nuke is purchased
 	if(hasPurchasedAbility(ABILITIES.NUKE)) {
 		if (isAbilityCoolingDown(ABILITIES.NUKE)) {
 			return;
 		}
-
 		//Check that the lane has a spawner and record it's health percentage
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 		var enemySpawnerExists = false;
@@ -526,7 +588,7 @@ function useTacticalNukeIfRelevant() {
 		for (var i = 0; i < 4; i++) {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
 			if (enemy) {
-				if (enemy.m_data.type == 0) {
+				if (enemy.m_data.type == 0 || (enemy.m_data.type == ENEMY_TYPE.BOSS && g_Minigame.m_CurrentScene.m_rgGameData.level > 1000 && g_Minigame.m_CurrentScene.m_rgGameData.level % 200 != 0)) {
 					enemySpawnerExists = true;
 					enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 				}
@@ -580,7 +642,7 @@ function useGoldRainIfRelevant() {
 
 		var enemy = g_Minigame.m_CurrentScene.GetEnemy(g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane, g_Minigame.m_CurrentScene.m_rgPlayerData.target);
 		// check if current target is a boss, otherwise its not worth using the gold rain
-		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {	
+		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS && g_Minigame.m_CurrentScene.m_rgGameData.level % 100 == 0) {	
 			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 
 		  if (enemyBossHealthPercent >= 0.6) { // We want sufficient time for the gold rain to be applicable
@@ -595,7 +657,7 @@ function useGoldRainIfRelevant() {
 //If player is dead, call respawn method
 function attemptRespawn() {
 	if ((g_Minigame.CurrentScene().m_bIsDead) && 
-			((g_Minigame.CurrentScene().m_rgPlayerData.time_died * 1000) + 5000) < (new Date().getTime())) {
+			((g_Minigame.CurrentScene().m_rgPlayerData.time_died) + 5) < (g_Minigame.CurrentScene().m_nTime)) {
 		RespawnPlayer();
 	}
 }
@@ -632,46 +694,27 @@ function triggerAbility(abilityId) {
 	g_Minigame.CurrentScene().m_rgAbilityQueue.push({'ability': abilityId})
 }
 
+function toggleAbilityVisibility(abilityId, show) {
+    var vis = show === true ? "visible" : "hidden";
+
+    var elem = document.getElementById('ability_' + abilityId);
+    if (elem && elem.childElements() && elem.childElements().length >= 1) {
+        elem.childElements()[0].style.visibility = vis;
+    }
+}
+
 function disableAbility(abilityId) {
-	var elem = document.getElementById('ability_' + abilityId);
-	if (elem && elem.childElements() && elem.childElements().length >= 1) {
-		elem.childElements()[0].style.visibility = "hidden";
-	}
+    toggleAbilityVisibility(abilityId, false);
 }
 
 function enableAbility(abilityId) {
-	var elem = document.getElementById('ability_' + abilityId);
-	if (elem && elem.childElements() && elem.childElements().length >= 1) {
-		elem.childElements()[0].style.visibility = "visible";
-	}
+    toggleAbilityVisibility(abilityId, true);
 }
 
 function isAbilityEnabled(abilityId) {
 	var elem = document.getElementById('ability_' + abilityId);
 	if (elem && elem.childElements() && elem.childElements().length >= 1) {
-		return  elem.childElements()[0].style.visibility == "visible";
-	}
-	return false;
-}
-
-function disableAbilityItem(abilityId) {
-	var elem = document.getElementById('abilityitem_' + abilityId);
-	if (elem && elem.childElements() && elem.childElements().length >= 1) {
-		elem.childElements()[0].style.visibility = "hidden";
-	}
-}
-
-function enableAbilityItem(abilityId) {
-    	var elem = document.getElementById('abilityitem_' + abilityId);
-	if (elem && elem.childElements() && elem.childElements().length >= 1) {
-		elem.childElements()[0].style.visibility = "visible";
-	}
-}
-
-function isAbilityItemEnabled(abilityId) {
-	var elem = document.getElementById('abilityitem_' + abilityId);
-	if (elem && elem.childElements() && elem.childElements().length >= 1) {
-		return  elem.childElements()[0].style.visibility == "visible";
+		return elem.childElements()[0].style.visibility == "visible";
 	}
 	return false;
 }
@@ -681,11 +724,57 @@ function toggleAbilityItemVisibility(abilityId, show) {
 
     var elem = document.getElementById('abilityitem_' + abilityId);
     if (elem && elem.childElements() && elem.childElements().length >= 1) {
-        elem.childElements()[0].style.visibility = show;
+        elem.childElements()[0].style.visibility = vis;
     }
 }
 
-var thingTimer = window.setInterval(doTheThing, 1000);
+function disableAbilityItem(abilityId) {
+    toggleAbilityItemVisibility(abilityId, false);
+}
+
+function enableAbilityItem(abilityId) {
+    toggleAbilityItemVisibility(abilityId, true);
+}
+
+function isAbilityItemEnabled(abilityId) {
+	var elem = document.getElementById('abilityitem_' + abilityId);
+	if (elem && elem.childElements() && elem.childElements().length >= 1) {
+		return elem.childElements()[0].style.visibility == "visible";
+	}
+	return false;
+}
+
+function lockElementToSteamID() {
+	String.prototype.hashCode=function(){
+		var t=0;
+		if(0==this.length)
+			return t;
+		for(i=0;i<this.length;i++)
+			char=this.charCodeAt(i),t=(t<<5)-t+char,t&=t;
+		return t;
+	}
+	var elem = Math.abs(g_steamID.hashCode()%4);
+	var fire = document.querySelector("a.link.element_upgrade_btn[data-type=\"3\"]")
+	var water = document.querySelector("a.link.element_upgrade_btn[data-type=\"4\"]")
+	var earth = document.querySelector("a.link.element_upgrade_btn[data-type=\"6\"]")
+	var air = document.querySelector("a.link.element_upgrade_btn[data-type=\"5\"]")
+	var elems = [fire, water, earth, air];
+	for(i=0; i< elems.length; i++) {
+		if(i == elem) {
+			continue;
+		}
+		elems[i].style.visibility = "hidden";
+		console.log('hidden');
+	}
+}
+
+var thingTimer = window.setInterval(function(){
+	if (g_Minigame && g_Minigame.CurrentScene().m_bRunning && g_Minigame.CurrentScene().m_rgPlayerTechTree) {
+		window.clearInterval(thingTimer);
+		firstRun();
+		thingTimer = window.setInterval(doTheThing, 100);
+	}
+}, 1000);
 function clickTheThing() {
     g_Minigame.m_CurrentScene.DoClick(
         {
@@ -705,22 +794,3 @@ function clickTheThing() {
         }
     );
 }
-
-if(enableAutoClicker) {
-	var resetTickTimer = setInterval(function(){g_msTickRate = 1000},1000); //Force update to be sent every 1000ms
-	if(setClickVariable) {
-		var clickTimer = setInterval( function(){
-			g_Minigame.m_CurrentScene.m_nClicks = clickRate;
-		}, 1000);
-	} else {
-		var clickTimer = window.setInterval(clickTheThing, 1000/clickRate);
-	}
-}
-
-var box = document.getElementsByClassName("leave_game_helper")[0];
-box.innerHTML = "Autoscript now enabled - your game ID is " + g_GameID +
-	"<br>Autoclicker: " + (enableAutoClicker?"enabled - "+clickRate+"cps, "+(setClickVariable?"variable":"clicks"):"disabled") +
-	"<br>Particle effects: " + (disableParticleEffects?"disabled":"enabled") +
-	"<br>Flinching effect: " + (disableFlinching?"disabled":"enabled") +
-	"<br>Crit effect: " + (disableCritText?"disabled":"enabled") +
-	"<br>Text: " + (disableText?"disabled":"enabled")
