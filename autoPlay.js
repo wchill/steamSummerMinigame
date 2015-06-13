@@ -1,7 +1,7 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements. /u/wchill and contributors on his repo for MSG2015-specific improvements.
-// @version 1.7
+// @version 1.94
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match http://steamcommunity.com/minigame/towerattack*
@@ -22,8 +22,6 @@ var disableFlinching = false; // Set to true to disable flinching animation for 
 var disableCritText = false; // Set to true to disable the crit text.
 var disableText = false; // Remove all animated text. This includes damage, crits and gold gain. 
                          // This OVERRIDES all text related options.
-
-var alertOnRun = true; // Set to false to disable information alert box
 
 var isAlreadyRunning = false;
 
@@ -61,26 +59,34 @@ var ENEMY_TYPE = {
 // Save old functions for toggles.
 var trt_oldCrit = window.g_Minigame.CurrentScene().DoCritEffect;
 var trt_oldPush = window.g_Minigame.m_CurrentScene.m_rgClickNumbers.push;
+var trt_critToggle = false;
+var trt_textToggle = false;
 
-// disable particle effects - this drastically reduces the game's memory leak
-if (window.g_Minigame !== undefined && disableParticleEffects) {
-	disableParticles();
+if (thingTimer){
+	window.clearInterval(thingTimer);
 }
 
-if (disableFlinching) {
-	stopFlinching();
-}
+function firstRun() {
+	// disable particle effects - this drastically reduces the game's memory leak
+	if (disableParticleEffects) {
+		disableParticles();
+		g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
+	}
 
-// Crit toggle.
-trt_critToggle = false;
-if (disableCritText) {
-	toggleCritText();
-}
+	// disable enemy flinching animation when they get hit
+	if (disableFlinching) {
+		stopFlinching();
+	}
 
-// Text toggle.
-trt_textToggle = false;
-if (disableText) {
-	toggleText();
+	// Crit toggle.
+	if (disableCritText) {
+		toggleCritText();
+	}
+
+	// Text toggle.
+	if (disableText) {
+		toggleText();
+	}
 }
 
 // Remove most effects from the game. Most of these are irreversible.
@@ -94,20 +100,28 @@ function trt_destroyAllEffects(){
 }
 
 // Callable function to remove particles.
-function disableParticles(){
-	window.g_Minigame.CurrentScene().DoClickEffect = function() {};
-	window.g_Minigame.CurrentScene().SpawnEmitter = function(emitter) {
-		emitter.emit = false;
-		return emitter;
+function disableParticles() {
+	if (window.g_Minigame) {
+		window.g_Minigame.CurrentScene().DoClickEffect = function() {};
+		window.g_Minigame.CurrentScene().SpawnEmitter = function(emitter) {
+			emitter.emit = false;
+			return emitter;
+		}
 	}
 }
 
 // Callable function to stop the flinching animation.
 function stopFlinching(){
-	window.CEnemy.prototype.TakeDamage = function(){};
-	window.CEnemySpawner.prototype.TakeDamage = function(){};
-	window.CEnemyBoss.prototype.TakeDamage = function(){};
-};
+	if (window.CEnemy) {
+		window.CEnemy.prototype.TakeDamage = function() {};
+	}
+	if (window.CEnemySpawner) {
+		window.CEnemySpawner.prototype.TakeDamage = function() {};
+	}
+	if (window.CEnemyBoss) {
+		window.CEnemyBoss.prototype.TakeDamage = function() {};
+	}
+}
 
 function toggleCritText(){
 	if (!trt_critToggle) {
@@ -118,14 +132,12 @@ function toggleCritText(){
 		window.g_Minigame.CurrentScene().DoCritEffect = trt_oldCrit;
 		trt_critToggle = false;
 	}
-	window.g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
 }
-
 
 // Toggles text on and off. We can't explicitly call disable/enable since we need to save the old function.
 function toggleText(){
 	if (!trt_textToggle) {
-	// Replaces the entire text function.
+		// Replaces the entire text function.
 		window.g_Minigame.m_CurrentScene.m_rgClickNumbers.push = function(elem){
 			elem.container.removeChild(elem);
 		};
@@ -134,12 +146,6 @@ function toggleText(){
 		window.g_Minigame.m_CurrentScene.m_rgClickNumbers.push = trt_oldPush;
 		trt_textToggle = false;
 	}
-}
-
-
-
-if (thingTimer !== undefined) {
-	window.clearTimeout(thingTimer);
 }
 
 function doTheThing() {
@@ -477,23 +483,111 @@ function useNapalmIfRelevant() {
 	}
 }
 
-// Use Morale Booster if doable
 function useMoraleBoosterIfRelevant() {
-	// check if Good Luck Charms is purchased and cooled down
-	if (hasPurchasedAbility(ABILITIES.MORALE_BOOSTER)) {
-		if (isAbilityCoolingDown(ABILITIES.MORALE_BOOSTER)) {
+	// Check if Morale Booster is purchased
+	if(hasPurchasedAbility(5)) {
+		if (isAbilityCoolingDown(5)) {
 			return;
 		}
-		var numberOfWorthwhileEnemies = 0;
-		for(i = 0; i < g_Minigame.CurrentScene().m_rgGameData.lanes[g_Minigame.CurrentScene().m_nExpectedLane].enemies.length; i++){
-			//Worthwhile enemy is when an enemy has a current hp value of at least 1,000,000
-			if(g_Minigame.CurrentScene().m_rgGameData.lanes[g_Minigame.CurrentScene().m_nExpectedLane].enemies[i].hp > 1000000)
-				numberOfWorthwhileEnemies++;
+		
+		//Check lane has monsters so the hype isn't wasted
+		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
+		var enemyCount = 0;
+		var enemySpawnerExists = false;
+		//Count each slot in lane
+		for (var i = 0; i < 4; i++) {
+			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
+			if (enemy) {
+				enemyCount++;
+				if (enemy.m_data.type == 0) { 
+					enemySpawnerExists = true;
+				}
+			}
 		}
-		if(numberOfWorthwhileEnemies >= 2){
-			// Moral Booster is purchased, cooled down, and needed. Trigger it.
-			console.log('Moral Booster is purchased, cooled down, and needed. Trigger it.');
-			triggerAbility(ABILITIES.MORALE_BOOSTER);
+		//Hype everybody up!
+		if (enemySpawnerExists && enemyCount >= 3) {
+			triggerAbility(5);
+		}
+	}
+}
+
+function useTacticalNukeIfRelevant() {
+	// Check if Tactical Nuke is purchased
+	if(hasPurchasedAbility(ABILITIES.NUKE)) {
+		if (isAbilityCoolingDown(ABILITIES.NUKE)) {
+			return;
+		}
+
+		//Check that the lane has a spawner and record it's health percentage
+		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
+		var enemySpawnerExists = false;
+		var enemySpawnerHealthPercent = 0.0;
+		//Count each slot in lane
+		for (var i = 0; i < 4; i++) {
+			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
+			if (enemy) {
+				if (enemy.m_data.type == 0) {
+					enemySpawnerExists = true;
+					enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
+				}
+			}
+		}
+
+		// If there is a spawner and it's health is between 60% and 30%, nuke it!
+		if (enemySpawnerExists && enemySpawnerHealthPercent < 0.6 && enemySpawnerHealthPercent > 0.3) {
+			console.log("Tactical Nuke is purchased, cooled down, and needed. Nuke 'em.");
+			triggerAbility(ABILITIES.NUKE);
+		}
+	}
+}
+
+function useCrippleSpawnerIfRelevant() {
+	// Check if Cripple Spawner is available
+	if(hasItem(ITEMS.CRIPPLE_SPAWNER)) {
+		if (isAbilityCoolingDown(ITEMS.CRIPPLE_SPAWNER)) {
+			return;
+		}
+
+		//Check that the lane has a spawner and record it's health percentage
+		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
+		var enemySpawnerExists = false;
+		var enemySpawnerHealthPercent = 0.0;
+		//Count each slot in lane
+		for (var i = 0; i < 4; i++) {
+			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
+			if (enemy) {
+				if (enemy.m_data.type == 0) {
+					enemySpawnerExists = true;
+					enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
+				}
+			}
+		}
+
+		// If there is a spawner and it's health is above 95%, cripple it!
+		if (enemySpawnerExists && enemySpawnerHealthPercent > 0.95) {
+			console.log("Cripple Spawner available, and needed. Cripple 'em.");
+			triggerItem(ITEMS.CRIPPLE_SPAWNER);
+		}
+	}
+}
+
+function useGoldRainIfRelevant() {
+	// Check if gold rain is purchased
+	if (hasItem(ITEMS.GOLD_RAIN)) {
+		if (isAbilityCoolingDown(ITEMS.GOLD_RAIN)) {
+			return;
+		}
+
+		var enemy = g_Minigame.m_CurrentScene.GetEnemy(g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane, g_Minigame.m_CurrentScene.m_rgPlayerData.target);
+		// check if current target is a boss, otherwise its not worth using the gold rain
+		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {	
+			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
+
+		  if (enemyBossHealthPercent >= 0.6) { // We want sufficient time for the gold rain to be applicable
+				// Gold Rain is purchased, cooled down, and needed. Trigger it.
+				console.log('Gold rain is purchased and cooled down, Triggering it on boss');
+				triggerItem(ITEMS.GOLD_RAIN);
+			}
 		}
 	}
 }
@@ -568,7 +662,7 @@ function disableAbilityItem(abilityId) {
 }
 
 function enableAbilityItem(abilityId) {
-	var elem = document.getElementById('abilityitem_' + abilityId);
+    	var elem = document.getElementById('abilityitem_' + abilityId);
 	if (elem && elem.childElements() && elem.childElements().length >= 1) {
 		elem.childElements()[0].style.visibility = "visible";
 	}
@@ -580,6 +674,15 @@ function isAbilityItemEnabled(abilityId) {
 		return  elem.childElements()[0].style.visibility == "visible";
 	}
 	return false;
+}
+
+function toggleAbilityItemVisibility(abilityId, show) {
+    var vis = show === true ? "visible" : "hidden";
+
+    var elem = document.getElementById('abilityitem_' + abilityId);
+    if (elem && elem.childElements() && elem.childElements().length >= 1) {
+        elem.childElements()[0].style.visibility = show;
+    }
 }
 
 var thingTimer = window.setInterval(doTheThing, 1000);
@@ -604,6 +707,7 @@ function clickTheThing() {
 }
 
 if(enableAutoClicker) {
+	var resetTickTimer = setInterval(function(){g_msTickRate = 1000},1000); //Force update to be sent every 1000ms
 	if(setClickVariable) {
 		var clickTimer = setInterval( function(){
 			g_Minigame.m_CurrentScene.m_nClicks = clickRate;
@@ -613,10 +717,10 @@ if(enableAutoClicker) {
 	}
 }
 
-alert("Autoscript now enabled - your game ID is " + g_GameID +
-	"\nAutoclicker: " + (enableAutoClicker?"enabled - "+clickRate+"cps, "+(setClickVariable?"variable":"clicks"):"disabled") +
-	"\nParticle effects: " + (disableParticleEffects?"disabled":"enabled") +
-	"\nFlinching effect: " + (disableFlinching?"disabled":"enabled") +
-	"\nCrit effect: " + (disableCritText?"disabled":"enabled") +
-	"\nText: " + (disableText?"disabled":"enabled")
-	);
+var box = document.getElementsByClassName("leave_game_helper")[0];
+box.innerHTML = "Autoscript now enabled - your game ID is " + g_GameID +
+	"<br>Autoclicker: " + (enableAutoClicker?"enabled - "+clickRate+"cps, "+(setClickVariable?"variable":"clicks"):"disabled") +
+	"<br>Particle effects: " + (disableParticleEffects?"disabled":"enabled") +
+	"<br>Flinching effect: " + (disableFlinching?"disabled":"enabled") +
+	"<br>Crit effect: " + (disableCritText?"disabled":"enabled") +
+	"<br>Text: " + (disableText?"disabled":"enabled")

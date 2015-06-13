@@ -27,17 +27,34 @@ powerups for you.
 
 ### Manual ###
 
-1. Open `autoPlay.js` in a text editor.
-2. Select All, Copy
-3. In a browser (Chrome, Firefox, IE), log in to Steam, navigate to the minigame page, and start playing the game.
-4. For your sanity, turn off sound and music.
-5. Hit `F12` to bring up the developer console.
-6. Navigate to the `Console` or `Script` section, where you can enter javascript and see javascript output.
-7. Paste into the javascript input, and hit `Enter`.
-8. (Optional) To stop the script, type `window.clearTimeout(thingTimer);` into the console and hit Enter.
+##### Chrome #####
+1. Open https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.js
+2. Select All, Copy.
+3. Navigate to `http://steamcommunity.com/minigame/` and join or start a game.
+4. Press `Ctrl + Shift + J`.
+5. Paste into the javascript input, and hit `Enter`.
 
-The game should now play itself, you should leave it running in the background. If you're not sure if it
-is auto-playing, try changing lanes. If it jumps back almost immediately, it's working.
+##### Firefox #####
+1. Open https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.js
+2. Select All, Copy.
+3. Navigate to `http://steamcommunity.com/minigame/` and join or start a game.
+4. Press `Ctrl + Shift + K`.
+5. Paste into the javascript input, and hit `Enter`.
+
+##### Internet Explorer / Microsoft Edge #####
+1. Open https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.js
+2. Select All, Copy.
+3. Navigate to `http://steamcommunity.com/minigame/` and join or start a game.
+4. Press `F12` and navigate to the `Console` tab.
+5. Paste into the javascript input, and hit `Enter`.
+
+To stop the manual script, type `window.clearTimeout(thingTimer);` into the console and hit `Enter`.
+
+The game should now play itself, you should leave it running in the background. If you're not sure if it is auto-playing, try changing lanes. If it jumps back almost immediately, it's working.
+
+## I want to contribute! ##
+
+This project is open-source on github. There are different ways you can help
 
 ## TODO ##
 
