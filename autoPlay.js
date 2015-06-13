@@ -122,6 +122,8 @@ function firstRun() {
         "<br>Flinching effect: " + (disableFlinching?"disabled":"enabled") +
         "<br>Crit effect: " + (disableCritText?"disabled":"enabled") +
         "<br>Text: " + (disableText?"disabled":"enabled")
+		
+	enhanceTooltips();
 }
 
 function initAutoClicker() {
@@ -793,4 +795,56 @@ function clickTheThing() {
             }
         }
     );
+}
+
+// Helpers to access player stats.
+function getCritChance(){
+	return g_Minigame.m_CurrentScene.m_rgPlayerTechTree.crit_percentage * 100;
+}
+
+function getCritMultiplier(){
+	return g_Minigame.m_CurrentScene.m_rgPlayerTechTree.damage_multiplier_crit;
+}
+
+function getDPS(){
+	return g_Minigame.m_CurrentScene.m_rgPlayerTechTree.dps;
+}
+
+function getClickDamage(){
+	return g_Minigame.m_CurrentScene.m_rgPlayerTechTree.damage_per_click;
+}
+
+function enhanceTooltips(){
+	trt_oldTooltip = window.fnTooltipUpgradeDesc;
+	window.fnTooltipUpgradeDesc = function(context){
+		var $context = $J(context);
+		var desc = $context.data('desc');
+		var strOut = desc;
+		console.log('Tooltip replaced');
+		var multiplier = parseFloat( $context.data('multiplier') );
+		switch( $context.data('upgrade_type') )
+		{
+			case 7: // Lucky Shot's type.
+				var currentMultiplier = getCritMultiplier();
+				var newMultiplier = currentMultiplier + multiplier;
+				var dps = getDPS();
+				var clickDamage = getClickDamage();
+				
+				strOut += '<br><br>You can have multiple crits in a second. The server combines them into one.';
+				
+				strOut += '<br><br>Crit Percentage: ' + getCritChance().toFixed(1) + '%';
+				
+				strOut += '<br><br>Current: ' + ( currentMultiplier ) + 'x';
+				strOut += '<br>Next Level: ' + ( newMultiplier ) + 'x';
+
+				strOut += '<br><br>Damage with one crit:';
+				strOut += '<br>DPS: ' + FormatNumberForDisplay( currentMultiplier * dps ) + ' => ' + FormatNumberForDisplay( newMultiplier * dps );
+				strOut += '<br>Click: ' + FormatNumberForDisplay( currentMultiplier * clickDamage ) + ' => ' + FormatNumberForDisplay( newMultiplier * clickDamage );
+				break;
+			default:
+				return trt_oldTooltip(context);
+		}
+		console.log(strOut);
+		return strOut;
+	};
 }
