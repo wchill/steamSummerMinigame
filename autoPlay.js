@@ -57,6 +57,11 @@ var ENEMY_TYPE = {
 	"MINIBOSS":3,
 	"TREASURE":4
 };
+// Prevent script from running before the game has loaded.
+var startingInterval = window.setInterval(startRunOnFullLoad, 3000);
+function startRunOnFullLoad() { if (document.getElementById("upgr_0") != null) {window.clearInterval(startingInterval);
+																																							 autoPlayScript()}}
+function autoPlayScript() {
 
 // Save old functions for toggles.
 var trt_oldCrit = window.g_Minigame.CurrentScene().DoCritEffect;
@@ -719,10 +724,12 @@ if(enableAutoClicker) {
 	}
 }
 
-alert("Autoscript now enabled - your game ID is " + g_GameID +
+if(alertOnRun) {alert("Autoscript now enabled - your game ID is " + g_GameID +
 	"\nAutoclicker: " + (enableAutoClicker?"enabled - "+clickRate+"cps, "+(setClickVariable?"variable":"clicks"):"disabled") +
 	"\nParticle effects: " + (disableParticleEffects?"disabled":"enabled") +
 	"\nFlinching effect: " + (disableFlinching?"disabled":"enabled") +
 	"\nCrit effect: " + (disableCritText?"disabled":"enabled") +
 	"\nText: " + (disableText?"disabled":"enabled")
 	);
+}
+}
