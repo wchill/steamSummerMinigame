@@ -196,7 +196,8 @@ function doTheThing() {
 	useNapalmIfRelevant();
 	useTacticalNukeIfRelevant();
 	useCrippleSpawnerIfRelevant();
-	useGoldRainIfRelevant();
+	if(g_Minigame.m_CurrentScene.m_rgGameData.level < 1000 || g_Minigame.m_CurrentScene.m_rgGameData.level % 200 == 0)
+		useGoldRainIfRelevant();
 	attemptRespawn();
 
 	if(enableAutoClicker) {
@@ -547,7 +548,6 @@ function useTacticalNukeIfRelevant() {
 		if (isAbilityCoolingDown(ABILITIES.NUKE)) {
 			return;
 		}
-
 		//Check that the lane has a spawner and record it's health percentage
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 		var enemySpawnerExists = false;
@@ -556,7 +556,7 @@ function useTacticalNukeIfRelevant() {
 		for (var i = 0; i < 4; i++) {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
 			if (enemy) {
-				if (enemy.m_data.type == 0) {
+				if (enemy.m_data.type == 0 || (enemy.m_data.type == ENEMY_TYPE.BOSS && g_Minigame.m_CurrentScene.m_rgGameData.level > 1000 && g_Minigame.m_CurrentScene.m_rgGameData.level % 200 != 0)) {
 					enemySpawnerExists = true;
 					enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 				}
