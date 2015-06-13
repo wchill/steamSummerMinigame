@@ -273,6 +273,7 @@ function goToLaneWithBestTarget() {
 				// ignore if lane is empty
 				if(g_Minigame.CurrentScene().m_rgGameData.lanes[i].dps == 0)
 					continue;
+					rainingGold = false;
 				var stacks = 0;
 				if(typeof g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[17] != 'undefined')
 					stacks = g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[17];
