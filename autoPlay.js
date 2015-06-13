@@ -1,7 +1,7 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements. /u/wchill and contributors on his repo for MSG2015-specific improvements.
-// @version 2.01
+// @version 2.02
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match http://steamcommunity.com/minigame/towerattack*
@@ -27,6 +27,7 @@ var disableText = false; // Remove all animated text. This includes damage, crit
                          
 var lockElements = true; // Set to false to allow upgrading all elements
 var slowStartMode = false; // Set to false to run script from beginning instead of lv11
+var lockAbilities = true; // Set to false to not auto-lock abilities on boss rounds/raining gold
 
 var isAlreadyRunning = false;
 
@@ -360,7 +361,7 @@ function goToLaneWithBestTarget() {
 		
 		
 		// Prevent attack abilities and items if up against a boss or treasure minion, or Raining Gold is active.
-		if ((targetIsTreasureOrBoss) || (rainingGold == true)) {
+		if (((targetIsTreasureOrBoss) || (rainingGold == true)) && (lockAbilities == true)) {
 			// Morale
 			disableAbility(ABILITIES.MORALE_BOOSTER);
 			// Luck
