@@ -194,7 +194,6 @@ function MainLoop() {
 		attemptRespawn();
 		disableCooldownIfRelevant();
 		updatePlayersInGame();
-		UIdisplayPayerIntel();
 
 		g_Minigame.m_CurrentScene.m_nClicks = currentClickRate;
 		g_msTickRate = 1000;
@@ -1092,6 +1091,10 @@ function getCritChance(){
     return g_Minigame.m_CurrentScene.m_rgPlayerTechTree.crit_percentage * 100;
 }
 
+function getBossLootChance(){
+    return g_Minigame.m_CurrentScene.m_rgPlayerTechTree.boss_loot_drop_percentage * 100;
+}
+
 function getCritMultiplier(){
     return g_Minigame.m_CurrentScene.m_rgPlayerTechTree.damage_multiplier_crit;
 }
@@ -1106,17 +1109,10 @@ function getClickDamage(){
 
 function fixActiveCapacityUI(){
 	$J('.tv_ui').css('background-image','url("'+GITHUB_BASE_URL+'game_frame_tv_fix.png")');
-	$J('#activeinlanecontainer').css('height','134px');
+	$J('#activeinlanecontainer').css('height','142px');
 	$J('#activitycontainer').css('height', '270px');
+	$J('#activitylog').css('margin-top', '24px')
 	$J('#activityscroll').css('height', '270px');
-}
-
-function UIdisplayPayerIntel(){
-	$J(".player_intel").remove();
-	$J("<div class=\"player_intel\">"
-		+"<div style=\"display: block;\">"+"Crit. : "+(g_Minigame.m_CurrentScene.m_rgPlayerTechTree.crit_percentage*100).toFixed(2)+"%</div>"
-		+"<div style=\"display: block;\">Boss Drop : "+(g_Minigame.m_CurrentScene.m_rgPlayerTechTree.boss_loot_drop_percentage*100).toFixed(2)+"%</div></div>").insertBefore(".player_ctn");
-	$J(".player_intel").css("position","absolute").css("z-index","12").css("left","322px").css("height","70px").css("bottom","68px").css("color","#fff").css("font-size","8px");
 }
 
 function enhanceTooltips(){
@@ -1144,6 +1140,12 @@ function enhanceTooltips(){
                 strOut += '<br><br>Damage with one crit:';
                 strOut += '<br>DPS: ' + FormatNumberForDisplay( currentMultiplier * dps ) + ' => ' + FormatNumberForDisplay( newMultiplier * dps );
                 strOut += '<br>Click: ' + FormatNumberForDisplay( currentMultiplier * clickDamage ) + ' => ' + FormatNumberForDisplay( newMultiplier * clickDamage );
+                break;
+            case 9: // Boss Tresor's type.
+
+                strOut += '<br><br>Boss Loot Drop Percentage: ' + getBossLootChance().toFixed(1) + '%';
+
+                strOut += "<br><br>" + 'Base Increased by: ' + FormatNumberForDisplay( 100 * multiplier ) + '%';
                 break;
             default:
                 return trt_oldTooltip(context);
