@@ -723,7 +723,7 @@ function useClusterBombIfRelevant() {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
 			if (enemy) {
 				enemyCount++;
-				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 != 0 && level % 10 == 0)) {
+				if (enemy.m_data.type === 0 || (level > 1000 && level % 10 == 0)) {
 					enemySpawnerExists = true;
 				}
 			}
@@ -752,7 +752,7 @@ function useNapalmIfRelevant() {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
 			if (enemy) {
 				enemyCount++;
-				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 != 0 && level % 10 == 0)) {
+				if (enemy.m_data.type === 0 || (level > 1000 && level % 10 == 0)) {
 					enemySpawnerExists = true;
 				}
 			}
@@ -801,7 +801,7 @@ function useTacticalNukeIfRelevant() {
 		for (var i = 0; i < 4; i++) {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
 			if (enemy) {
-				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 != 0 && level % 10 == 0)) {
+				if (enemy.m_data.type === 0 || (level > 1000 && level % 10 == 0)) {
 					enemySpawnerExists = true;
 					enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 				}
