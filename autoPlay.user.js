@@ -2,7 +2,7 @@
 // @name Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 3.7.1
+// @version 3.7.2
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -164,16 +164,27 @@ function firstRun() {
 	checkboxes.appendChild(makeCheckBox("removeCritText", "Remove crit text", removeCritText, toggleCritText));
 	checkboxes.appendChild(makeCheckBox("removeAllText", "Remove all text (overrides above)", removeAllText, toggleAllText));
 	checkboxes.appendChild(makeCheckBox("enableElementLock", "Lock element upgrades", enableElementLock, toggleElementLock));
+	
+	var btn = document.createElement("BUTTON");      
+	var t = document.createTextNode("SMACK TV!");     
+	btn.appendChild(t);
+	btn.onclick = function() { 
+        SmackTV();
+    };
+	checkboxes.appendChild(btn);
+	
 	info_box.appendChild(checkboxes);
 	
 	enhanceTooltips();
+	
+	
 }
 
 function MainLoop() {
 	if (!isAlreadyRunning) {
 		isAlreadyRunning = true;
 
-        var level = g_Minigame.m_CurrentScene.m_rgGameData.level; 
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1; 
 		goToLaneWithBestTarget();
 		useGoodLuckCharmIfRelevant();
 		useMedicsIfRelevant();
@@ -182,7 +193,7 @@ function MainLoop() {
 		useNapalmIfRelevant();
 		useTacticalNukeIfRelevant();
 		useCrippleSpawnerIfRelevant();
-        if(level < 1000 || level % 200 === 0) {
+        if(level < 1000 || level % 200 == 0) {
 		    useGoldRainIfRelevant();
         }
 		useMetalDetectorIfRelevant();
@@ -226,7 +237,9 @@ function MainLoop() {
 	        {
 	            var goldPerSecond = enemy.m_data.gold * goldPerClickPercentage * currentClickRate;
 	            advLog(
-	                "Raining gold ability is active in current lane. Percentage per click: " + goldPerClickPercentage + "%. Approximately gold per second: " + goldPerSecond, 4
+	                "Raining gold ability is active in current lane. Percentage per click: " + goldPerClickPercentage
+	                + "%. Approximately gold per second: " + goldPerSecond,
+	                4
 	            );
 	            displayText(
 	                enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
@@ -492,7 +505,7 @@ function goToLaneWithBestTarget() {
 		}
 
 		//Prefer lane with raining gold, unless current enemy target is a treasure or boss.
-		if(lowTarget != ENEMY_TYPE.TREASURE && lowTarget != ENEMY_TYPE.BOSS ){
+    if (!targetIsTreasure || !targetIsBoss){
 			var potential = 0;
 			// Loop through lanes by elemental preference
 			var sortedLanes = sortLanesByElementals();
@@ -591,8 +604,8 @@ function goToLaneWithBestTarget() {
 
 
 		// Prevent attack abilities and items if up against a boss or treasure minion
-        var level = g_Minigame.m_CurrentScene.m_rgGameData.level; 
-		if (targetIsTreasure || (targetIsBoss && (level < 1000 || level % 200 === 0)) {
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1; 
+		if (targetIsTreasure || (targetIsBoss && (level < 1000 || level % 200 == 0))) {
 			// Morale
 			disableAbility(ABILITIES.MORALE_BOOSTER);
 			// Luck
@@ -715,13 +728,13 @@ function useClusterBombIfRelevant() {
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 		var enemyCount = 0;
 		var enemySpawnerExists = false;
-        var level = g_Minigame.m_CurrentScene.m_rgGameData.level; 
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1; 
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
 			if (enemy) {
 				enemyCount++;
-				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 !== 0 && level % 10 === 0)) {
+				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 != 0 && level % 10 == 0)) {
 					enemySpawnerExists = true;
 				}
 			}
@@ -744,13 +757,13 @@ function useNapalmIfRelevant() {
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 		var enemyCount = 0;
 		var enemySpawnerExists = false;
-        var level = g_Minigame.m_CurrentScene.m_rgGameData.level; 
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1; 
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
 			if (enemy) {
 				enemyCount++;
-				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 !== 0 && level % 10 === 0)) {
+				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 != 0 && level % 10 == 0)) {
 					enemySpawnerExists = true;
 				}
 			}
@@ -794,12 +807,12 @@ function useTacticalNukeIfRelevant() {
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
 		var enemySpawnerExists = false;
 		var enemySpawnerHealthPercent = 0.0;
-        var level = g_Minigame.m_CurrentScene.m_rgGameData.level;
+        var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1;
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
 			if (enemy) {
-				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 !== 0 && level % 10 === 0)) {
+				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 != 0 && level % 10 == 0)) {
 					enemySpawnerExists = true;
 					enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 				}
