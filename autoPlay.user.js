@@ -156,6 +156,15 @@ if (node && node.parentNode) {
 	if (w.CSceneGame !== undefined) {
 		w.CSceneGame.prototype.DoScreenShake = function() {};
 	}
+	
+	// Easter egg button
+	var egg = document.createElement("span");
+	egg.className = "toggle_music_btn";
+	egg.innerText = "Easter Egg";
+	egg.onclick = function () {
+		SmackTV();
+	};
+	document.querySelector(".game_options").insertBefore(egg, document.querySelector(".leave_game_btn"));
 
 	// Add "players in game" label
 	var oldHTML = document.getElementsByClassName("title_activity")[0].innerHTML;
