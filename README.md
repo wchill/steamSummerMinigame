@@ -1,14 +1,12 @@
 #Steam Summer 2015 Monster Minigame AutoScript#
 
-#Buy at least 1 "Auto-fire Cannon" for lane switching to work.#
-
 ## Purpose ##
 
 It cheats for you.
 
 This fork has:
 * Elemental damage prioritizing, gold prioritizing
-* Auto clicking (change `clickRate` in console)
+* Auto clicking (do **not** click, this will mess with the autoclicker)
 * Tickrate set to 1000ms every second
 * Disable most particles
 * Auto use abilities
@@ -16,10 +14,6 @@ This fork has:
 
 **This fork is designed for use as a group (specifically the [MSG2015 Steam Group](http://steamcommunity.com/groups/MSG2015)).**
 
-
-**DISCLAIMER:** This autoscript *will* include an auto-clicker. Automatic clicking pushes into the area of cheating, and this script is designed for cheating and automating the process of collecting gold.
-
-**Notice:** The script 'auto-clicks' a combined ammount once a second, so it may seems as if it isn't auto-clicking. The Raining Gold and damage values are combined and processed once a second to be more efficient and reduce client load (as compared to the previous method of simulating 20 clicks-per-second). As long as the 'Enable autoclicker' is checked at the bottom of the screen in the options box, it is autoclicking.
 
 ## Features ##
 
@@ -62,21 +56,21 @@ This fork has:
 ### Manual ###
 
 ##### Chrome #####
-1. Open https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js
+1. Open https://raw.githubusercontent.com/SteamDatabase/steamSummerMinigame/master/autoPlay.user.js
 2. Select All, Copy.
 3. Navigate to `http://steamcommunity.com/minigame/` and join or start a game.
 4. Press `Ctrl + Shift + J`.
 5. Paste into the javascript input, and hit `Enter`.
 
 ##### Firefox #####
-1. Open https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js
+1. Open https://raw.githubusercontent.com/SteamDatabase/steamSummerMinigame/master/autoPlay.user.js
 2. Select All, Copy.
 3. Navigate to `http://steamcommunity.com/minigame/` and join or start a game.
 4. Press `Ctrl + Shift + K`.
 5. Paste into the javascript input, and hit `Enter`.
 
 ##### Internet Explorer / Microsoft Edge #####
-1. Open https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js
+1. Open https://raw.githubusercontent.com/SteamDatabase/steamSummerMinigame/master/autoPlay.user.js
 2. Select All, Copy.
 3. Navigate to `http://steamcommunity.com/minigame/` and join or start a game.
 4. Press `F12` and navigate to the `Console` tab.
