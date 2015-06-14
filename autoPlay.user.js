@@ -82,7 +82,7 @@ var GITHUB_BASE_URL = "https://raw.githubusercontent.com/pkolodziejczyk/steamSum
 
 
 function firstRun() {
-	trt_oldCrit = w.g_Minigame.CurrentScene().DoCritEffect;
+	trt_oldCrit = s().DoCritEffect;
 	trt_oldPush = s().m_rgClickNumbers.push;
 	
 	if(enableElementLock) {
@@ -94,7 +94,7 @@ function firstRun() {
 	// disable particle effects - this drastically reduces the game's memory leak
 	if(removeParticles) {
 		if (g_Minigame !== undefined) {
-			g_Minigame.CurrentScene().SpawnEmitter = function(emitter) {
+			s().SpawnEmitter = function(emitter) {
 				emitter.emit = false;
 				return emitter;
 			};
@@ -333,9 +333,9 @@ function toggleCritText(event){
 		value = handleCheckBox(event);
 	if (value) {
 			// Replaces the entire crit display function.
-			w.g_Minigame.CurrentScene().DoCritEffect = function( nDamage, x, y, additionalText ) {};
+			s().DoCritEffect = function( nDamage, x, y, additionalText ) {};
 	} else {
-		  w.g_Minigame.CurrentScene().DoCritEffect = trt_oldCrit;
+		  s().DoCritEffect = trt_oldCrit;
 	}
 }
 
@@ -394,10 +394,10 @@ function unlockElements() {
 
 function lockElements() {
 	var elementMultipliers = [
-		g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_multiplier_fire,
-		g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_multiplier_water,
-		g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_multiplier_air,
-		g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_multiplier_earth
+		s().m_rgPlayerTechTree.damage_multiplier_fire,
+		s().m_rgPlayerTechTree.damage_multiplier_water,
+		s().m_rgPlayerTechTree.damage_multiplier_air,
+		s().m_rgPlayerTechTree.damage_multiplier_earth
 	];
 
   var hashCode=function(str) {
@@ -464,8 +464,8 @@ function displayText(x, y, strText, color) {
 	text.x = x;
 	text.y = y;
 
-	g_Minigame.CurrentScene().m_containerUI.addChild( text );
-	text.container = g_Minigame.CurrentScene().m_containerUI;
+	s().m_containerUI.addChild( text );
+	text.container = s().m_containerUI;
 
 	var e = new CEasingSinOut( text.y, -200, 1000 );
 	e.parent = text;
@@ -475,7 +475,7 @@ function displayText(x, y, strText, color) {
 	e.parent = text;
 	text.m_easeAlpha = e;
 
-	g_Minigame.CurrentScene().m_rgClickNumbers.push(text);
+	s().m_rgClickNumbers.push(text);
 }
 
 function updatePlayersInGame() {
@@ -523,7 +523,7 @@ function goToLaneWithBestTarget() {
 		// gather all the enemies of the specified type.
 		for (i = 0; i < 3; i++) {
 			for (var j = 0; j < 4; j++) {
-				var enemy = g_Minigame.CurrentScene().GetEnemy(i, j);
+				var enemy = s().GetEnemy(i, j);
 				if (enemy && enemy.m_data.type == enemyTypePriority[k]) {
 					enemies[enemies.length] = enemy;
 				}
@@ -539,7 +539,7 @@ function goToLaneWithBestTarget() {
 				// Maximize compability with upstream
 				i = sortedLanes[notI];
 				// ignore if lane is empty
-				if(g_Minigame.CurrentScene().m_rgGameData.lanes[i].dps === 0)
+				if(s().m_rgGameData.lanes[i].dps === 0)
 					continue;
 				var stacks = 0;
 				if(typeof s().m_rgLaneData[i].abilities[17] != 'undefined') {
@@ -563,10 +563,10 @@ function goToLaneWithBestTarget() {
 			if (enemies[i] && !enemies[i].m_bIsDestroyed) {
 				// Only select enemy and lane if the preferedLane matches the potential enemy lane
 				if(lowHP < 1 || enemies[i].m_flDisplayedHP < lowHP) {
-					var element = g_Minigame.CurrentScene().m_rgGameData.lanes[enemies[i].m_nLane].element;
+					var element = s().m_rgGameData.lanes[enemies[i].m_nLane].element;
 
-					var dmg = g_Minigame.CurrentScene().CalculateDamage(
-							g_Minigame.CurrentScene().m_rgPlayerTechTree.dps,
+					var dmg = s().CalculateDamage(
+							s().m_rgPlayerTechTree.dps,
 							element
 						);
 					if(mostHPDone < dmg)
@@ -617,15 +617,15 @@ function goToLaneWithBestTarget() {
 
 	// go to the chosen lane
 	if (targetFound) {
-		if (g_Minigame.CurrentScene().m_nExpectedLane != lowLane) {
+		if (s().m_nExpectedLane != lowLane) {
 			advLog('Switching to lane' + lowLane, 3);
-			g_Minigame.CurrentScene().TryChangeLane(lowLane);
+			s().TryChangeLane(lowLane);
 		}
 
 		// target the chosen enemy
-		if (g_Minigame.CurrentScene().m_nTarget != lowTarget) {
+		if (s().m_nTarget != lowTarget) {
 			advLog('Switching targets', 3);
-			g_Minigame.CurrentScene().TryChangeTarget(lowTarget);
+			s().TryChangeTarget(lowTarget);
 		}
 
 
@@ -696,13 +696,6 @@ function disableCooldownIfRelevant() {
 }
 
 function useMedicsIfRelevant() {
-	var myMaxHealth = g_Minigame.CurrentScene().m_rgPlayerTechTree.max_hp;
-
-	// check if health is below 50%
-	var hpPercent = g_Minigame.CurrentScene().m_rgPlayerData.hp / myMaxHealth;
-	if (hpPercent > 0.5 || g_Minigame.CurrentScene().m_rgPlayerData.hp < 1) {
-		return; // no need to heal - HP is above 50% or already dead
-	}
 
 	// check if Medics is purchased and cooled down
 	if (hasPurchasedAbility(ABILITIES.MEDIC) && !isAbilityCoolingDown(ABILITIES.MEDIC)) {
@@ -710,6 +703,21 @@ function useMedicsIfRelevant() {
 		// Medics is purchased, cooled down, and needed. Trigger it.
 		advLog('Medics is purchased, cooled down, and needed. Trigger it.', 2);
 		triggerAbility(ABILITIES.MEDIC);
+		return;
+	}
+
+	var myMaxHealth = s().m_rgPlayerTechTree.max_hp;
+
+	// check if health is below 50%
+	var hpPercent = s().m_rgPlayerData.hp / myMaxHealth;
+	if (hpPercent > 0.5 || s().m_rgPlayerData.hp < 1) {
+		return; // no need to heal - HP is above 50% or already dead
+	}
+	
+	if (hasItem(ITEMS.PUMPED_UP) && !isAbilityCoolingDown(ITEMS.PUMPED_UP)) {
+
+		advLog('We have pumped up, cooled down, and needed. Trigger it.', 2);
+		triggerItem(ITEMS.PUMPED_UP);
 	} else if (hasItem(ITEMS.GOD_MODE) && !isAbilityCoolingDown(ITEMS.GOD_MODE)) {
 
 		advLog('We have god mode, cooled down, and needed. Trigger it.', 2);
@@ -751,13 +759,13 @@ function useClusterBombIfRelevant() {
 		}
 
 		//Check lane has monsters to explode
-		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
+		var currentLane = s().m_nExpectedLane;
 		var enemyCount = 0;
 		var enemySpawnerExists = false;
 		var level = s().m_rgGameData.level + 1; 
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
-			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
+			var enemy = s().GetEnemy(currentLane, i);
 			if (enemy) {
 				enemyCount++;
 				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 != 0 && level % 10 == 0)) {
@@ -780,13 +788,13 @@ function useNapalmIfRelevant() {
 		}
 
 		//Check lane has monsters to burn
-		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
+		var currentLane = s().m_nExpectedLane;
 		var enemyCount = 0;
 		var enemySpawnerExists = false;
 		var level = s().m_rgGameData.level + 1; 
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
-			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
+			var enemy = s().GetEnemy(currentLane, i);
 			if (enemy) {
 				enemyCount++;
 				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 != 0 && level % 10 == 0)) {
@@ -809,9 +817,9 @@ function useMoraleBoosterIfRelevant() {
 			return;
 		}
 		var numberOfWorthwhileEnemies = 0;
-		for(var i = 0; i < g_Minigame.CurrentScene().m_rgGameData.lanes[g_Minigame.CurrentScene().m_nExpectedLane].enemies.length; i++){
+		for(var i = 0; i < s().m_rgGameData.lanes[s().m_nExpectedLane].enemies.length; i++){
 			//Worthwhile enemy is when an enamy has a current hp value of at least 1,000,000
-			if(g_Minigame.CurrentScene().m_rgGameData.lanes[g_Minigame.CurrentScene().m_nExpectedLane].enemies[i].hp > 1000000) {
+			if(s().m_rgGameData.lanes[s().m_nExpectedLane].enemies[i].hp > 1000000) {
 				numberOfWorthwhileEnemies++;
 			}
 		}
@@ -830,13 +838,13 @@ function useTacticalNukeIfRelevant() {
 		}
 
 		//Check that the lane has a spawner and record it's health percentage
-		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
+		var currentLane = s().m_nExpectedLane;
 		var enemySpawnerExists = false;
 		var enemySpawnerHealthPercent = 0.0;
 		var level = s().m_rgGameData.level + 1;
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
-			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
+			var enemy = s().GetEnemy(currentLane, i);
 			if (enemy) {
 				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 != 0 && level % 10 == 0)) {
 					enemySpawnerExists = true;
@@ -882,12 +890,12 @@ function useCrippleSpawnerIfRelevant() {
 		}
 
 		//Check that the lane has a spawner and record it's health percentage
-		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
+		var currentLane = s().m_nExpectedLane;
 		var enemySpawnerExists = false;
 		var enemySpawnerHealthPercent = 0.0;
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
-			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
+			var enemy = s().GetEnemy(currentLane, i);
 			if (enemy) {
 				if (enemy.m_data.type === 0) {
 					enemySpawnerExists = true;
@@ -947,19 +955,19 @@ function useMetalDetectorIfRelevant() {
 }
 
 function attemptRespawn() {
-	if ((g_Minigame.CurrentScene().m_bIsDead) &&
-			((g_Minigame.CurrentScene().m_rgPlayerData.time_died) + 5) < (g_Minigame.CurrentScene().m_nTime)) {
+	if ((s().m_bIsDead) &&
+			((s().m_rgPlayerData.time_died) + 5) < (s().m_nTime)) {
 		RespawnPlayer();
 	}
 }
 
 function isAbilityActive(abilityId) {
-	return g_Minigame.CurrentScene().bIsAbilityActive(abilityId);
+	return s().bIsAbilityActive(abilityId);
 }
 
 function hasItem(itemId) {
-	for ( var i = 0; i < g_Minigame.CurrentScene().m_rgPlayerTechTree.ability_items.length; ++i ) {
-		var abilityItem = g_Minigame.CurrentScene().m_rgPlayerTechTree.ability_items[i];
+	for ( var i = 0; i < s().m_rgPlayerTechTree.ability_items.length; ++i ) {
+		var abilityItem = s().m_rgPlayerTechTree.ability_items[i];
 		if (abilityItem.ability == itemId) {
 			return true;
 		}
@@ -968,7 +976,7 @@ function hasItem(itemId) {
 }
 
 function isAbilityCoolingDown(abilityId) {
-	return g_Minigame.CurrentScene().GetCooldownForAbility(abilityId) > 0;
+	return s().GetCooldownForAbility(abilityId) > 0;
 }
 
 function hasOneUseAbility(abilityId) {
@@ -980,18 +988,18 @@ function hasPurchasedAbility(abilityId) {
 	// each bit in unlocked_abilities_bitfield corresponds to an ability.
 	// the above condition checks if the ability's bit is set or cleared. I.e. it checks if
 	// the player has purchased the specified ability.
-	return (1 << abilityId) & g_Minigame.CurrentScene().m_rgPlayerTechTree.unlocked_abilities_bitfield;
+	return (1 << abilityId) & s().m_rgPlayerTechTree.unlocked_abilities_bitfield;
 }
 
 function triggerItem(itemId) {
 	var elem = document.getElementById('abilityitem_' + itemId);
 	if (elem && elem.childElements() && elem.childElements().length >= 1) {
-		g_Minigame.CurrentScene().TryAbility(document.getElementById('abilityitem_' + itemId).childElements()[0]);
+		s().TryAbility(document.getElementById('abilityitem_' + itemId).childElements()[0]);
 	}
 }
 
 function triggerAbility(abilityId) {
-	g_Minigame.CurrentScene().m_rgAbilityQueue.push({'ability': abilityId});
+	s().m_rgAbilityQueue.push({'ability': abilityId});
 }
 
 function toggleAbilityVisibility(abilityId, show) {
@@ -1062,13 +1070,13 @@ function getActiveAbilityNum(ability) {
 
 function sortLanesByElementals() {
 	var elementPriorities = [
-		g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_multiplier_fire,
-		g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_multiplier_water,
-		g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_multiplier_air,
-		g_Minigame.CurrentScene().m_rgPlayerTechTree.damage_multiplier_earth
+		s().m_rgPlayerTechTree.damage_multiplier_fire,
+		s().m_rgPlayerTechTree.damage_multiplier_water,
+		s().m_rgPlayerTechTree.damage_multiplier_air,
+		s().m_rgPlayerTechTree.damage_multiplier_earth
 	];
 
-	var lanes = g_Minigame.CurrentScene().m_rgGameData.lanes;
+	var lanes = s().m_rgGameData.lanes;
 	var lanePointers = [];
 
 	for (var i = 0; i < lanes.length; i++) {
@@ -1096,7 +1104,7 @@ if(w.SteamDB_Minigame_Timer) {
 }
 
 w.SteamDB_Minigame_Timer = w.setInterval(function(){
-	if (g_Minigame && g_Minigame.CurrentScene().m_bRunning && g_Minigame.CurrentScene().m_rgPlayerTechTree) {
+	if (g_Minigame && s().m_bRunning && s().m_rgPlayerTechTree) {
 		w.clearInterval(w.SteamDB_Minigame_Timer);
 		firstRun();
 		w.SteamDB_Minigame_Timer = w.setInterval(MainLoop, 1000);
