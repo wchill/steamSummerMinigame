@@ -179,9 +179,20 @@ function firstRun() {
 	checkboxes.appendChild(makeCheckBox("removeCritText", "Remove crit text", removeCritText, toggleCritText));
 	checkboxes.appendChild(makeCheckBox("removeAllText", "Remove all text (overrides above)", removeAllText, toggleAllText));
 	checkboxes.appendChild(makeCheckBox("enableElementLock", "Lock element upgrades", enableElementLock, toggleElementLock));
+	
+	var btn = document.createElement("BUTTON");      
+	var t = document.createTextNode("SMACK TV!");     
+	btn.appendChild(t);
+	btn.onclick = function() { 
+        SmackTV();
+    };
+	checkboxes.appendChild(btn);
+	
 	info_box.appendChild(checkboxes);
 	
 	enhanceTooltips();
+	
+	
 }
 
 function MainLoop() {
@@ -521,6 +532,7 @@ function goToLaneWithBestTarget() {
 		}
 
 		//Prefer lane with raining gold, unless current enemy target is a treasure or boss.
+
     if (!targetIsTreasure && !targetIsBoss){
 			var potential = 0;
 			// Loop through lanes by elemental preference
