@@ -185,6 +185,7 @@ function MainLoop() {
 		useClusterBombIfRelevant();
 		useNapalmIfRelevant();
 		useTacticalNukeIfRelevant();
+    useCrippleMonsterIfRelevant();
 		useCrippleSpawnerIfRelevant();
         if(level < 1000 || level % 200 == 0) {
 		    useGoldRainIfRelevant();
@@ -498,7 +499,7 @@ function goToLaneWithBestTarget() {
 		}
 
 		//Prefer lane with raining gold, unless current enemy target is a treasure or boss.
-    if (!targetIsTreasure || !targetIsBoss){
+    if (!targetIsTreasure && !targetIsBoss){
 			var potential = 0;
 			// Loop through lanes by elemental preference
 			var sortedLanes = sortLanesByElementals();
@@ -820,6 +821,27 @@ function useTacticalNukeIfRelevant() {
 	}
 }
 
+function useCrippleMonsterIfRelevant() {
+	// Check if Cripple Spawner is available
+	if(hasItem(ITEMS.CRIPPLE_MONSTER)) {
+		if (isAbilityCoolingDown(ITEMS.CRIPPLE_MONSTER)) {
+			return;
+		}
+  }
+  
+  var level = g_Minigame.m_CurrentScene.m_rgGameData.level + 1;
+  // Use nukes on boss when level >3000 for faster kills
+    if (level > 1000 && level % 200 != 0 && level % 10 == 0) {
+      var enemy = g_Minigame.m_CurrentScene.GetEnemy(g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane, g_Minigame.m_CurrentScene.m_rgPlayerData.target);
+      if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
+        var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp
+        if (enemyBossHealthPercent>0.5){
+        advLog("Cripple Monster available and used on boss", 2);
+        triggerItem(ITEMS.CRIPPLE_MONSTER);
+        }
+      }
+    }  
+}
 function useCrippleSpawnerIfRelevant() {
 	// Check if Cripple Spawner is available
 	if(hasItem(ITEMS.CRIPPLE_SPAWNER)) {
