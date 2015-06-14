@@ -1,0 +1,21 @@
+{
+	"node": false,
+	"browser": true,
+	"curly": true,
+	"newcap": false,
+	"strict": true,
+	"globals":
+	{
+		"g_steamID": false,
+		"g_GameID": false,
+		"g_Minigame": false,
+		"g_msTickRate": true,
+		"CEnemy": false,
+		"CEnemyBoss": false,
+		"CEnemySpawner": false,
+		"RespawnPlayer": false,
+		"FormatNumberForDisplay": false,
+		"CEasingSinOut": false,
+		"PIXI": false
+	}
+}
