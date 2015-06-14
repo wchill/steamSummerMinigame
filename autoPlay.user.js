@@ -181,6 +181,7 @@ function MainLoop() {
 		useClusterBombIfRelevant();
 		useNapalmIfRelevant();
 		useTacticalNukeIfRelevant();
+		useCrippleMonsterIfRelevant();
 		useCrippleSpawnerIfRelevant();
         if(level < 1000 || level % 200 == 0) {
 		    useGoldRainIfRelevant();
@@ -596,7 +597,7 @@ function goToLaneWithBestTarget() {
 
 
 		// Prevent attack abilities and items if up against a boss or treasure minion
-		if (targetIsTreasureOrBoss) {
+		if (targetIsTreasureOrBoss && g_Minigame.m_CurrentScene.m_nCurrentLevel<3000) {
 			// Morale
 			disableAbility(ABILITIES.MORALE_BOOSTER);
 			// Luck
@@ -791,6 +792,18 @@ function useTacticalNukeIfRelevant() {
 		if (isAbilityCoolingDown(ABILITIES.NUKE)) {
 			return;
 		}
+    
+    // Use nukes on boss when level >3000 for faster kills
+    if (g_Minigame.m_CurrentScene.m_nCurrentLevel>3000) {
+      var enemy = g_Minigame.m_CurrentScene.GetEnemy(g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane, g_Minigame.m_CurrentScene.m_rgPlayerData.target);
+      if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
+        var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp
+        if (enemyBossHealthPercent>0.5){
+        advLog("Tactical Nuke used on boss on level "+(g_Minigame.m_CurrentScene.m_nCurrentLevel+1), 2);
+        triggerAbility(ABILITIES.NUKE);
+        }
+      }
+    }
 
 		//Check that the lane has a spawner and record it's health percentage
 		var currentLane = g_Minigame.CurrentScene().m_nExpectedLane;
@@ -815,7 +828,25 @@ function useTacticalNukeIfRelevant() {
 		}
 	}
 }
-
+function useCrippleMonsterIfRelevant() {
+	// Check if Cripple Spawner is available
+	if(hasItem(ITEMS.CRIPPLE_MONSTER)) {
+		if (isAbilityCoolingDown(ITEMS.CRIPPLE_MONSTER)) {
+			return;
+		}
+  }
+  // Use nukes on boss when level >3000 for faster kills
+    if (g_Minigame.m_CurrentScene.m_nCurrentLevel>3000) {
+      var enemy = g_Minigame.m_CurrentScene.GetEnemy(g_Minigame.m_CurrentScene.m_rgPlayerData.current_lane, g_Minigame.m_CurrentScene.m_rgPlayerData.target);
+      if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
+        var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp
+        if (enemyBossHealthPercent>0.5){
+        advLog("Cripple Monster available and used on boss", 2);
+        triggerItem(ITEMS.CRIPPLE_MONSTER);
+        }
+      }
+    }  
+}
 function useCrippleSpawnerIfRelevant() {
 	// Check if Cripple Spawner is available
 	if(hasItem(ITEMS.CRIPPLE_SPAWNER)) {
