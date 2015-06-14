@@ -1,10 +1,10 @@
-# Steam Summer 2015 Monster Minigame AutoScript #
+#Steam Summer 2015 Monster Minigame AutoScript#
 
 #Buy at least 1 "Auto-fire Cannon" for lane switching to work.#
 
 ## Purpose ##
 
-it cheats for you.
+It cheats for you.
 
 This fork has:
 * Elemental damage prioritizing, gold prioritizing
@@ -14,7 +14,7 @@ This fork has:
 * Auto use abilities
 * idk
 
-** This fork is designed for use as a group (specifically the MSG2015 Steam group). **
+**This fork is designed for use as a group (specifically the [MSG2015 Steam Group](http://steamcommunity.com/groups/MSG2015)).**
 
 
 **DISCLAIMER:** This autoscript *will* include an auto-clicker. Automatic clicking pushes into the area of cheating, and this script is designed for cheating and automating the process of collecting gold.
