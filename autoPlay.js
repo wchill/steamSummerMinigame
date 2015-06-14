@@ -1,7 +1,7 @@
 // ==UserScript== 
 // @name Monster Minigame AutoScript
 // @author /u/mouseasw for creating and maintaining the script, /u/WinneonSword for the Greasemonkey support, and every contributor on the GitHub repo for constant enhancements. /u/wchill and contributors on his repo for MSG2015-specific improvements.
-// @version 2.03
+// @version 2.04
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @match http://steamcommunity.com/minigame/towerattack*
@@ -114,14 +114,29 @@ function firstRun() {
 	} else {
 		initAutoClicker();
 	}
+	
+	// Append gameid to breadcrumbs
+	var breadcrumbs = document.querySelector('.breadcrumbs');
 
-    var box = document.getElementsByClassName("leave_game_helper")[0];
-    box.innerHTML = "Autoscript now enabled - your game ID is " + g_GameID +
-        "<br>Autoclicker: " + (enableAutoClicker?"enabled - "+clickRate+"cps, "+(setClickVariable?"variable":"clicks"):"disabled") +
-        "<br>Particle effects: " + (disableParticleEffects?"disabled":"enabled") +
-        "<br>Flinching effect: " + (disableFlinching?"disabled":"enabled") +
-        "<br>Crit effect: " + (disableCritText?"disabled":"enabled") +
-        "<br>Text: " + (disableText?"disabled":"enabled")
+	if(breadcrumbs) {
+		var element = document.createElement('span');
+		element.textContent = ' > ';
+		breadcrumbs.appendChild(element);
+
+		element = document.createElement('span');
+		element.style.color = '#D4E157';
+		element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
+		element.textContent = 'Room ' + g_GameID;
+		breadcrumbs.appendChild(element);
+	}
+
+	var box = document.getElementsByClassName("leave_game_helper")[0];
+	box.innerHTML = "Autoscript now enabled - your game ID is " + g_GameID +
+		"<br>Autoclicker: " + (enableAutoClicker?"enabled - "+clickRate+"cps, "+(setClickVariable?"variable":"clicks"):"disabled") +
+		"<br>Particle effects: " + (disableParticleEffects?"disabled":"enabled") +
+		"<br>Flinching effect: " + (disableFlinching?"disabled":"enabled") +
+		"<br>Crit effect: " + (disableCritText?"disabled":"enabled") +
+		"<br>Text: " + (disableText?"disabled":"enabled")
 }
 
 function initAutoClicker() {
