@@ -19,6 +19,8 @@ This fork has:
 
 **DISCLAIMER:** This autoscript *will* include an auto-clicker. Automatic clicking pushes into the area of cheating, and this script is designed for cheating and automating the process of collecting gold.
 
+**Notice:** The script 'auto-clicks' a combined ammount once a second, so it may seems as if it isn't auto-clicking. The Raining Gold and damage values are combined and processed once a second to be more efficient and reduce client load (as compared to the previous method of simulating 20 clicks-per-second). As long as the 'Enable autoclicker' is checked at the bottom of the screen in the options box, it is autoclicking.
+
 ## Features ##
 
 - Moves you to the lane most likely to give you gold, prioritized like so:
@@ -40,15 +42,16 @@ This fork has:
 - Disables certain abilities and items if facing a Boss (to try to maximize Raining Gold and Metal Detector benefits)
 
 ## Installation ##
+**It is recommended to use either [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=en) (Chrome) or [Greasemonkey](https://addons.mozilla.org/en-us/firefox/addon/greasemonkey/) (Firefox).** This allows the script to auto-update to the most recent version. The rate of this update can be changed in each extension's preferences.
 
-### Tampermonkey ###
+### [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=en) ###
 
 1. Open Tapermonkey's dashboard.
 2. Click on the `Utilites` tab on the right.
 3. Paste `https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js` into the text area, and click `Import`.
 4. When the editor has loaded, click `Install` (*NOT* `Process with Chrome`).
 
-### Greasemonkey ###
+### [Greasemonkey](https://addons.mozilla.org/en-us/firefox/addon/greasemonkey/) ###
 
 1. Navigate to `https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js`.
 2. Right click on the page, and click `Save Page As`.
