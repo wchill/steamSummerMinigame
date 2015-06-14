@@ -2,7 +2,7 @@
 // @name Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 3.7.2
+// @version 3.7.3
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -193,6 +193,7 @@ function MainLoop() {
 		attemptRespawn();
 		disableCooldownIfRelevant();
 		updatePlayersInGame();
+		UIdisplayPayerIntel();
 
 		g_Minigame.m_CurrentScene.m_nClicks = currentClickRate;
 		g_msTickRate = 1000;
@@ -1086,6 +1087,14 @@ function fixActiveCapacityUI(){
 	$J('#activeinlanecontainer').css('height','134px');
 	$J('#activitycontainer').css('height', '270px');
 	$J('#activityscroll').css('height', '270px');
+}
+
+function UIdisplayPayerIntel(){
+	$J(".player_intel").remove();
+	$J("<div class=\"player_intel\">"
+		+"<div style=\"display: block;\">"+"Crit. : "+(g_Minigame.m_CurrentScene.m_rgPlayerTechTree.crit_percentage*100).toFixed(2)+"%</div>"
+		+"<div style=\"display: block;\">Boss Drop : "+(g_Minigame.m_CurrentScene.m_rgPlayerTechTree.boss_loot_drop_percentage*100).toFixed(2)+"%</div></div>").insertBefore(".player_ctn");
+	$J(".player_intel").css("position","absolute").css("z-index","12").css("left","322px").css("height","70px").css("bottom","68px").css("color","#fff").css("font-size","8px");
 }
 
 function enhanceTooltips(){
