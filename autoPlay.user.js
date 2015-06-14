@@ -182,7 +182,7 @@ function MainLoop() {
 		useNapalmIfRelevant();
 		useTacticalNukeIfRelevant();
 		useCrippleSpawnerIfRelevant();
-        if(level < 1000 || level % 200 == 0) {
+        if(level < 1000 || level % 200 === 0) {
 		    useGoldRainIfRelevant();
         }
 		useMetalDetectorIfRelevant();
@@ -226,9 +226,7 @@ function MainLoop() {
 	        {
 	            var goldPerSecond = enemy.m_data.gold * goldPerClickPercentage * currentClickRate;
 	            advLog(
-	                "Raining gold ability is active in current lane. Percentage per click: " + goldPerClickPercentage
-	                + "%. Approximately gold per second: " + goldPerSecond,
-	                4
+	                "Raining gold ability is active in current lane. Percentage per click: " + goldPerClickPercentage + "%. Approximately gold per second: " + goldPerSecond, 4
 	            );
 	            displayText(
 	                enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
@@ -594,7 +592,7 @@ function goToLaneWithBestTarget() {
 
 		// Prevent attack abilities and items if up against a boss or treasure minion
         var level = g_Minigame.m_CurrentScene.m_rgGameData.level; 
-		if (targetIsTreasure || (targetIsBoss && (level < 1000 || level % 200 == 0)) {
+		if (targetIsTreasure || (targetIsBoss && (level < 1000 || level % 200 === 0)) {
 			// Morale
 			disableAbility(ABILITIES.MORALE_BOOSTER);
 			// Luck
@@ -723,7 +721,7 @@ function useClusterBombIfRelevant() {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
 			if (enemy) {
 				enemyCount++;
-				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 != 0 && level % 10 == 0)) {
+				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 !== 0 && level % 10 === 0)) {
 					enemySpawnerExists = true;
 				}
 			}
@@ -752,7 +750,7 @@ function useNapalmIfRelevant() {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
 			if (enemy) {
 				enemyCount++;
-				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 != 0 && level % 10 == 0)) {
+				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 !== 0 && level % 10 === 0)) {
 					enemySpawnerExists = true;
 				}
 			}
@@ -801,7 +799,7 @@ function useTacticalNukeIfRelevant() {
 		for (var i = 0; i < 4; i++) {
 			var enemy = g_Minigame.CurrentScene().GetEnemy(currentLane, i);
 			if (enemy) {
-				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 != 0 && level % 10 == 0)) {
+				if (enemy.m_data.type === 0 || (level > 1000 && level % 200 !== 0 && level % 10 === 0)) {
 					enemySpawnerExists = true;
 					enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 				}
