@@ -27,6 +27,7 @@ var disableText = false; // Remove all animated text. This includes damage, crit
                          
 var lockElements = true; // Set to false to allow upgrading all elements
 var slowStartMode = false; // Set to false to run script from beginning instead of lv11
+var lockAbilities = true; // Set to false to not auto-lock abilities on boss rounds/raining gold
 
 var isAlreadyRunning = false;
 
@@ -361,7 +362,7 @@ function goToLaneWithBestTarget() {
 		
 		
 		// Prevent attack abilities and items if up against a boss or treasure minion, or Raining Gold is active.
-		if ((targetIsTreasureOrBoss) || (rainingGold == true)) {
+		if (((targetIsTreasureOrBoss) || (rainingGold == true)) && (lockAbilities == true)) {
 			// Morale
 			disableAbility(ABILITIES.MORALE_BOOSTER);
 			// Luck
