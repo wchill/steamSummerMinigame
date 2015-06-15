@@ -235,7 +235,11 @@ if (node && node.parentNode) {
     var oldHTML = document.getElementsByClassName("title_activity")[0].innerHTML;
     document.getElementsByClassName("title_activity")[0].innerHTML = "<span id=\"players_in_game\">0/1500</span>&nbsp;Players in room<br />" + oldHTML;
 
-    var info_box = document.querySelector(".leave_game_helper");
+	var newDiv = document.createElement("div");
+	document.getElementsByClassName('pagecontent')[0].insertBefore(newDiv, document.getElementsByClassName('footer_spacer')[0]);
+	newDiv.className = "info-box";
+	
+    var info_box = document.querySelector(".info-box");
     info_box.innerHTML = '<b>OPTIONS</b><br/>Some of these may need a refresh to take effect.<br/>Version: ' + SCRIPT_VERSION +'<br/>';
 
     // reset the CSS for the info box for aesthetics
@@ -244,9 +248,10 @@ if (node && node.parentNode) {
     info_box.style.width = "600px";
     info_box.style.top = "73px";
     info_box.style.padding = "12px";
-    info_box.style.position = "absolute";
     info_box.style.boxShadow = "2px 2px 0 rgba( 0, 0, 0, 0.6 )";
     info_box.style.color = "#ededed";
+	info_box.style.marginLeft = "auto";
+	info_box.style.marginRight = "auto";
 
     var options = document.createElement("div");
     options.style["-moz-column-count"] = 2;
