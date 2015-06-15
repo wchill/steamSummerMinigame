@@ -1100,16 +1100,16 @@ function autoRefreshPage(autoRefreshMinutes) {
 
 function autoRefreshHandler() {
      var enemyData = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target).m_data; 
-     if(typeof enemyData !== "undefined"){
+     if (typeof enemyData !== "undefined") {
         var enemyType = enemyData.type;
-        if(enemyType != ENEMY_TYPE.BOSS) {
+        if (enemyType != ENEMY_TYPE.BOSS) {
             advLog('Refreshing, not boss', 5);
             w.location.reload(true);
-        }else {
+        } else {
             advLog('Not refreshing, A boss!', 5);
             setTimeout(autoRefreshHandler, 3000);
         }
-    }else{
+    } else {
         //Wait until it is defined
         setTimeout(autoRefreshHandler, 1000);
     }
