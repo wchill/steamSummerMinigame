@@ -1137,12 +1137,28 @@ function advLog(msg, lvl) {
     }
 }
 
+// reload if script has not started after a reasonable wait, possible problem on reload
+var waitErrorReload = 30;
+var timerErrorReload = w.setInterval(function() {
+    if ( --waitErrorReload > 0 ) {
+        advLog("Reloading in " + waitErrorReload + "s if game does not run...", 1); 
+        return;
+    }
+
+    w.clearTimeout(timerErrorReload);
+    advLog("Forcing reload; Game not running", 1);
+    w.location.reload(true);
+}, 1000);
+
 if (w.SteamDB_Minigame_Timer) {
     w.clearInterval(w.SteamDB_Minigame_Timer);
 }
 
 w.SteamDB_Minigame_Timer = w.setInterval(function() {
     if (g_Minigame && s().m_bRunning && s().m_rgPlayerTechTree && s().m_rgGameData) {
+        w.clearTimeout(timerErrorReload);
+        advLog("Game running", 1);
+
         w.clearInterval(w.SteamDB_Minigame_Timer);
         firstRun();
         w.SteamDB_Minigame_Timer = w.setInterval(MainLoop, 1000);
