@@ -24,6 +24,7 @@ var logLevel = 1; // 5 is the most verbose, 0 disables all log
 
 var enableAutoClicker = getPreferenceBoolean("enableAutoClicker", true);
 
+var removeCanvas = getPreferenceBoolean("removeCanvas", false);
 var removeInterface = getPreferenceBoolean("removeInterface", true); // get rid of a bunch of pointless DOM var removeParticles = getPreferenceBoolean("removeParticles", true);
 var removeParticles = getPreferenceBoolean("removeParticles", true); 
 var removeFlinching = getPreferenceBoolean("removeFlinching", true);
@@ -132,6 +133,15 @@ function s() {
 var refreshTimer = null; // global to cancel running timers if disabled after timer has already started
 var GITHUB_BASE_URL = "https://raw.githubusercontent.com/pkolodziejczyk/steamSummerMinigame/master/";
 
+function addGlobalStyle(css) {
+    var head, style;
+    head = document.getElementsByTagName('head')[0];
+    if (!head) { return; }
+    style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = css;
+    head.appendChild(style);
+};
 
 function firstRun() {
     /*
@@ -179,6 +189,10 @@ function firstRun() {
     if (removeAllText) {
         toggleAllText();
     }
+
+    if (removeCanvas) {
+        addGlobalStyle('canvas{visibility:hidden !important;}');
+        } 
 
     if (removeInterface) {
         var node = document.getElementById("global_header");
@@ -257,6 +271,7 @@ if (node && node.parentNode) {
     if (typeof GM_info !== "undefined") {
         options.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh (fix memory leak)", enableAutoRefresh, toggleAutoRefresh));
     }
+    options.appendChild(makeCheckBox("removeCanvas", "Remove canvas (needs refresh)", removeCanvas, handleEvent));
     options.appendChild(makeCheckBox("removeInterface", "Remove interface (needs refresh)", removeInterface, handleEvent));
     options.appendChild(makeCheckBox("removeParticles", "Remove particle effects (needs refresh)", removeParticles, handleEvent));
     options.appendChild(makeCheckBox("removeFlinching", "Remove flinching effects (needs refresh)", removeFlinching, handleEvent));
