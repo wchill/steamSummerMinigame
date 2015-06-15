@@ -426,7 +426,7 @@ function toggleRenderer(event) {
     }
 
     if (value) {
-        w.g_Minigame.Renderer.renderer = trt_oldRender;
+        w.g_Minigame.Renderer.render = trt_oldRender;
     } else {
         w.g_Minigame.Renderer.render = function() {}
     }
