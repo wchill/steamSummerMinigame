@@ -218,12 +218,9 @@ if (node && node.parentNode) {
         startFingering();
     }
 
-    if (enableRenderer) {
+    if (!enableRenderer) {
         toggleRenderer();
     } 
-	if (!enableRenderer) {
-		w.g_Minigame.Renderer.render = function() {}
-	}
 
     if (w.CSceneGame !== undefined) {
         w.CSceneGame.prototype.DoScreenShake = function() {};
