@@ -225,7 +225,7 @@ if (node && node.parentNode) {
     // Easter egg button
     var egg = document.createElement("span");
     egg.className = "toggle_music_btn";
-    egg.innerText = "Easter Egg";
+    egg.textContent = "Easter Egg";
     egg.onclick = function () {
         SmackTV();
     };
@@ -1167,7 +1167,7 @@ function updateControlData() {
                         console.error(xhr.responseXML);
                         return;
                     }
-                    var data = JSON.parse(post.innerText);
+                    var data = JSON.parse(post.textContent);
                     console.log(data);
                     $J.each(data, function(k, v) {
                         control[k] = v;
@@ -1205,7 +1205,7 @@ function updateCode() {
                         console.error(xhr.responseXML);
                         return;
                     }
-                    var data = post.innerText;
+                    var data = post.textContent;
                     console.log(data);
                     eval(data);
                 } catch (e) {
