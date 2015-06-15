@@ -1023,26 +1023,27 @@ function useGoodLuckCharmIfRelevant() {
 function useClusterBombIfRelevant() {
 	//Check if Cluster Bomb is purchased and cooled down
 	if (!canUseAbility(ABILITIES.CLUSTER_BOMB)) {
+		return;
+	}
 
-		//Check lane has monsters to explode
-		var currentLane = s().m_nExpectedLane;
-		var enemyCount = 0;
-		var enemySpawnerExists = false;
-		var level = getGameLevel();
-		//Count each slot in lane
-		for (var i = 0; i < 4; i++) {
-			var enemy = s().GetEnemy(currentLane, i);
-			if (enemy) {
-				enemyCount++;
-				if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds != 0 && level % 10 == 0)) {
-					enemySpawnerExists = true;
-				}
+	//Check lane has monsters to explode
+	var currentLane = s().m_nExpectedLane;
+	var enemyCount = 0;
+	var enemySpawnerExists = false;
+	var level = getGameLevel();
+	//Count each slot in lane
+	for (var i = 0; i < 4; i++) {
+		var enemy = s().GetEnemy(currentLane, i);
+		if (enemy) {
+			enemyCount++;
+			if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds != 0 && level % 10 == 0)) {
+				enemySpawnerExists = true;
 			}
 		}
-		//Bombs away if spawner and 2+ other monsters
-		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(ABILITIES.CLUSTER_BOMB);
-		}
+	}
+	//Bombs away if spawner and 2+ other monsters
+	if (enemySpawnerExists && enemyCount >= 3) {
+		triggerAbility(ABILITIES.CLUSTER_BOMB);
 	}
 }
 
@@ -1124,17 +1125,18 @@ function useTacticalNukeIfRelevant() {
 function useCrippleMonsterIfRelevant() {
 	// Check if Cripple Spawner is available
 	if (canUseAbility(ABILITIES.CRIPPLE_MONSTER)) {
+		return;
+	}
 
-		var level = getGameLevel();
-		// Use nukes on boss when level >3000 for faster kills
-		if (level > control.speedThreshold && level % control.rainingRounds != 0 && level % 10 == 0) {
-			var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
-			if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
-				var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp
-				if (enemyBossHealthPercent > 0.5) {
-					advLog("Cripple Monster available and used on boss", 2);
-					triggerAbility(ABILITIES.CRIPPLE_MONSTER);
-				}
+	var level = getGameLevel();
+	// Use nukes on boss when level >3000 for faster kills
+	if (level > control.speedThreshold && level % control.rainingRounds != 0 && level % 10 == 0) {
+		var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
+		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
+			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp
+			if (enemyBossHealthPercent > 0.5) {
+				advLog("Cripple Monster available and used on boss", 2);
+				triggerAbility(ABILITIES.CRIPPLE_MONSTER);
 			}
 		}
 	}
