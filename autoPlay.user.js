@@ -55,7 +55,7 @@ var control = {
 };
 
 var remoteControlURL = "http://steamcommunity.com/groups/MSG2015/discussions/0/598198356173574660";
-var remoteControlURL2 = "http://steamcommunity.com/groups/MSG2015/discussions/0/598198356175571067";
+var updateURL = "https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js";
 var showedUpdateInfo = getPreferenceBoolean("showedUpdateInfo", false);
 
 var UPGRADES = {
@@ -1155,7 +1155,7 @@ if (w.controlUpdateTimer) {
 }
 
 function updateControlData() {
-    console.log("Updating script control data");
+    advLog("Updating script control data", 3);
     var xhr = new XMLHttpRequest();
     xhr.onload = function() {
         if(xhr.readyState === 4) {
@@ -1172,6 +1172,9 @@ function updateControlData() {
                     $J.each(data, function(k, v) {
                         control[k] = v;
                     });
+                    if(enableAutoUpdate) {
+                        updateCode();
+                    }
                 } catch (e) {
                     console.error(e);
                 }
@@ -1186,42 +1189,16 @@ function updateControlData() {
     xhr.open("GET", remoteControlURL, true); 
     xhr.responseType = "document";
     xhr.send(null);
-
-    if(enableAutoUpdate) {
-        updateCode();
-    }
 }
 
 function updateCode() {
-    console.log("Updating script control code");
-    var xhr = new XMLHttpRequest();
-    xhr.onload = function() {
-        if(xhr.readyState === 4) {
-            if(xhr.status === 200) {
-                try {
-                    var post = xhr.responseXML.querySelectorAll("div.content")[1];
-                    if(!post) {
-                        console.error("Failed to load for some reason... debug DOM output:");
-                        console.error(xhr.responseXML);
-                        return;
-                    }
-                    var data = post.innerText;
-                    console.log(data);
-                    eval(data);
-                } catch (e) {
-                    console.error(e);
-                }
-            } else {
-                console.error(xhr.statusText);
-            }
-        }
+    if (control.version && control.version !== SCRIPT_VERSION) {
+        advLog("Updating script code from " + SCRIPT_VERSION + " to " + control.version, 1);
+        $J.ajax({
+            url: updateURL,
+            dataType: "script"
+        });
     }
-    xhr.onerror = function(e) {
-        console.error(xhr.statusText);
-    }
-    xhr.open("GET", remoteControlURL2, true); 
-    xhr.responseType = "document";
-    xhr.send(null);
 }
 
 // Append gameid to breadcrumbs
