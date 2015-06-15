@@ -220,7 +220,10 @@ if (node && node.parentNode) {
 
     if (enableRenderer) {
         toggleRenderer();
-    }
+    } 
+	if (!enableRenderer) {
+		w.g_Minigame.Renderer.render = function() {}
+	}
 
     if (w.CSceneGame !== undefined) {
         w.CSceneGame.prototype.DoScreenShake = function() {};
