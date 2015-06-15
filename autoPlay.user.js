@@ -38,6 +38,7 @@ var enableAutoUpdate = getPreferenceBoolean("enableAutoUpdate", true);
 var enableElementLock = getPreferenceBoolean("enableElementLock", true);
 
 var autoRefreshMinutes = 30; // refresh page after x minutes
+var autoRefreshSecondsCheckLoadedDelay = 30;
 
 // DO NOT MODIFY
 var isAlreadyRunning = false;
@@ -1223,6 +1224,17 @@ function updateCode() {
     xhr.responseType = "document";
     xhr.send(null);
 }
+
+// reload page if game isn't fully loaded, regardless of autoRefresh setting
+w.setTimeout(function() {
+	// m_rgGameData is 'undefined' if stuck at 97/97 or below
+	if (!w.g_Minigame
+	||  !w.g_Minigame.m_CurrentScene
+	||  !w.g_Minigame.m_CurrentScene.m_rgGameData) {
+		w.location.reload(true);
+	}
+}, autoRefreshSecondsCheckLoadedDelay * 1000);
+
 
 // Append gameid to breadcrumbs
 var breadcrumbs = document.querySelector('.breadcrumbs');
