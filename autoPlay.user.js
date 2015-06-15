@@ -973,6 +973,7 @@ function useCrippleSpawnerIfRelevant() {
     }
 }
 
+var lastGoldRainLevel = -1;
 function useGoldRainIfRelevant() {
     // Check if gold rain is purchased
     if (hasAbility('RAINING_GOLD')) {
@@ -981,11 +982,13 @@ function useGoldRainIfRelevant() {
         // check if current target is a boss, otherwise its not worth using the gold rain
         if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
             var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
+            var bossHealthTreshold = ((lastGoldRainLevel == getGameLevel() && level > control.speedThreshold) ? 0.25 : 0.6);
 
-            if (enemyBossHealthPercent >= 0.6) { // We want sufficient time for the gold rain to be applicable
+            if (enemyBossHealthPercent >= bossHealthTreshold) { // We want sufficient time for the gold rain to be applicable
                 // Gold Rain is purchased, cooled down, and needed. Trigger it.
                 advLog('Gold rain is purchased and cooled down, Triggering it on boss', 2);
                 triggerAbility('RAINING_GOLD');
+                lastGoldRainLevel = getGameLevel();
             }
         }
     }
