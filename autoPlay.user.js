@@ -277,6 +277,7 @@ function MainLoop() {
         isAlreadyRunning = true;
 
         var level = getGameLevel();
+        document.title = level;
         readTickData();
 
         goToLaneWithBestTarget();
