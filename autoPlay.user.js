@@ -214,9 +214,9 @@ if (node && node.parentNode) {
         startFingering();
     }
 
-    if (enableRenderer) {
+    if (!enableRenderer) {
         toggleRenderer();
-    }
+    } 
 
     if (w.CSceneGame !== undefined) {
         w.CSceneGame.prototype.DoScreenShake = function() {};
@@ -425,7 +425,7 @@ function toggleRenderer(event) {
     }
 
     if (value) {
-        w.g_Minigame.Renderer.renderer = trt_oldRender;
+        w.g_Minigame.Renderer.render = trt_oldRender;
     } else {
         w.g_Minigame.Renderer.render = function() {}
     }
