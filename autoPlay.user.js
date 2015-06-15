@@ -901,7 +901,7 @@ function useMoraleBoosterIfRelevant() {
 
 function useTacticalNukeIfRelevant() {
     // Check if Tactical Nuke is purchased
-    if(hasAbility('TACTICAL_NUKE')) {
+    if(hasAbility('TACTICAL_NUKE') || hasAbility('MAX_ELEMENTAL_DAMAGE') || hasAbility('REFLECT_DAMAGE')) {
 
         //Check that the lane has a spawner and record it's health percentage
         var currentLane = s().m_nExpectedLane;
@@ -921,8 +921,16 @@ function useTacticalNukeIfRelevant() {
 
         // If there is a spawner and it's health is between 60% and 30%, nuke it!
         if (enemySpawnerExists && enemySpawnerHealthPercent < 0.6 && enemySpawnerHealthPercent > 0.3) {
-            advLog("Tactical Nuke is purchased, cooled down, and needed. Nuke 'em.", 2);
-            triggerAbility('TACTICAL_NUKE');
+            if(hasAbility('TACTICAL_NUKE')) {
+                advLog("Tactical Nuke is purchased, cooled down, and needed. Nuke 'em.", 2);
+                triggerAbility('TACTICAL_NUKE');
+            } else if (hasAbility('MAX_ELEMENTAL_DAMAGE')) {
+                advLog("Max elemental damage is available, cooled down, and needed. Nuke 'em.", 2);
+                triggerAbility('MAX_ELEMENTAL_DAMAGE');
+            } else if (hasAbility('REFLECT_DAMAGE')) {
+                advLog("Reflect damage is available, cooled down, and needed. Nuke 'em.", 2);
+                triggerAbility('REFLECT_DAMAGE');
+            }
         }
     }
 }
