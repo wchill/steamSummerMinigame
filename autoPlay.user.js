@@ -236,12 +236,12 @@ if (node && node.parentNode) {
     document.getElementsByClassName("title_activity")[0].innerHTML = "<span id=\"players_in_game\">0/1500</span>&nbsp;Players in room<br />" + oldHTML;
 
     var info_box = document.querySelector(".leave_game_helper");
-    info_box.innerHTML = '<b>OPTIONS</b><br/>Some of these may need a refresh to take effect.<br/>Version: ' + SCRIPT_VERSION +'<br/>';
+    info_box.innerHTML = '<b>OPTIONS</b> (Version: ' + SCRIPT_VERSION + ')<br/>Some of these may need a refresh to take effect.<br/>';
 
     // reset the CSS for the info box for aesthetics
     info_box.className = "options_box";
     info_box.style.backgroundColor = "#000000";
-    info_box.style.width = "600px";
+    info_box.style.width = "1256px";
     info_box.style.top = "73px";
     info_box.style.padding = "12px";
     info_box.style.position = "absolute";
@@ -249,9 +249,9 @@ if (node && node.parentNode) {
     info_box.style.color = "#ededed";
 
     var options = document.createElement("div");
-    options.style["-moz-column-count"] = 2;
-    options.style["-webkit-column-count"] = 2;
-    options.style["column-count"] = 2;
+    options.style["-moz-column-count"] = 4;
+    options.style["-webkit-column-count"] = 4;
+    options.style["column-count"] = 4;
 
     options.appendChild(makeCheckBox("enableAutoClicker", "Enable autoclicker", enableAutoClicker, toggleAutoClicker));
     if (typeof GM_info !== "undefined") {
