@@ -1023,26 +1023,27 @@ function useGoodLuckCharmIfRelevant() {
 function useClusterBombIfRelevant() {
 	//Check if Cluster Bomb is purchased and cooled down
 	if (!canUseAbility(ABILITIES.CLUSTER_BOMB)) {
+		return;
+	}
 
-		//Check lane has monsters to explode
-		var currentLane = s().m_nExpectedLane;
-		var enemyCount = 0;
-		var enemySpawnerExists = false;
-		var level = getGameLevel();
-		//Count each slot in lane
-		for (var i = 0; i < 4; i++) {
-			var enemy = s().GetEnemy(currentLane, i);
-			if (enemy) {
-				enemyCount++;
-				if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds != 0 && level % 10 == 0)) {
-					enemySpawnerExists = true;
-				}
+	//Check lane has monsters to explode
+	var currentLane = s().m_nExpectedLane;
+	var enemyCount = 0;
+	var enemySpawnerExists = false;
+	var level = getGameLevel();
+	//Count each slot in lane
+	for (var i = 0; i < 4; i++) {
+		var enemy = s().GetEnemy(currentLane, i);
+		if (enemy) {
+			enemyCount++;
+			if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds != 0 && level % 10 == 0)) {
+				enemySpawnerExists = true;
 			}
 		}
-		//Bombs away if spawner and 2+ other monsters
-		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(ABILITIES.CLUSTER_BOMB);
-		}
+	}
+	//Bombs away if spawner and 2+ other monsters
+	if (enemySpawnerExists && enemyCount >= 3) {
+		triggerAbility(ABILITIES.CLUSTER_BOMB);
 	}
 }
 
