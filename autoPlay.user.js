@@ -12,7 +12,7 @@
 
 // IMPORTANT: Update the @version property above to a higher number such as 1.1 and 1.2 when you update the script! Otherwise, Tamper / Greasemonkey users will not update automatically.
 
-(function(w) {
+(function(w, d) {
 "use strict";
 
 //Version displayed to client, update along with the @version above
@@ -259,6 +259,7 @@ function MainLoop() {
         isAlreadyRunning = true;
 
         var level = getGameLevel();
+        d.title = level;
         readTickData();
 
         goToLaneWithBestTarget();
@@ -1264,4 +1265,4 @@ function getGameLevel() {
     return s().m_rgGameData.level + 1;
 }
 
-}(window));
+}(window, document));
