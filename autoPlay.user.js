@@ -288,6 +288,7 @@ function MainLoop() {
         useTacticalNukeIfRelevant();
         useCrippleMonsterIfRelevant();
         useCrippleSpawnerIfRelevant();
+        useMaxElementalDamageIfRelevant();
         if (level < control.speedThreshold || level % control.rainingRounds == 0) {
             useGoldRainIfRelevant();
         }
@@ -1019,6 +1020,17 @@ function useMetalDetectorIfRelevant() {
             }
         }
     }
+}
+
+function useMaxElementalDamageIfRelevant() {
+	if(hasAbility('MAX_ELEMENTAL_DAMAGE')) {
+	    if(isAbilityActive('MAX_ELEMENTAL_DAMAGE', true)) {
+	        disableAbility('MAX_ELEMENTAL_DAMAGE');
+	    } else if(!isAbilityActive('MAX_ELEMENTAL_DAMAGE')) {
+	        enableAbility('MAX_ELEMENTAL_DAMAGE');
+	        triggerAbility('MAX_ELEMENTAL_DAMAGE');
+	    }
+	}
 }
 
 function attemptRespawn() {
