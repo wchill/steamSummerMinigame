@@ -924,8 +924,10 @@ function useTacticalNukeIfRelevant() {
                 advLog("Tactical Nuke is purchased, cooled down, and needed. Nuke 'em.", 2);
                 triggerAbility('TACTICAL_NUKE');
             } else if (hasAbility('MAX_ELEMENTAL_DAMAGE')) {
+                advLog("Max elemental damage is available, cooled down, and needed. Nuke 'em.", 2);
                 triggerAbility('MAX_ELEMENTAL_DAMAGE');
             } else if (hasAbility('REFLECT_DAMAGE')) {
+                advLog("Reflect damage is available, cooled down, and needed. Nuke 'em.", 2);
                 triggerAbility('REFLECT_DAMAGE');
             }
         }
