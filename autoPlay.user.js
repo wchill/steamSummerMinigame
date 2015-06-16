@@ -340,9 +340,9 @@
 
 	function fixActiveCapacityUI() {
 		w.$J('.tv_ui').css('background-image', 'url(http://i.imgur.com/eLYhRcU.png)');
-		w.$J('#activeinlanecontainer').css('height','186px');
+		w.$J('#activeinlanecontainer').css('height', '186px');
 		w.$J('#activitycontainer').css('height', '225px');
-		W.$J('#activitylog').css('margin-top', '24px');
+		w.$J('#activitylog').css('margin-top', '24px');
 		w.$J('#activityscroll').css('height', '225px');
 	}
 
