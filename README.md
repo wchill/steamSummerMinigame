@@ -1,13 +1,21 @@
-# Steam Summer 2015 Monster Minigame AutoScript #
+#Steam Summer 2015 Monster Minigame AutoScript#
+
+[![forthebadge](http://forthebadge.com/images/badges/fuck-it-ship-it.svg)](http://forthebadge.com) [![Build Status](https://travis-ci.org/wchill/steamSummerMinigame.svg)](https://travis-ci.org/wchill/steamSummerMinigame)
 
 ## Purpose ##
 
-This javascript automatically plays the 2015 Steam Summer minigame for you in a semi-optimal way.
+It cheats for you.
 
-It goes beyond the autoclicker scripts already out there. It will keep you in the lane where you'll make the most money, activate abilities as they are available and best apply, and possibly purchase upgrades and
-powerups for you.
+This fork has:
+* Elemental damage and gold prioritization
+* Auto clicking
+* Tickrate set to 1000ms every second
+* Disable most particles
+* Auto use abilities
+* idk
 
-**DISCLAIMER:** This autoscript will *NOT* include an auto-clicker. Automatic clicking pushes into the area of cheating, and this script is not designed for cheating. It is designed for automating the process of collecting gold.
+**This fork is designed for use as a group (specifically the [MSG2015 Steam Group](http://steamcommunity.com/groups/MSG2015)).**
+
 
 ## Features ##
 
@@ -30,64 +38,54 @@ powerups for you.
 - Disables certain abilities and items if facing a Boss (to try to maximize Raining Gold and Metal Detector benefits)
 
 ## Installation ##
+**It is recommended to use either [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=en) (Chrome) or [Greasemonkey](https://addons.mozilla.org/en-us/firefox/addon/greasemonkey/) (Firefox).** This allows the script to auto-update to the most recent version. The rate of this update can be changed in each extension's preferences.
 
-### Tampermonkey ###
+### [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=en) ###
 
-1. Open Tampermonkey's dashboard.
-2. Click on the `Utilites` tab on the right.
-3. Paste `https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.js` into the text area, and click `Import`.
-4. When the editor has loaded, click `Install` (*NOT* `Process with Chrome`).
+1. Navigate to `https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js` or click [here](https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js).
+2. When the editor has loaded, click `Install` (*NOT* `Process with Chrome`).
 
-### Greasemonkey ###
+### [Greasemonkey](https://addons.mozilla.org/en-us/firefox/addon/greasemonkey/) ###
 
-1. Navigate to `https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.js`.
+1. Navigate to `https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js` or click [here](https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js).
 2. Right click on the page, and click `Save Page As`.
-3. In the name text area at the top, remove the tailing `.js` and add `.user.js` to the end (this may be redundant in the future).
-4. While Firefox is still open, open a File Manager of any sort, and navigate to the directory you saved the script.
-5. Drag & drop the script file onto the Firefox window.
-6. Press `Install`.
+3. While Firefox is still open, open a File Manager of any sort, and navigate to the directory you saved the script.
+4. Drag & drop the script file onto the Firefox window.
+5. Press `Install`.
 
 ### Manual ###
 
 ##### Chrome #####
-1. Open `autoPlay.js` in a text editor.
+1. Open https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js
 2. Select All, Copy.
 3. Navigate to `http://steamcommunity.com/minigame/` and join or start a game.
 4. Press `Ctrl + Shift + J`.
 5. Paste into the javascript input, and hit `Enter`.
 
 ##### Firefox #####
-1. Open `autoPlay.js` in a text editor.
+1. Open https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js
 2. Select All, Copy.
 3. Navigate to `http://steamcommunity.com/minigame/` and join or start a game.
 4. Press `Ctrl + Shift + K`.
 5. Paste into the javascript input, and hit `Enter`.
 
 ##### Internet Explorer / Microsoft Edge #####
-1. Open `autoPlay.js` in a text editor.
+1. Open https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js
 2. Select All, Copy.
 3. Navigate to `http://steamcommunity.com/minigame/` and join or start a game.
 4. Press `F12` and navigate to the `Console` tab.
 5. Paste into the javascript input, and hit `Enter`.
 
-To stop the manual script, type `window.clearTimeout(thingTimer);` into the console and hit `Enter`.
+To stop the manual script, type `window.clearTimeout(window.SteamDB_Minigame_Timer);` into the console and hit `Enter`.
 
 The game should now play itself, you should leave it running in the background. If you're not sure if it is auto-playing, try changing lanes. If it jumps back almost immediately, it's working.
 
 ## I want to contribute! ##
 
-This project is open-source on github. There are different ways you can help:
+This project is open-source on GitHub. There are different ways you can help:
 
 - Find a Pull Request that's marked `needs testing`. Run that version of the script for a while and watch the console for errors. If there's no errors, pay attention to what the changes are doing gameplay-wise, and make sure it's doing what it's supposed to do.
 - Find an Issue that's marked `help wanted`. Make the changes needed by that issue, and create a Pull Request with your enhancement or bugfix.
 - Pick an item off the TODO list, below, and implement it. When it's done (and tested and working), create a Pull Request.
 - Got an idea for an improvement that's not already listed? Code it up, test it out, then make a Pull Request when it's ready.
-
-### TODO ###
-
-- use abilities if available and a suitable target exists:
-	 - Metal Detector if a spawner death is imminent (predicted in > 2 and < 7 seconds)
-	 - Decrease Cooldowns right before using another long-cooldown item. (Decrease Cooldown affects abilities triggered while it is active, not right before it's used)
-	 - Steal Health item if Medics is in cooldown and health is low. This should happen before using God Mode, and God Mode shouldn't be used if Steal Health is active.
-- purchase abilities and upgrades intelligently
-- automatically update the manual script by periodically checking https://raw.githubusercontent.com/mouseas/steamSummerMinigame/master/autoPlay.js
+- Do NOT change the script version in your PR as it could be incremented before your PR is merged.

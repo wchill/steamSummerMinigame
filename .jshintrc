@@ -1,0 +1,14 @@
+{
+	"node": false,
+	"browser": true,
+	"devel": true,
+	"curly": true,
+	"newcap": false,
+	"strict": true,
+	"undef": true,
+	"laxbreak": true,
+	"globals":
+	{
+		"GM_info": false
+	}
+}
