@@ -134,11 +134,6 @@
 		"TREASURE": 4
 	};
 
-	var STRIKE_TIMEOUT = 5000;
-	var WORMHOLE_LEVEL = 100;
-	var recentlyWormholed = false;
-	var idStrikeTimeout = 0;
-
 	disableParticles();
 
 	function s() {
@@ -367,10 +362,6 @@
 		}
 	}
 
-	function isWormholeLevel(){
-		return getGameLevel() % WORMHOLE_LEVEL == 0;
-	}
-
 	function isNearEndGame() {
 		var cTime = new Date();
 		var cHours = cTime.getUTCHours();
@@ -381,22 +372,6 @@
 		} else {
 			return false;
 		}
-	}
-
-	function strike(){
-		if ((level < control.speedThreshold || level % control.rainingRounds === 0) && level > control.useGoldThreshold) {
-			useGoldRainIfRelevant();
-		}
-		useGoodLuckCharmIfRelevant();
-		useMoraleBoosterIfRelevant();
-		useMetalDetectorIfRelevant();
-		useClusterBombIfRelevant();
-		useNapalmIfRelevant();
-		useTacticalNukeIfRelevant();
-		useCrippleMonsterIfRelevant();
-		useCrippleSpawnerIfRelevant();
-		useCrippleMonsterIfRelevant(level);
-		useMaxElementalDmgIfRelevant();
 	}
 
 	function MainLoop() {
@@ -412,23 +387,23 @@
 
 			attemptRespawn();
 			goToLaneWithBestTarget();
-			useMedicsIfRelevant();
-			useReviveIfRelevant(level);
-
-			if(isWormholeLevel()){
-				useWormholeIfRelevant();
-				recentlyWormholed = true;
-				idStrikeTimeout = setTimeout(strike, STRIKE_TIMEOUT);
-			} else {
-
-				if(recentlyWormholed){
-					clearTimeout(idStrikeTimeout);
-				}
-
-				strike();
-			}
-
 			useCooldownIfRelevant();
+			useGoodLuckCharmIfRelevant();
+			useMedicsIfRelevant();
+			useMoraleBoosterIfRelevant();
+			useMetalDetectorIfRelevant();
+			useClusterBombIfRelevant();
+			useNapalmIfRelevant();
+			useTacticalNukeIfRelevant();
+			useCrippleMonsterIfRelevant();
+			useCrippleSpawnerIfRelevant();
+			if ((level < control.speedThreshold || level % control.rainingRounds === 0) && level > control.useGoldThreshold) {
+				useGoldRainIfRelevant();
+			}
+			useCrippleMonsterIfRelevant(level);
+			useReviveIfRelevant(level);
+			useMaxElementalDmgIfRelevant();
+			useWormholeIfRelevant();
 			updatePlayersInGame();
 
 			if (level !== lastLevel) {
