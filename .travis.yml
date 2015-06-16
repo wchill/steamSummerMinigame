@@ -4,6 +4,6 @@ node_js:
 notifications:
   email: false
 install:
- - npm install jshint -g
+ - npm install eslint -g
 script:
- - jshint autoPlay.user.js
+ - eslint autoPlay.user.js
