@@ -231,10 +231,6 @@
 		playersInGame.innerHTML = '<span id=\"players_in_game\">0/1500</span>&nbsp;Players in room<br>';
 		titleActivity.insertBefore(playersInGame, titleActivity.firstChild);
 
-		// Fix alignment
-		var activity = document.getElementById("activitylog");
-		activity.style.marginTop = "33px";
-
 		var newDiv = document.createElement("div");
 		document.getElementsByClassName('pagecontent')[0].insertBefore(newDiv, document.getElementsByClassName('footer_spacer')[0]);
 		newDiv.className = "options_box";
@@ -343,10 +339,11 @@
 	}
 
 	function fixActiveCapacityUI() {
-		w.$J('.tv_ui').css('background-image', 'url(http://i.imgur.com/ieDoLnx.png)');
-		w.$J('#activeinlanecontainer').css('height', '154px');
-		w.$J('#activitycontainer').css('height', '270px');
-		w.$J('#activityscroll').css('height', '270px');
+		w.$J('.tv_ui').css('background-image', 'url(http://i.imgur.com/eLYhRcU.png)');
+		w.$J('#activeinlanecontainer').css('height','186px');
+		w.$J('#activitycontainer').css('height', '225px');
+		W.$J('#activitylog').css('margin-top', '24px');
+		w.$J('#activityscroll').css('height', '225px');
 	}
 
 	function disableParticles() {
