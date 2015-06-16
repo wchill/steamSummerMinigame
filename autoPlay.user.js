@@ -415,7 +415,7 @@
 			useMedicsIfRelevant();
 			useReviveIfRelevant(level);
 
-			if(isWormholeLevel()){
+			if(level > control.speedThreshold && isWormholeLevel()){
 				useWormholeIfRelevant();
 				recentlyWormholed = true;
 				idStrikeTimeout = setTimeout(strike, STRIKE_TIMEOUT);
@@ -1000,7 +1000,7 @@
 				BOSS_DISABLED_ABILITIES.forEach(enableAbility);
 			}
 			if (level < control.allowWormholeLevel && !isNearEndGame()) {
-				disableAbility(ABILITIES.WORMHOLE);
+				//disableAbility(ABILITIES.WORMHOLE);
 			} else {
 				enableAbility(ABILITIES.WORMHOLE);
 			}
@@ -1270,7 +1270,7 @@
 
 	function useWormholeIfRelevant() {
 		// Check the time before using wormhole.
-		if (isWormholeLevel() || isNearEndGame()) {
+		if (level < control.speedThreshold || !isWormholeLevel() || !isNearEndGame()) {
 			return;
 		}
 		// Check if Wormhole is purchased
