@@ -64,7 +64,7 @@ var control = {
 };
 
 var remoteControlURL = "http://steamcommunity.com/groups/MSG2015/discussions/0/598198356173574660";
-var remoteControlURL2 = "http://steamcommunity.com/groups/MSG2015/discussions/0/598198356175571067";
+var remoteControlURL2 = "https://steamcommunity.com/groups/MSG2015/discussions/0/598198356175571067";
 var showedUpdateInfo = getPreferenceBoolean("showedUpdateInfo", false);
 
 var lane_info = {};
