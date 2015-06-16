@@ -1706,18 +1706,12 @@
 		var highestUpgradeValueForArmorIsFuture = false;
 		var lowestElementLevel = Math.min(s().GetUpgradeLevel(UPGRADES.DAMAGE_TO_FIRE_MONSTERS), s().GetUpgradeLevel(UPGRADES.DAMAGE_TO_WATER_MONSTERS), s().GetUpgradeLevel(UPGRADES.DAMAGE_TO_AIR_MONSTERS), s().GetUpgradeLevel(UPGRADES.DAMAGE_TO_EARTH_MONSTERS));
 
-		var playerUpgradeMap = {};  // We'll remap our existing upgrades, as they can get out of order
-		for (i=0; i < s().m_rgPlayerUpgrades.length; i++) {
-			playerUpgradeMap[s().m_rgPlayerUpgrades[i].upgrade] = s().m_rgPlayerUpgrades[i];
-		}
-
 		var upgrades = s().m_rgTuningData.upgrades;
 
 		var critMultiplier = s().m_rgPlayerTechTree.damage_multiplier_crit;
 		var critChance = s().m_rgPlayerTechTree.crit_percentage>1?1:s().m_rgPlayerTechTree.crit_percentage;
 		var avgElementalMultiplier = (s().m_rgPlayerTechTree.damage_multiplier_fire + s().m_rgPlayerTechTree.damage_multiplier_water + s().m_rgPlayerTechTree.damage_multiplier_air + s().m_rgPlayerTechTree.damage_multiplier_earth) / 4;
 		var dpc = s().m_rgPlayerTechTree.damage_per_click;
-		
 		var newDpc = 0;
 		var currentClickDps = 0;
 		var newClickDps = 0;
