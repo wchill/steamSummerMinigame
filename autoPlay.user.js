@@ -134,6 +134,19 @@
 		"TREASURE": 4
 	};
 
+	var UPGRADE_TYPES = {
+		"ARMOR": 0,
+		"DPS": 1,
+		"CLICK_DAMAGE": 2,
+		"ELEMENTAL_FIRE": 3,
+		"ELEMENTAL_WATER": 4,
+		"ELEMENTAL_AIR": 5,
+		"ELEMENTAL_EARTH": 6,
+		"LUCKY_SHOT": 7,
+		"ABILITY": 8,
+		"LOOT": 9
+	}
+
 	disableParticles();
 
 	function s() {
@@ -405,6 +418,7 @@
 			useMaxElementalDmgIfRelevant();
 			useWormholeIfRelevant();
 			updatePlayersInGame();
+			findBestUpgrade();
 
 			if (level !== lastLevel) {
 				lastLevel = level;
@@ -1660,6 +1674,207 @@
 
 			return strOut;
 		};
+	}
+
+	function buyUpgrade(id) {
+		if (s().m_rgUpgradesQueue.length > 0) {
+			return  // To try and avoid double buying upgrades
+		}
+		advLog("Buying " + s().m_rgTuningData.upgrades[id].name + " level " + (s().GetUpgradeLevel(id) + 1), 2);
+		if(id >= 3 && id <= 6) { //If upgrade is element damage
+			s().TryUpgrade(document.getElementById('upgr_' + id).childElements()[3]);
+		} else {
+			s().TryUpgrade(document.getElementById('upgr_' + id).childElements()[0].childElements()[1]);
+		}
+	}
+
+	function findBestUpgrade(){
+		var oddsOfElement = .25;
+		
+		var myGold = s().m_rgPlayerData.gold;
+		
+		var playerUpgradeMap = {};  // We'll remap our existing upgrades, as they can get out of order
+		for (var i=0; i < s().m_rgPlayerUpgrades; i++) {
+			playerUpgradeMap[i.upgrade] = i
+		}
+
+		//Initial values for   armor, dps, click damage 
+		var bestUpgradeForDamage,bestUpgradeForArmor;
+		var highestUpgradeValueForDamage = 0;
+		var highestUpgradeValueForArmor = 0;
+		var highestUpgradeValueForDamageIsFuture = false;
+		var highestUpgradeValueForArmorIsFuture = false;
+		var lowestElementLevel = Math.min(s().GetUpgradeLevel(UPGRADES.DAMAGE_TO_FIRE_MONSTERS), s().GetUpgradeLevel(UPGRADES.DAMAGE_TO_WATER_MONSTERS), s().GetUpgradeLevel(UPGRADES.DAMAGE_TO_AIR_MONSTERS), s().GetUpgradeLevel(UPGRADES.DAMAGE_TO_EARTH_MONSTERS));
+		
+		var playerUpgradeMap = {};  // We'll remap our existing upgrades, as they can get out of order
+		for (var i=0; i < s().m_rgPlayerUpgrades.length; i++) {
+			playerUpgradeMap[s().m_rgPlayerUpgrades[i].upgrade] = s().m_rgPlayerUpgrades[i];
+		}
+		
+		var upgrades = g_Minigame.CurrentScene().m_rgTuningData.upgrades;
+		
+		for( var i=0; i< upgrades.length; i++ ) {
+			var upgrade = upgrades[i];
+			var futureUpgrade = false;
+			
+			if ( upgrade.required_upgrade != undefined )
+			{
+				var requiredUpgradeLevel = upgrade.required_upgrade_level != undefined ? upgrade.required_upgrade_level : 1;
+				var parentUpgradeLevel = s().GetUpgradeLevel(upgrade.required_upgrade);
+				if (parentUpgradeLevel == 0)
+				{
+					//If required upgrade is not available, we skip it
+					continue;
+				} else if (parentUpgradeLevel < requiredUpgradeLevel) {
+					futureUpgrade = true;
+				}
+				
+			}
+		
+			var upgradeCurrentLevel = playerUpgradeMap[i].level;
+			var upgradeCost = playerUpgradeMap[i].cost_for_next_level;
+			if (futureUpgrade) {
+				// If we're still working towards the next tier, we need to find out the total cost of all
+				// the upgrades left on the required tier before the next tier upgrade could be purchased
+				for (var l=s().GetUpgradeLevel(upgrade.required_upgrade); l<10; l++) {
+					upgradeCost += upgrade.cost * Math.pow(parseFloat(upgrade.cost_exponential_base), l);
+				}
+			}
+			
+			switch(upgrade.type) {
+				case UPGRADE_TYPES.ARMOR:
+					if(upgrade.multiplier / upgradeCost > highestUpgradeValueForArmor) { // hp increase per moneys
+						bestUpgradeForArmor = i;
+						highestUpgradeValueForArmor = upgrade.multiplier / upgradeCost;
+						highestUpgradeValueForArmorIsFuture = futureUpgrade;
+					}
+					break;
+				case UPGRADE_TYPES.CLICK_DAMAGE:
+					if (currentClickRate > 0) {
+						var critMultiplier = s().m_rgPlayerTechTree.damage_multiplier_crit
+						var critChance = s().m_rgPlayerTechTree.crit_percentage>1?1:s().m_rgPlayerTechTree.crit_percentage;
+						var avgElementalMultiplier = (s().m_rgPlayerTechTree.damage_multiplier_fire + s().m_rgPlayerTechTree.damage_multiplier_water + s().m_rgPlayerTechTree.damage_multiplier_air + s().m_rgPlayerTechTree.damage_multiplier_earth) / 4;
+						var dpc = s().m_rgPlayerTechTree.damage_per_click;
+						var newDpc = dpc + (upgrade.multiplier * s().m_rgPlayerTechTree.base_dps);
+						var currentClickDps = ((dpc * critChance * critMultiplier) + (dpc * avgElementalMultiplier)) * currentClickRate;
+						var newClickDps = ((newDpc * critChance * critMultiplier) + (newDpc * avgElementalMultiplier)) * currentClickRate;
+						if((newClickDps - currentClickDps) / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
+							bestUpgradeForDamage = i;
+							highestUpgradeValueForDamage = (newClickDps - currentClickDps) / upgradeCost;
+							highestUpgradeValueForDamageIsFuture = futureUpgrade;
+						}
+					}
+					break;
+				case UPGRADE_TYPES.DPS:
+					var avgElementalMultiplier = (s().m_rgPlayerTechTree.damage_multiplier_fire + s().m_rgPlayerTechTree.damage_multiplier_water + s().m_rgPlayerTechTree.damage_multiplier_air + s().m_rgPlayerTechTree.damage_multiplier_earth) / 4;
+					var currentDps = s().m_rgPlayerTechTree.dps * avgElementalMultiplier;
+					var newDps = (s().m_rgPlayerTechTree.dps + (upgrade.multiplier * s().m_rgPlayerTechTree.base_dps)) * avgElementalMultiplier;
+					if((newDps - currentDps) / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
+						bestUpgradeForDamage = i;
+						highestUpgradeValueForDamage = (newDps - currentDps) / upgradeCost;
+						highestUpgradeValueForDamageIsFuture = futureUpgrade;
+					}
+					break;
+				case UPGRADE_TYPES.ELEMENTAL_FIRE:
+					if ((lockedElement != -1 && lockedElement == i) || (lockedElement == -1 && s().GetUpgradeLevel(i) == lowestElementLevel)) {
+						var autoDps = s().m_rgPlayerTechTree.dps;
+						var clickDps = s().m_rgPlayerTechTree.damage_per_click * currentClickRate;
+						var currentDps =  (autoDps + clickDps) * s().m_rgPlayerTechTree.damage_multiplier_fire;
+						var newDps = (autoDps + clickDps) * (s().m_rgPlayerTechTree.damage_multiplier_fire + parseFloat(upgrade.multiplier));
+						if (((newDps - currentDps) * oddsOfElement) / upgradeCost > highestUpgradeValueForDamage) {
+							bestUpgradeForDamage = i;
+							highestUpgradeValueForDamage = (newDps - currentDps) / upgradeCost;
+							highestUpgradeValueForDamageIsFuture = futureUpgrade;
+						}
+					}
+					break;
+				case UPGRADE_TYPES.ELEMENTAL_WATER:
+					if ((lockedElement != -1 && lockedElement == i) || (lockedElement == -1 && s().GetUpgradeLevel(i) == lowestElementLevel)) {
+						var autoDps = s().m_rgPlayerTechTree.dps;
+						var clickDps = s().m_rgPlayerTechTree.damage_per_click * currentClickRate;
+						var currentDps =  (autoDps + clickDps) * s().m_rgPlayerTechTree.damage_multiplier_water;
+						var newDps = (autoDps + clickDps) * (s().m_rgPlayerTechTree.damage_multiplier_water + parseFloat(upgrade.multiplier));
+						if (((newDps - currentDps) * oddsOfElement) / upgradeCost > highestUpgradeValueForDamage) {
+							bestUpgradeForDamage = i;
+							highestUpgradeValueForDamage = (newDps - currentDps) / upgradeCost;
+							highestUpgradeValueForDamageIsFuture = futureUpgrade;
+						}
+					}
+					break;
+				case UPGRADE_TYPES.ELEMENTAL_AIR:
+					if ((lockedElement != -1 && lockedElement == i) || (lockedElement == -1 && s().GetUpgradeLevel(i) == lowestElementLevel)) {
+						var autoDps = s().m_rgPlayerTechTree.dps;
+						var clickDps = s().m_rgPlayerTechTree.damage_per_click * currentClickRate;
+						var currentDps =  (autoDps + clickDps) * s().m_rgPlayerTechTree.damage_multiplier_air;
+						var newDps = (autoDps + clickDps) * (s().m_rgPlayerTechTree.damage_multiplier_air + parseFloat(upgrade.multiplier));
+						if (((newDps - currentDps) * oddsOfElement) / upgradeCost > highestUpgradeValueForDamage) {
+							bestUpgradeForDamage = i;
+							highestUpgradeValueForDamage = (newDps - currentDps) / upgradeCost;
+							highestUpgradeValueForDamageIsFuture = futureUpgrade;
+						}
+					}
+					break;
+				case UPGRADE_TYPES.ELEMENTAL_EARTH:
+					if ((lockedElement != -1 && lockedElement == i) || (lockedElement == -1 && s().GetUpgradeLevel(i) == lowestElementLevel)) {
+						var autoDps = s().m_rgPlayerTechTree.dps;
+						var clickDps = s().m_rgPlayerTechTree.damage_per_click * currentClickRate;
+						var currentDps =  (autoDps + clickDps) * s().m_rgPlayerTechTree.damage_multiplier_earth;
+						var newDps = (autoDps + clickDps) * (s().m_rgPlayerTechTree.damage_multiplier_earth + parseFloat(upgrade.multiplier));
+						if (((newDps - currentDps) * oddsOfElement) / upgradeCost > highestUpgradeValueForDamage) {
+							bestUpgradeForDamage = i;
+							highestUpgradeValueForDamage = (newDps - currentDps) / upgradeCost;
+							highestUpgradeValueForDamageIsFuture = futureUpgrade;
+						}
+					}
+					break;
+				case UPGRADE_TYPES.LUCKY_SHOT:
+					if (currentClickRate > 0) {
+						var critMultiplier = s().m_rgPlayerTechTree.damage_multiplier_crit
+						var critChance = s().m_rgPlayerTechTree.crit_percentage>1?1:s().m_rgPlayerTechTree.crit_percentage;
+						var dpc = s().m_rgPlayerTechTree.damage_per_click;
+						var currentClickDps = dpc * critChance * critMultiplier * currentClickRate;
+						var newClickDps = dpc * critChance * (critMultiplier + parseFloat(upgrade.multiplier)) * currentClickRate;
+						if((newClickDps - currentClickDps) / upgradeCost > highestUpgradeValueForDamage) { // dmg increase per moneys
+							bestUpgradeForDamage = i;
+							highestUpgradeValueForDamage = (newClickDps - currentClickDps) / upgradeCost;
+							highestUpgradeValueForDamageIsFuture = futureUpgrade;
+						}
+					}
+					break;
+				default:
+					break;
+			}
+		}
+		
+		// If our best upgrade is the next tier, then we need to upgrade the current required tier first
+		if (highestUpgradeValueForArmorIsFuture) {
+			highestUpgradeValueForArmor = upgrades[highestUpgradeValueForArmor].required_upgrade;
+		}
+		if (highestUpgradeValueForDamageIsFuture) {
+			highestUpgradeValueForDamage = upgrades[highestUpgradeValueForDamage].required_upgrade;
+		}
+
+		var myMaxHealth = s().m_rgPlayerTechTree.max_hp;
+		// check if health is below 30%
+		var hpPercent = s().m_rgPlayerData.hp / myMaxHealth;
+		if (hpPercent < 0.3) {
+			// Prioritize armor over damage
+			// - Should we by any armor we can afford or just wait for the best one possible?
+			//	 currently waiting
+			upgradeCost = upgradeCost = playerUpgradeMap[bestUpgradeForArmor].cost_for_next_level;
+			
+			if(myGold > upgradeCost && bestUpgradeForArmor) {
+				buyUpgrade(bestUpgradeForArmor);
+				myGold = s().m_rgPlayerData.gold;
+			}
+		}
+		
+		// Try to buy some damage
+		upgradeCost = playerUpgradeMap[bestUpgradeForDamage].cost_for_next_level;
+
+		if(myGold > upgradeCost && bestUpgradeForDamage) {
+			buyUpgrade(bestUpgradeForDamage);
+		}
 	}
 
 	function getGameLevel() {
