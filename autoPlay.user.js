@@ -61,7 +61,9 @@
 		useLikeNewMinChance: 0.01,
 		useLikeNewMaxChance: 0.5,
 		useLikeNewTimeSpread: 1000,
-		useGoldThreshold: 200
+		useGoldThreshold: 200,
+		reflectDamageThreshold: 40000,
+		stealHealthThreshold: 25000
 	};
 
 	var canUseLikeNew = true;
@@ -390,7 +392,7 @@
 			goToLaneWithBestTarget();
 			useCooldownIfRelevant();
 			useGoodLuckCharmIfRelevant();
-			useMedicsIfRelevant();
+			useMedicsIfRelevant(level);
 			useMoraleBoosterIfRelevant();
 			useMetalDetectorIfRelevant();
 			useClusterBombIfRelevant();
