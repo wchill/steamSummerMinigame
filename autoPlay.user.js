@@ -1694,8 +1694,8 @@
 		var myGold = s().m_rgPlayerData.gold;
 
 		var playerUpgradeMap = {};  // We'll remap our existing upgrades, as they can get out of order
-		for (var i=0; i < s().m_rgPlayerUpgrades; i++) {
-			playerUpgradeMap[i.upgrade] = i;
+		for (var i=0; i < s().m_rgPlayerUpgrades.length; i++) {
+			playerUpgradeMap[s().m_rgPlayerUpgrades[i].upgrade] = s().m_rgPlayerUpgrades[i];
 		}
 
 		//Initial values for armor, dps, click damage
