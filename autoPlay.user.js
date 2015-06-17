@@ -398,7 +398,7 @@
 			goToLaneWithBestTarget();
 			useCooldownIfRelevant();
 			useGoodLuckCharmIfRelevant();
-			useMedicsIfRelevant();
+			useMedicsIfRelevant(level);
 			useMoraleBoosterIfRelevant();
 			useMetalDetectorIfRelevant();
 			useClusterBombIfRelevant();
