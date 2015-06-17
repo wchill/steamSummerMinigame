@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 4.6.3
+// @version 4.6.4
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '4.6.3';
+	var SCRIPT_VERSION = '4.6.4';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -34,8 +34,6 @@
 	var enableFingering = getPreferenceBoolean("enableFingering", true);
 	var disableRenderer = getPreferenceBoolean("disableRenderer", false);
 
-	var enableElementLock = getPreferenceBoolean("enableElementLock", true);
-
 	var autoRefreshMinutes = 30; // refresh page after x minutes
 	var autoRefreshMinutesRandomDelay = 10;
 	var autoRefreshSecondsCheckLoadedDelay = 30;
@@ -44,7 +42,6 @@
 	var isAlreadyRunning = false;
 	var refreshTimer = null;
 	var currentClickRate = enableAutoClicker ? clickRate : 0;
-	var lockedElement = -1;
 	var lastLevel = 0;
 	var trt_oldCrit = function() {};
 	var trt_oldPush = function() {};
@@ -168,10 +165,7 @@
 		trt_oldCrit = s().DoCritEffect;
 		trt_oldPush = s().m_rgClickNumbers.push;
 		trt_oldRender = w.g_Minigame.Render;
-
-		if (enableElementLock) {
-			lockElements();
-		}
+		lockElements();
 
 		// disable particle effects - this drastically reduces the game's memory leak
 		if (removeParticles) {
@@ -322,23 +316,6 @@
 
 		var leave_game_box = document.querySelector(".leave_game_helper");
 		leave_game_box.parentElement.removeChild(leave_game_box);
-
-		//Elemental upgrades lock
-		var ab_box = document.getElementById("abilities");
-		var lock_elements_box = document.createElement("div");
-		lock_elements_box.className = "lock_elements_box";
-		lock_elements_box.style.width = "165px";
-		lock_elements_box.style.top = "-76px";
-		lock_elements_box.style.left = "303px";
-		lock_elements_box.style.boxSizing = "border-box";
-		lock_elements_box.style.lineHeight = "1rem";
-		lock_elements_box.style.padding = "7px 10px";
-		lock_elements_box.style.position = "absolute";
-		lock_elements_box.style.color = "#ededed";
-		lock_elements_box.title = "To maximise team damage players should max only one element. But distributions of elements through people should be equal. So we calculated your element using your unique ID. Upgrade your element to make maximum performance or disable this checkbox.";
-		var lock_elements_checkbox = makeCheckBox("enableElementLock", "Lock element upgrades for more team dps", enableElementLock, toggleElementLock, false);
-		lock_elements_box.appendChild(lock_elements_checkbox);
-		ab_box.appendChild(lock_elements_box);
 
 		enhanceTooltips();
 		addBadgeItemPurchaseMultiplierButtons();
@@ -501,15 +478,18 @@
 					}
 				}
 			}
-			// Iterate down the levelskipped memory
-			for (var i = 4; i >= 0; i--) {
-				levelsSkipped[i+1] = levelsSkipped[i];
+			
+			// Make sure to only include ticks that are relevant
+			var level_jump = getGameLevel() - oldLevel;
+			if (level_jump > 0) {
+				// Iterate down the levelskipped memory
+				for (var i = 4; i >= 0; i--) {
+					levelsSkipped[i+1] = levelsSkipped[i];
+				}
+				levelsSkipped[0] = level_jump;
+				
+				oldLevel = getGameLevel();	
 			}
-			// Just a failsafe for tick 0
-			if (oldLevel !== 0) {
-				levelsSkipped[0] = getGameLevel() - oldLevel;
-			}
-			oldLevel = getGameLevel();
 		}
 	}
 
@@ -673,18 +653,6 @@
 		}
 	}
 
-	function toggleElementLock(event) {
-		var value = enableElementLock;
-		if (event !== undefined) {
-			value = handleCheckBox(event);
-		}
-		if (value) {
-			lockElements();
-		} else {
-			unlockElements();
-		}
-	}
-
 	function toggleCritText(event) {
 		var value = removeCritText;
 		if (event !== undefined) {
@@ -770,71 +738,7 @@
 		return (getPreference(key, defaultValue.toString()) == "true");
 	}
 
-	function unlockElements() {
-		var fire = document.querySelector("a.link.element_upgrade_btn[data-type=\"3\"]");
-		var water = document.querySelector("a.link.element_upgrade_btn[data-type=\"4\"]");
-		var air = document.querySelector("a.link.element_upgrade_btn[data-type=\"5\"]");
-		var earth = document.querySelector("a.link.element_upgrade_btn[data-type=\"6\"]");
-
-		var elems = [fire, water, air, earth];
-
-		for (var i = 0; i < elems.length; i++) {
-			elems[i].style.visibility = "visible";
-		}
-	}
-
 	function lockElements() {
-		var elementMultipliers = [
-			s().m_rgPlayerTechTree.damage_multiplier_fire,
-			s().m_rgPlayerTechTree.damage_multiplier_water,
-			s().m_rgPlayerTechTree.damage_multiplier_air,
-			s().m_rgPlayerTechTree.damage_multiplier_earth
-		];
-
-		var hashCode = function(str) {
-			var t = 0,
-				i, ch;
-			if (0 === str.length) {
-				return t;
-			}
-
-			for (i = 0; i < str.length; i++) {
-				ch = str.charCodeAt(i);
-				t = (t << 5) - t + ch;
-				t &= t;
-			}
-
-			return t;
-		};
-
-		var elem = (parseInt(w.g_steamID.slice(-2)) + (parseInt(w.g_Minigame.gameid) % 100)) % 4;
-
-		// If more than two elements are leveled to 3 or higher, do not enable lock
-		var leveled = 0;
-		var lastLeveled = -1;
-
-		for (var i = 0; i < elementMultipliers.length; i++) {
-			advLog("Element " + i + " is at level " + (elementMultipliers[i] - 1) / 1.5, 3);
-			if ((elementMultipliers[i] - 1) / 1.5 >= 3) {
-				leveled++;
-				// Only used if there is only one so overwriting it doesn't matter
-				lastLeveled = i;
-			}
-		}
-
-		if (leveled >= 2) {
-			advLog("More than 2 elementals leveled to 3 or above, not locking.", 1);
-			return;
-		} else if (leveled == 1) {
-			advLog("Found existing lock on " + lastLeveled + ", locking to it.", 1);
-			lockToElement(lastLeveled);
-		} else {
-			advLog("Locking to element " + elem + " as chosen by SteamID", 1);
-			lockToElement(elem);
-		}
-	}
-
-	function lockToElement(element) {
 		var fire = document.querySelector("a.link.element_upgrade_btn[data-type=\"3\"]");
 		var water = document.querySelector("a.link.element_upgrade_btn[data-type=\"4\"]");
 		var air = document.querySelector("a.link.element_upgrade_btn[data-type=\"5\"]");
@@ -843,12 +747,8 @@
 		var elems = [fire, water, air, earth];
 
 		for (var i = 0; i < elems.length; i++) {
-			if (i === element) {
-				continue;
-			}
 			elems[i].style.visibility = "hidden";
 		}
-		lockedElement = element; // Save locked element.
 	}
 
 	function displayText(x, y, strText, color) {
@@ -1735,31 +1635,6 @@
 					break;
 				default:
 					return trt_oldTooltip(context);
-			}
-
-			return strOut;
-		};
-
-		var trt_oldElemTooltip = w.fnTooltipUpgradeElementDesc;
-		w.fnTooltipUpgradeElementDesc = function(context) {
-			var strOut = trt_oldElemTooltip(context);
-
-			var $context = w.$J(context);
-			var upgrades = w.g_Minigame.CurrentScene().m_rgTuningData.upgrades.slice(0);
-			// Element Upgrade index 3 to 6
-			var idx = $context.data('type');
-			// Is the current tooltip for the recommended element?
-			var isRecommendedElement = (lockedElement == idx - 3);
-
-			if (isRecommendedElement) {
-				strOut += "<br><br>This is your recommended element. Please upgrade this.";
-
-				if (w.enableElementLock) {
-					strOut += "<br><br>Other elements are LOCKED to prevent accidentally upgrading.";
-				}
-
-			} else if (-1 != lockedElement) {
-				strOut += "<br><br>This is NOT your recommended element. DO NOT upgrade this.";
 			}
 
 			return strOut;
