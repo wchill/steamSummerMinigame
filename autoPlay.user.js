@@ -1652,7 +1652,7 @@
 		var LN = Math.floor(large * Like_new_ratio);
 		BP = BP - ((WP + LN) * 100);
 		var medium = Math.floor(BP / 10);
-    	var crit = Math.floor(medium * (4/5));
+		var crit = Math.floor(medium * (4/5));
 		var rain = Math.floor(medium * (1/5));
 		BP = BP - (medium * 10);
 		var treasure = Math.floor(BP / 2);
