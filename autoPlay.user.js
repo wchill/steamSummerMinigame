@@ -339,7 +339,6 @@
 		var lock_elements_checkbox = makeCheckBox("enableElementLock", "Lock element upgrades for more team dps", enableElementLock, toggleElementLock, false);
 		lock_elements_box.appendChild(lock_elements_checkbox);
 		ab_box.appendChild(lock_elements_box);
-
 		enhanceTooltips();
 		addBadgeItemPurchaseMultiplierButtons();
 	}
@@ -1773,13 +1772,37 @@
 		var buttonX1 = w.$J('<button onclick="setBadgeItemByMultiplier(1)" type="button">x1</button>');
 		var buttonX10 = w.$J('<button onclick="setBadgeItemByMultiplier(10)" type="button">x10</button>');
 		var buttonX100 = w.$J('<button onclick="setBadgeItemByMultiplier(100)" type="button">x100</button>');
+		var buttonAuto = w.$J('<button onclick="autoBuyWithBadges();" type="button">AutoBuy 25WH/1LN</button>');
 
 		// Add them to the badge point item purache panel
-		w.$J('#badge_items').append('<span>Batch purchase : </span>')
-			.append(buttonX1).append(buttonX10).append(buttonX100);
+		w.$J('#badge_items').append('<span>Batch purchase : </span>').append(buttonX1).append(buttonX10).append(buttonX100).append(buttonAuto);
 
 		// hook to handle multiplier button clicks
 		var badgeItemByMultiplier = 1;
+
+		w.autoBuyWithBadges = function(){
+		 	var badgePointsNumber = w.g_Minigame.m_CurrentScene.m_rgPlayerTechTree.badge_points;
+			var queue = w.g_Minigame.CurrentScene().m_rgPurchaseItemsQueue;
+			for(var i = 1; badgePointsNumber > 0; i++) {
+				//buy 1 Like New for every 10 Worm Hole;
+				if (i % 26 == 0 && badgePointsNumber > 100){
+					queue.push(ABILITIES.LIKE_NEW);
+					badgePointsNumber -= 100;
+				}
+				else if (badgePointsNumber > 100){
+					queue.push(ABILITIES.WORMHOLE);
+					badgePointsNumber -= 100;
+				}
+				else if (badgePointsNumber > 2){
+					queue.push(ABILITIES.TREASURE);
+					badgePointsNumber -= 2;
+				}
+				else{
+					queue.push(ABILITIES.PUMPED_UP);
+					badgePointsNumber -= 1;
+				}
+			}
+		};
 
 		w.setBadgeItemByMultiplier = function(newMult) {
 			if(typeof newMult === 'number' && newMult >= 1) {
@@ -1807,5 +1830,4 @@
 			});
 		});
 	}
-
 }(window));
