@@ -43,7 +43,7 @@
 	// DO NOT MODIFY
 	var isAlreadyRunning = false;
 	var refreshTimer = null;
-	var currentClickRate = enableAutoClicker ? clickRate : 0;
+	var currentClickRate = clickRate;
 	var lockedElement = -1;
 	var lastLevel = 0;
 	var trt_oldCrit = function() {};
@@ -326,6 +326,7 @@
 		ab_box.appendChild(lock_elements_box);
 
 		enhanceTooltips();
+		Startup((10/11), (1/11));
 	}
 
 	function updateLaneData() {
@@ -1592,39 +1593,6 @@
 		document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected Level: ' + exp_lvl.expected_level + ', Likely Level: ' + exp_lvl.likely_level;
 		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
 	}
-	
-	function Startup(WP_ratio, Like_new_ratio){
-		var BP = g_Minigame.m_CurrentScene.m_rgPlayerTechTree.badge_points;
-		var large = (BP / 100) - 2;
-		var WP = Math.floor(large * WP_ratio);
-		var LN = Math.floor(large * Like_new_ratio);
-		BP = BP - ((WP + LN) * 100);
-		var rain = Math.floor(BP / 10);
-		BP = BP - (rain * 10);
-		var treasure = Math.floor(BP / 2);
-		BP = BP - (treasure * 2);
-	
-		while(WP > 0){
-		    g_Minigame.m_CurrentScene.TrySpendBadgePoints($J('#purchase_abilityitem_26')); //wormhole
-		    WP--;
-		}
-		while(LN > 0){
-		    g_Minigame.m_CurrentScene.TrySpendBadgePoints($J('#purchase_abilityitem_27')); //Like New
-		    LN--;
-		}
-		while(rain > 0){
-		    g_Minigame.m_CurrentScene.TrySpendBadgePoints($J('#purchase_abilityitem_17')); //Raining Gold
-		    rain--;
-		}
-		while(treasure > 0){
-		    g_Minigame.m_CurrentScene.TrySpendBadgePoints($J('#purchase_abilityitem_22')); //Treasure
-		    treasure--;
-		}
-		if(BP > 0){
-		    g_Minigame.m_CurrentScene.TrySpendBadgePoints($J('#purchase_abilityitem_19')); //Pumped Up
-		    BP--;
-		}
-	}
 
 	// Helpers to access player stats.
 	function getCritChance() {
@@ -1675,6 +1643,40 @@
 		}
 
 		document.getElementById('newplayer').style.display = 'none';
+	}
+	function Startup(WP_ratio, Like_new_ratio){
+
+		var BP = w.g_Minigame.m_CurrentScene.m_rgPlayerTechTree.badge_points;
+		var large = (BP / 100) - 5;
+		var WP = Math.floor(large * WP_ratio);
+		var LN = Math.floor(large * Like_new_ratio);
+		BP = BP - ((WP + LN) * 100);
+        var medium = Math.floor(BP / 10);
+        var crit = Math.floor(medium * (4/5));
+		var rain = Math.floor(medium * (1/5));
+		BP = BP - (medium * 10);
+		var treasure = Math.floor(BP / 2);
+		BP = BP - (treasure * 2);
+		while(WP > 0){
+			w.g_Minigame.m_CurrentScene.TrySpendBadgePoints(w.$J('#purchase_abilityitem_'+ABILITIES.WORMHOLE)); //wormhole
+			WP--;
+		}
+		while(LN > 0){
+			w.g_Minigame.m_CurrentScene.TrySpendBadgePoints(w.$J('#purchase_abilityitem_'+ABILITIES.LIKE_NEW)); //Like New
+			LN--;
+		}
+		while(rain > 0){
+			w.g_Minigame.m_CurrentScene.TrySpendBadgePoints(w.$J('#purchase_abilityitem_'+ABILITIES.RAINING_GOLD)); //Raining Gold
+			rain--;
+		}
+		while(treasure > 0){
+			w.g_Minigame.m_CurrentScene.TrySpendBadgePoints(w.$J('#purchase_abilityitem_'+ABILITIES.TREASURE)); //Treasure
+			treasure--;
+		}
+		if(BP > 0){
+			w.g_Minigame.m_CurrentScene.TrySpendBadgePoints(w.$J('#purchase_abilityitem_'+ABILITIES.PUMPED_UP)); //Pumped Up
+			BP--;
+		}
 	}
 
 	function enhanceTooltips() {
