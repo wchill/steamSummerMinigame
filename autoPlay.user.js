@@ -326,7 +326,7 @@
 		ab_box.appendChild(lock_elements_box);
 
 		enhanceTooltips();
-		Startup((10/11), (1/11));
+		spendBP((10/11), (1/11));
 	}
 
 	function updateLaneData() {
@@ -1645,14 +1645,14 @@
 		document.getElementById('newplayer').style.display = 'none';
 	}
 	
-	function Startup(WP_ratio, Like_new_ratio){
+	function spendBP(WP_ratio, Like_new_ratio){
 		var BP = w.g_Minigame.m_CurrentScene.m_rgPlayerTechTree.badge_points;
 		var large = (BP / 100) - 5;
 		var WP = Math.floor(large * WP_ratio);
 		var LN = Math.floor(large * Like_new_ratio);
 		BP = BP - ((WP + LN) * 100);
-        var medium = Math.floor(BP / 10);
-        var crit = Math.floor(medium * (4/5));
+		var medium = Math.floor(BP / 10);
+    	var crit = Math.floor(medium * (4/5));
 		var rain = Math.floor(medium * (1/5));
 		BP = BP - (medium * 10);
 		var treasure = Math.floor(BP / 2);
