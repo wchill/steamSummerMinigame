@@ -256,7 +256,7 @@
 		// Fix alignment
 		var activity = document.getElementById("activitylog");
 		activity.style.marginTop = "20px";
-		
+
 		// Fix abilities active in lane box size
 		var abilitybox = document.getElementById("activeinlanecontainer");
 		abilitybox.style.height = "200px";
