@@ -339,10 +339,9 @@
 		var lock_elements_checkbox = makeCheckBox("enableElementLock", "Lock element upgrades for more team dps", enableElementLock, toggleElementLock, false);
 		lock_elements_box.appendChild(lock_elements_checkbox);
 		ab_box.appendChild(lock_elements_box);
-
 		enhanceTooltips();
-		addBadgeItemPurchaseMultiplierButtons();	
-		}
+		addBadgeItemPurchaseMultiplierButtons();
+	}
 
 	function updateLaneData() {
 		var element_names = {1:":shelterwildfire:", 2:":waterrune:", 3:":Wisp:", 4:":FateTree:"};
@@ -1780,8 +1779,7 @@
 		var buttonAuto = w.$J('<button onclick="autoBuyWithBadges();" type="button">AutoBuy 25WH/1LN</button>');
 
 		// Add them to the badge point item purache panel
-		w.$J('#badge_items').append('<span>Batch purchase : </span>')
-			.append(buttonX1).append(buttonX10).append(buttonX100).append(buttonAuto);
+		w.$J('#badge_items').append('<span>Batch purchase : </span>').append(buttonX1).append(buttonX10).append(buttonX100).append(buttonAuto);
 
 		// hook to handle multiplier button clicks
 		var badgeItemByMultiplier = 1;
@@ -1808,7 +1806,7 @@
 					badgePointsNumber -= 1;
 				}
 			}
-		}
+		};
 
 		w.setBadgeItemByMultiplier = function(newMult) {
 			if(typeof newMult === 'number' && newMult >= 1) {
@@ -1836,8 +1834,4 @@
 			});
 		});
 	}
-
-	 
-
-
 }(window));
