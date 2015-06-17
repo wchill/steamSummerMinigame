@@ -1644,8 +1644,8 @@
 
 		document.getElementById('newplayer').style.display = 'none';
 	}
+	
 	function Startup(WP_ratio, Like_new_ratio){
-
 		var BP = w.g_Minigame.m_CurrentScene.m_rgPlayerTechTree.badge_points;
 		var large = (BP / 100) - 5;
 		var WP = Math.floor(large * WP_ratio);
