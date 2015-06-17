@@ -1772,7 +1772,7 @@
 						}
 					}
 					break;
-				case UPGRADE_TYPES.DPS:
+				/*case UPGRADE_TYPES.DPS:
 					avgElementalMultiplier = (s().m_rgPlayerTechTree.damage_multiplier_fire + s().m_rgPlayerTechTree.damage_multiplier_water + s().m_rgPlayerTechTree.damage_multiplier_air + s().m_rgPlayerTechTree.damage_multiplier_earth) / 4;
 					currentDps = s().m_rgPlayerTechTree.dps * avgElementalMultiplier;
 					newDps = (s().m_rgPlayerTechTree.dps + (upgrade.multiplier * s().m_rgPlayerTechTree.base_dps)) * avgElementalMultiplier;
@@ -1781,7 +1781,7 @@
 						highestUpgradeValueForDamage = (newDps - currentDps) / upgradeCost;
 						highestUpgradeValueForDamageIsFuture = futureUpgrade;
 					}
-					break;
+					break;*/
 				case UPGRADE_TYPES.ELEMENTAL_FIRE:
 					if ((lockedElement != -1 && lockedElement == i) || (lockedElement == -1 && s().GetUpgradeLevel(i) == lowestElementLevel)) {
 						autoDps = s().m_rgPlayerTechTree.dps;
