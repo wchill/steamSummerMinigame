@@ -1386,7 +1386,7 @@
 	function canUseOffensiveAbility() {
 		var level = getGameLevel();
 		var levelmod = level % control.rainingRounds;
-		// Early in the game, or we're a safe distance away from raining rounds.
+		// Whether we're a safe distance away from raining rounds.
 		return (levelmod > 0 && levelmod < control.rainingRounds - control.rainingSafeRounds);
 	}
 
