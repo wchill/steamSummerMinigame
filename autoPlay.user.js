@@ -1592,6 +1592,39 @@
 		document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected Level: ' + exp_lvl.expected_level + ', Likely Level: ' + exp_lvl.likely_level;
 		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
 	}
+	
+	function Startup(WP_ratio, Like_new_ratio){
+		var BP = g_Minigame.m_CurrentScene.m_rgPlayerTechTree.badge_points;
+		var large = (BP / 100) - 2;
+		var WP = Math.floor(large * WP_ratio);
+		var LN = Math.floor(large * Like_new_ratio);
+		BP = BP - ((WP + LN) * 100);
+		var rain = Math.floor(BP / 10);
+		BP = BP - (rain * 10);
+		var treasure = Math.floor(BP / 2);
+		BP = BP - (treasure * 2);
+	
+		while(WP > 0){
+		    g_Minigame.m_CurrentScene.TrySpendBadgePoints($J('#purchase_abilityitem_26')); //wormhole
+		    WP--;
+		}
+		while(LN > 0){
+		    g_Minigame.m_CurrentScene.TrySpendBadgePoints($J('#purchase_abilityitem_27')); //Like New
+		    LN--;
+		}
+		while(rain > 0){
+		    g_Minigame.m_CurrentScene.TrySpendBadgePoints($J('#purchase_abilityitem_17')); //Raining Gold
+		    rain--;
+		}
+		while(treasure > 0){
+		    g_Minigame.m_CurrentScene.TrySpendBadgePoints($J('#purchase_abilityitem_22')); //Treasure
+		    treasure--;
+		}
+		if(BP > 0){
+		    g_Minigame.m_CurrentScene.TrySpendBadgePoints($J('#purchase_abilityitem_19')); //Pumped Up
+		    BP--;
+		}
+	}
 
 	// Helpers to access player stats.
 	function getCritChance() {
