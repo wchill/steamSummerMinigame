@@ -1123,11 +1123,7 @@
 		var enemyCount = 0;
 		var enemySpawnerExists = false;
 		var level = getGameLevel();
-		
-		// Prevent this outright if its within control.rainingSafeRounds of the next rainingRound
-		if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds)
-			return;
-		
+
 		//Count each slot in lane
 		for (var i = 0; i < 4; i++) {
 			var enemy = s().GetEnemy(currentLane, i);
