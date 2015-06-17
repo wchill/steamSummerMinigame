@@ -341,7 +341,7 @@
 		ab_box.appendChild(lock_elements_box);
 
 		enhanceTooltips();
-		addBadgeItemPurchaseMultiplierButtons();
+		autoBuyWithBadges();
 	}
 
 	function updateLaneData() {
@@ -1810,6 +1810,30 @@
 				return false;
 			});
 		});
+	}
+
+	 function autoBuyWithBadges() {
+	 	var badgePointsNumber = w.g_Minigame.m_CurrentScene.m_rgPlayerTechTree.badge_points;
+		var queue = w.g_Minigame.CurrentScene().m_rgPurchaseItemsQueue;
+		for(var i = 1; badgePointsNumber > 0; i++) {
+			//buy 1 Like New for every 10 Worm Hole;
+			if (i % 10 == 0 && badgePointsNumber > 100){
+				queue.push(ABILITIES.LIKE_NEW);
+				badgePointsNumber -= 100;
+			}
+			else if (badgePointsNumber > 100){
+				queue.push(ABILITIES.WORMHOLE);
+				badgePointsNumber -= 100;
+			}
+			else if (badgePointsNumber > 2){
+				queue.push(ABILITIES.TREASURE);
+				badgePointsNumber -= 2;
+			}
+			else{
+				queue.push(ABILITIES.PUMPED_UP);
+				badgePointsNumber -= 1;
+			}
+		}
 	}
 
 }(window));
