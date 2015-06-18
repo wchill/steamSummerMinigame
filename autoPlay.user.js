@@ -1897,6 +1897,72 @@
 				}
 			});
 		};
+		
+		var autobuyBtn = $J('<div>Autobuy</div>');
+		autobuyBtn.css('margin-top', '10px');
+		autobuyBtn.css('text-align', 'center');
+		autobuyBtn.css('padding', '5px');
+		autobuyBtn.css('color', '#fff');
+		autobuyBtn.css('background-color', '#ff7b00');
+		autobuyBtn.css('display', 'block');
+		autobuyBtn.css('cursor', 'pointer');
+		autobuyBtn.click(function() {
+			var numPoints = w.g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points;
+	
+			var items =
+			{
+				wh: {id: 26},
+				likeNew: {id: 27},
+				rain: {id: 17},
+				treasure: {id: 22},
+				pump: {id: 19}
+			}
+		
+			for(var itemName in items)
+			{
+				if(items.hasOwnProperty(itemName))
+				{
+					var item = items[itemName];
+					item.btn = w.$J('#purchase_abilityitem_'+item.id);
+					item.cost = parseInt(item.btn.find('span.cost').text())
+					
+					if(item.btn.length !== 1 || isNaN(item.cost) || item.cost === 0)
+					{
+						alert("Available items not recognised, aborting autobuy.");
+						return;
+					}
+				}
+			}
+			
+			if(items.pump.cost === 1 && numPoints % 2 === 1)
+			{
+				w.g_Minigame.CurrentScene().TrySpendBadgePoints(items.pump.btn, 1, true);
+				numPoints -= items.pump.cost;
+			}
+		
+			var numLikeNew = Math.floor(numPoints / ((10*items.wh.cost)+items.likeNew.cost));
+			if(numLikeNew > 0)
+			{
+				w.g_Minigame.CurrentScene().TrySpendBadgePoints(items.likeNew.btn, numLikeNew, true);
+				numPoints -= numLikeNew*items.likeNew.cost;
+			}
+		
+			function buyItem(item)
+			{
+				var numItem = Math.floor(numPoints / item.cost);
+				if(numItem > 0)
+				{
+					w.g_Minigame.CurrentScene().TrySpendBadgePoints(item.btn, numItem, true);
+					numPoints -= numItem * item.cost;
+				}
+			}
+		
+			buyItem(items.wh);
+			buyItem(items.rain);
+			buyItem(items.treasure);
+		});
+			
+		$J('#badge_items').after(autobuyBtn);
 	}, false);
 
 
