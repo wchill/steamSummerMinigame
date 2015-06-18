@@ -1280,11 +1280,17 @@
 			return;
 		}
 		// Check if Wormhole is purchased
-		if (tryUsingItem(ABILITIES.WORMHOLE)) {
+		if (fireWormhole(ABILITIES.WORMHOLE)) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Triggering wormholes...', 2);
 		} else if (isNearEndGame() && tryUsingItem(ABILITIES.THROW_MONEY_AT_SCREEN)) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Throwing money at screen for no particular reason...', 2);
 		}
+	}
+	
+	//We don't care if the client thinks the wh is on cooldown, fire anyways after 1/2 second
+	function fireWormhole(itemId) {
+		//Wait 1/2 second and fire
+		setTimeout(triggerItem(itemId), 500);
 	}
 
 	function useLikeNewIfRelevant() {
