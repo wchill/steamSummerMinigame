@@ -781,7 +781,6 @@
 		for (var i = 3; i >= 0; i--) {
 			total += levelsSkipped[i];
 		}
-		total += levelsSkipped[0];
 		return total;
 	}
 
