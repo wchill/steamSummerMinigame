@@ -1925,7 +1925,7 @@
 					var item = items[itemName];
 					item.btn = w.$J('#purchase_abilityitem_'+item.id);
 					item.cost = parseInt(item.btn.find('span.cost').text());
-					
+
 					if(item.btn.length !== 1 || isNaN(item.cost) || item.cost === 0)
 					{
 						alert("Available items not recognised, aborting autobuy.");
