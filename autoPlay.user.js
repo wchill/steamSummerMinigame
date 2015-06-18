@@ -1794,9 +1794,9 @@
 	function enableMultibuy(){
 
 		var trt_oldbuy = w.g_Minigame.m_CurrentScene.TrySpendBadgePoints;
-		w.g_Minigame.m_CurrentScene.TrySpendBadgePoints = function(ele, count){
+		w.g_Minigame.m_CurrentScene.TrySpendBadgePoints = function(ele, count, skipMulti){
 
-			if (count != 1){
+			if (skipMulti || count != 1){
 				trt_oldbuy.call(w.g_Minigame.m_CurrentScene, ele, count);
 				return;
 			}
