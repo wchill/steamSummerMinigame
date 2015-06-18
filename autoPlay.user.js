@@ -689,7 +689,7 @@
 		w[checkbox.name] = checkbox.checked;
 		return checkbox.checked;
 	}
-	
+
 	function togglePraise(event) {
 		if (event !== undefined) {
 			praiseGoldHelm = handleCheckBox(event);
