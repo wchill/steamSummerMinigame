@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 4.7.4
+// @version 4.7.8
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '4.7.4';
+	var SCRIPT_VERSION = '4.7.8';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -44,6 +44,15 @@
 	var refreshTimer = null;
 	var currentClickRate = enableAutoClicker ? clickRate : 0;
 	var lastLevel = 0;
+	var goldHelmURLs = {
+		"Original Gold Helm": "https://i.imgur.com/1zRXQgm.png",
+		"Moving Gold Helm": "http://i.imgur.com/XgT8Us8.gif",
+		"Golden Gaben": "http://i.imgur.com/ueDBBrA.png",
+		"Gaben + Snoop Dogg": "http://i.imgur.com/9R0436k.gif",
+		"Wormhole Gaben": "http://i.imgur.com/6BuBgxY.png"
+	};
+	var goldHelmUI = getPreference("praiseGoldHelmImage", goldHelmURLs["Golden Gaben"]);
+	var fixedUI = "http://i.imgur.com/ieDoLnx.png";
 	var trt_oldCrit = function() {};
 	var trt_oldPush = function() {};
 	var trt_oldRender = function() {};
@@ -301,7 +310,8 @@
 		}
 
 		options1.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer", enableFingering, handleEvent, true));
-		options1.appendChild(makeCheckBox("praiseGoldHelm", "Praise Gold Helm!", praiseGoldHelm, togglePraise, true));
+		options1.appendChild(makeCheckBox("praiseGoldHelm", "Praise Gold Helm!", praiseGoldHelm, togglePraise, false));
+		options1.appendChild(makeDropdown("praiseGoldHelmImage", "", goldHelmUI, goldHelmURLs, changePraiseImage));
 		options1.appendChild(makeNumber("setLogLevel", "Change the log level", "25px", logLevel, 0, 5, updateLogLevel));
 
 		options_box.appendChild(options1);
@@ -325,7 +335,9 @@
 		leave_game_box.parentElement.removeChild(leave_game_box);
 
 		enhanceTooltips();
+		enableMultibuy();
 		waitForWelcomePanelLoad();
+
 	}
 
 	function updateLaneData() {
@@ -351,9 +363,9 @@
 
 	function fixActiveCapacityUI() {
 		if(praiseGoldHelm) {
-			w.$J('.tv_ui').css('background-image', 'url(http://i.imgur.com/ANl0UCb.png)');
+			w.$J('.tv_ui').css('background-image', 'url(' + goldHelmUI + ')');
 		} else {
-			w.$J('.tv_ui').css('background-image', 'url(http://i.imgur.com/ieDoLnx.png)');
+			w.$J('.tv_ui').css('background-image', 'url(' + fixedUI + ')');
 		}
 		w.$J('#activeinlanecontainer').css('height', '154px');
 		w.$J('#activitycontainer').css('height', '270px');
@@ -576,7 +588,9 @@
 					e.children[e.children.length-1].remove();
 				}
 			};
-			this.m_eleUpdateLogContainer[0].innerHTML = "";
+			if(this.m_eleUpdateLogContainer) {
+				this.m_eleUpdateLogContainer[0].innerHTML = "";
+			}
 		}
 	}
 
@@ -607,6 +621,31 @@
 			function() {},
 			true
 		);
+	}
+
+	function makeDropdown(name, desc, value, values, listener) {
+		var label = document.createElement("label");
+		var description = document.createTextNode(desc);
+		var drop = document.createElement("select");
+
+		for(var k in values) {
+			var choice = document.createElement("option");
+			choice.value = values[k];
+			choice.textContent = k;
+			if(values[k] == value) {
+				choice.selected = true;
+			}
+			drop.appendChild(choice);
+		}
+
+		drop.name = name;
+		drop.style.marginRight = "5px";
+		drop.onchange = listener;
+
+		label.appendChild(drop);
+		label.appendChild(description);
+		label.appendChild(document.createElement("br"));
+		return label;
 	}
 
 	function makeNumber(name, desc, width, value, min, max, listener) {
@@ -693,9 +732,24 @@
 		return checkbox.checked;
 	}
 
+	function handleDropdown(event) {
+		var dropdown = event.target;
+		setPreference(dropdown.name, dropdown.value);
+
+		w[dropdown.name] = dropdown.value;
+		return dropdown.value;
+	}
+
 	function togglePraise(event) {
 		if (event !== undefined) {
 			praiseGoldHelm = handleCheckBox(event);
+		}
+		fixActiveCapacityUI();
+	}
+
+	function changePraiseImage(event) {
+		if (event !== undefined) {
+			goldHelmUI = handleDropdown(event);
 		}
 		fixActiveCapacityUI();
 	}
@@ -1738,7 +1792,7 @@
 					strOut += '<br><br>Damage with one crit:';
 					strOut += '<br>DPS: ' + w.FormatNumberForDisplay(currentMultiplier * dps) + ' => ' + w.FormatNumberForDisplay(newMultiplier * dps);
 					strOut += '<br>Click: ' + w.FormatNumberForDisplay(currentMultiplier * clickDamage) + ' => ' + w.FormatNumberForDisplay(newMultiplier * clickDamage);
-					strOut += '<br><br>Base Increased By: ' + w.FormatNumberForDisplay(multiplier) + 'x';
+					strOut += '<br><br>Base Increased By: ' + multiplier.toFixed(1) + 'x';
 					break;
 				case 9: // Boss Loot Drop's type
 					strOut += '<br><br>Boss Loot Drop Rate:';
@@ -1751,6 +1805,49 @@
 			}
 
 			return strOut;
+		};
+	}
+
+	function enableMultibuy(){
+
+		// We have to add this to the scene so that we can access the "this" identifier.
+		s().trt_oldbuy = w.g_Minigame.m_CurrentScene.TrySpendBadgePoints;
+		w.g_Minigame.m_CurrentScene.TrySpendBadgePoints = function(ele, count){
+
+			if (count != 1){
+				s().trt_oldbuy(ele, count);
+				return;
+			}
+
+			var instance = this;
+			var $ele = w.$J(ele);
+
+			var name = w.$J('.name', ele).text();
+			var type = $ele.data('type');
+			var cost = $ele.data('cost');
+
+			var badge_points = instance.m_rgPlayerTechTree.badge_points;
+			var maxBuy = Math.floor(badge_points / cost);
+			var resp = prompt("How many "+ name + " do you want to buy? (max " + maxBuy + ")", 0);
+
+			if (!resp){
+				return;
+			}
+
+			var newCount = parseInt(resp);
+
+			if (isNaN(newCount) || newCount < 0) {
+				alert("Please enter a positive number.");
+				return;
+			}
+
+			if ( instance.m_rgPlayerTechTree.badge_points < (cost * newCount))
+			{
+				alert("Not enough badge points.");
+				return;
+			}
+
+			s().trt_oldbuy(ele, newCount);
 		};
 	}
 
@@ -1819,5 +1916,6 @@
 			});
 		};
 	}, false);
+
 
 }(window));
