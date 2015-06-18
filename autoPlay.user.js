@@ -1364,14 +1364,14 @@
 		}
 	}
 
-    function wormholeTimeout(timeout) {
-    	setTimeout(function(){
-    		var level = getGameLevel();
-    		if (level % control.rainingRounds !== 0) {
-    			return;
-    		}
-    		triggerAbility(ABILITIES.WORMHOLE);
-    	}, timeout);
+	function wormholeTimeout(timeout) {
+		setTimeout(function(){
+			var level = getGameLevel();
+			if (level % control.rainingRounds !== 0) {
+				return;
+			}
+			triggerAbility(ABILITIES.WORMHOLE);
+		}, timeout);
 	}
 
 	function useLikeNewIfRelevant() {
