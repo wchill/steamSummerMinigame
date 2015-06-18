@@ -1604,7 +1604,7 @@
 		document.LevelsSkip = element;
 	}
 
-	function updateLevelInfoTitle(level)
+	function updateLevelInfoTitle(level, lastLevel)
 	{
 		var exp_lvl = expectedLevel(level);
 		var rem_time = countdown(exp_lvl.remaining_time);
