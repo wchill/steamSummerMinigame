@@ -61,6 +61,7 @@
 		useAbilityChance: 0.03,
 		wormholeLikeNewRatio: 10,
 		//Number of suggested WHs to buy for every LN
+		useLikeNewExponent: 1.5,
 		useLikeNewMinChance: 0.02,
 		useLikeNewMaxChance: 0.25,
 		useLikeNewMinTime: 0,
@@ -1320,7 +1321,7 @@
 		if (hasItem(ABILITIES.WORMHOLE)) {
 			chanceMultiplier = countItem(ABILITIES.LIKE_NEW) / countItem(ABILITIES.WORMHOLE) * control.wormholeLikeNewRatio;
 		}
-		var likeNewChance = ((control.useLikeNewMaxChance - control.useLikeNewMinChance) * cLobbyTime/24.0 + control.useLikeNewMinChance) * chanceMultiplier;
+		var likeNewChance = ((control.useLikeNewMaxChance - control.useLikeNewMinChance) * Math.pow(cLobbyTime/24.0, control.useLikeNewExponent) + control.useLikeNewMinChance) * chanceMultiplier;
 
 		if (Math.random() > likeNewChance || level % control.rainingRounds !== 0) {
 			return;
