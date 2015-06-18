@@ -39,6 +39,9 @@
 	var autoRefreshMinutesRandomDelay = 10;
 	var autoRefreshSecondsCheckLoadedDelay = 30;
 
+	var isFiring = false;
+	var firingSolution = 10;
+
 	// DO NOT MODIFY
 	var isAlreadyRunning = false;
 	var refreshTimer = null;
@@ -1290,18 +1293,24 @@
 
 	function fireWormhole(itemId) {
 		//Wait 1/2 second and fire
-		s().TryAbility(document.getElementById('abilityitem_' + itemId).childElements()[0]);
+		return setInterval(function(){g_Minigame.m_CurrentScene.TryAbility(document.getElementById('abilityitem_' + 26).childElements()[0])}, 100);
 	}
 
 	function useWormholeIfRelevant() {
 		// Check the time before using wormhole.
 		var level = getGameLevel();
 		if (level % control.rainingRounds !== 0) {
+			if(isFiring) {
+				clearInterval(firingSolution);
+				isFiring = false;
+			}
 			return;
 		}
 		// Check if Wormhole is purchased
-		if (fireWormhole(ABILITIES.WORMHOLE)) {
+		if (isFiring == false) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Triggering wormholes...', 2);
+			firingSolution = fireWormhole(ABILITIES.WORMHOLE);
+			isFiring == true;
 		} else if (isNearEndGame() && tryUsingItem(ABILITIES.THROW_MONEY_AT_SCREEN)) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Throwing money at screen for no particular reason...', 2);
 		}
