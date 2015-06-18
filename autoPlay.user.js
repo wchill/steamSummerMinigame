@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 4.7.4
+// @version 4.7.3
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '4.7.4';
+	var SCRIPT_VERSION = '4.7.3';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -59,6 +59,8 @@
 		allowWormholeLevel: 180000,
 		githubVersion: SCRIPT_VERSION,
 		useAbilityChance: 0.03,
+		wormholeLikeNewRatio: 10,
+		//Number of suggested WHs to buy for every LN
 		useLikeNewMinChance: 0.02,
 		useLikeNewMaxChance: 0.25,
 		useLikeNewMinTime: 0,
@@ -348,7 +350,7 @@
 
 	function fixActiveCapacityUI() {
 		if(praiseGoldHelm) {
-			w.$J('.tv_ui').css('background-image', 'url(http://i.imgur.com/ANl0UCb.png)');
+			w.$J('.tv_ui').css('background-image', 'url(https://i.imgur.com/1zRXQgm.png)');
 		} else {
 			w.$J('.tv_ui').css('background-image', 'url(http://i.imgur.com/ieDoLnx.png)');
 		}
@@ -1314,7 +1316,11 @@
 		// Check if wormhole is on cooldown and roll the dice.
 
 		var cLobbyTime = (getCurrentTime() - s().m_rgGameData.timestamp_game_start) / 3600;
-		var likeNewChance = (control.useLikeNewMaxChance - control.useLikeNewMinChance) * cLobbyTime/24.0 + control.useLikeNewMinChance;
+		var chanceMultiplier = 1; // Multiplier for likeNewChance based on ratio of LN:WH available
+		if (hasItem(ABILITIES.WORMHOLE)) {
+			chanceMultiplier = countItem(ABILITIES.LIKE_NEW) / countItem(ABILITIES.WORMHOLE) * control.wormholeLikeNewRatio; 
+		}
+		var likeNewChance = ((control.useLikeNewMaxChance - control.useLikeNewMinChance) * cLobbyTime/24.0 + control.useLikeNewMinChance) * chanceMultiplier;
 
 		if (Math.random() > likeNewChance || level % control.rainingRounds !== 0) {
 			return;
@@ -1451,6 +1457,16 @@
 			}
 		}
 		return false;
+	}
+
+	function countItem(itemId) {
+		for (var i = 0; i < s().m_rgPlayerTechTree.ability_items.length; ++i) {
+			var abilityItem = s().m_rgPlayerTechTree.ability_items[i];
+			if (abilityItem.ability == itemId) {
+				return abilityItem.quantity;
+			}
+		}
+		return 0;
 	}
 
 	function tryUsingItem(itemId, checkInLane) {
