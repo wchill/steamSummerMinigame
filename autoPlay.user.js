@@ -1190,7 +1190,7 @@
 		var level = getGameLevel();
 
 		// Prevent this outright if its within control.rainingSafeRounds of the next rainingRound
-		if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds+20) {
+		if (level % control.rainingRounds > control.rainingRounds - ( control.rainingSafeRounds + 20 )) {
 			return;
 		}
 
