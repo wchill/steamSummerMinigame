@@ -39,6 +39,9 @@
 	var autoRefreshMinutesRandomDelay = 10;
 	var autoRefreshSecondsCheckLoadedDelay = 30;
 
+	var isFiring = false;
+	var firingSolution = 10;
+
 	// DO NOT MODIFY
 	var isAlreadyRunning = false;
 	var refreshTimer = null;
@@ -691,7 +694,7 @@
 		w[checkbox.name] = checkbox.checked;
 		return checkbox.checked;
 	}
-	
+
 	function togglePraise(event) {
 		if (event !== undefined) {
 			praiseGoldHelm = handleCheckBox(event);
@@ -1288,15 +1291,26 @@
 		}
 	}
 
+	function fireWormhole() {
+		//Wait 1/2 second and fire
+		setInterval(function(){g_Minigame.m_CurrentScene.m_rgAbilityQueue.push({'ability': 26})}, 100);
+	}
+
 	function useWormholeIfRelevant() {
 		// Check the time before using wormhole.
 		var level = getGameLevel();
 		if (level % control.rainingRounds !== 0) {
+			if(isFiring) {
+				clearInterval(firingSolution);
+				isFiring = false;
+			}
 			return;
 		}
 		// Check if Wormhole is purchased
-		if (tryUsingItem(ABILITIES.WORMHOLE)) {
+		if (isFiring == false) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Triggering wormholes...', 2);
+			firingSolution = fireWormhole();
+			isFiring = true;
 		} else if (isNearEndGame() && tryUsingItem(ABILITIES.THROW_MONEY_AT_SCREEN)) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Throwing money at screen for no particular reason...', 2);
 		}
