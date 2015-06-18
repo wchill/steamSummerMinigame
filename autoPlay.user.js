@@ -531,18 +531,18 @@
 							if(getGameLevel() % 100 === 0 && [10, 11, 12, 15, 20].indexOf(rgEntry.ability) > -1) {
 								w.$J(ele).data('abilityid', rgEntry.ability );
 								w.$J('.name', ele).text( rgEntry.actor_name );
-								w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
+								w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel().toLocaleString());
 								w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
 
 								w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
 
 								this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
-								advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
+								advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel().toLocaleString(), 1);
 								w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
 							} else if(getGameLevel() % 100 !== 0 && getGameLevel() % 10 > 3 && rgEntry.ability === 26) {
 								w.$J(ele).data('abilityid', rgEntry.ability );
 								w.$J('.name', ele).text( rgEntry.actor_name );
-								w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
+								w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel().toLocaleString());
 								w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
 								w.$J('.name', ele).attr( "style", "color: yellow" );
 
@@ -1601,7 +1601,7 @@
 		element = document.createElement('span');
 		element.style.color = '#FFA07A';
 		element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
-		element.textContent = 'Level: 0, Expected Level: 0, Likely Level: 0';
+		element.textContent = 'Level: 0, Expected: 0, Likely: 0';
 		breadcrumbs.appendChild(element);
 		document.ExpectedLevel = element;
 
@@ -1634,9 +1634,9 @@
 		var rem_time = countdown(exp_lvl.remaining_time);
 		var lvl_skip = getLevelsSkipped();
 
-		document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected Level: ' + exp_lvl.expected_level + ', Likely Level: ' + exp_lvl.likely_level;
+		document.ExpectedLevel.textContent = 'Level: ' + level.toLocaleString() + ', Expected: ' + exp_lvl.expected_level.toLocaleString() + ', Likely: ' + exp_lvl.likely_level.toLocaleString();
 		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
-		document.LevelsSkip.textContent = 'Skipped ' + lvl_skip + ' levels in last 5s.';
+		document.LevelsSkip.textContent = 'Skipped ' + lvl_skip.toLocaleString() + ' levels in last 5s.';
 	}
 
 	// Helpers to access player stats.
