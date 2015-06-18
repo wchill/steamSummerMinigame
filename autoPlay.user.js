@@ -61,7 +61,7 @@
 	var control = {
 		speedThreshold: 2000,
 		// Stop using offensive abilities shortly before rain/wormhole rounds.
-		rainingSafeRounds: 5,
+		rainingSafeRounds: 9,
 		rainingRounds: 100,
 		timePerUpdate: 60000,
 		useSlowMode: false,
@@ -1190,7 +1190,7 @@
 		var level = getGameLevel();
 
 		// Prevent this outright if its within control.rainingSafeRounds of the next rainingRound
-		if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds) {
+		if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds+20) {
 			return;
 		}
 
