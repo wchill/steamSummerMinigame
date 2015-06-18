@@ -1635,8 +1635,8 @@
 		var lvl_skip = getLevelsSkipped();
 
 		document.ExpectedLevel.textContent = 'Level: ' + level.toLocaleString() + ', Expected: ' + exp_lvl.expected_level.toLocaleString() + ', Likely: ' + exp_lvl.likely_level.toLocaleString();
-		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
-		document.LevelsSkip.textContent = 'Skipped ' + lvl_skip.toLocaleString() + ' levels in last 5s.';
+		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes';
+		document.LevelsSkip.textContent = 'Skipped ' + lvl_skip.toLocaleString() + ' levels in last 5s';
 	}
 
 	// Helpers to access player stats.
