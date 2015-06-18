@@ -542,6 +542,9 @@
 									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
 	
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
+								var key = "baduser-"+rgEntry.actor_name;
+								var current = parseInt(localStorage.getItem( key ) || 0, 10);
+								localStorage.setItem( key, (current+1)+"" );
 									advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
 									w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
 								} else if(getGameLevel() % 100 !== 0 && getGameLevel() % 10 > 3 && rgEntry.ability === 26) {
@@ -552,6 +555,9 @@
 									w.$J('.name', ele).attr( "style", "color: yellow" );
 	
 									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
+								var key = "laguser-"+rgEntry.actor_name;
+								var current = parseInt(localStorage.getItem( key ) || 0, 10);
+								localStorage.setItem( key, (current+1)+"" );
 	
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 								}
@@ -560,21 +566,6 @@
 								w.$J('.name', ele).text( rgEntry.actor_name );
 								w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
 								w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
-
-								w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
-
-								this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
-								var key = "user-"+rgEntry.actor_name;
-								var current = parseInt(localStorage.getItem( key ) || 0, 10);
-								localStorage.setItem( key, (current+1)+"" );
-								advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
-								w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
-							} else if(getGameLevel() % 100 !== 0 && getGameLevel() % 10 > 3 && rgEntry.ability === 26) {
-								w.$J(ele).data('abilityid', rgEntry.ability );
-								w.$J('.name', ele).text( rgEntry.actor_name );
-								w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
-								w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
-								w.$J('.name', ele).attr( "style", "color: yellow" );
 
 								w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
 
