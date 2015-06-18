@@ -779,7 +779,8 @@
 		if (level % control.rainingRounds === 0) {
 			if (hasItem(ABILITIES.WORMHOLE)) {
 				return 0;
-			} else if (getActiveAbilityLaneCount(ABILITIES.WORMHOLE) > control.rainingRounds) {
+			}
+			if (getActiveAbilityLaneCount(ABILITIES.WORMHOLE) > control.rainingRounds) {
 +				return 0;
 			} else {
 				return Math.floor(clickRate/2);
