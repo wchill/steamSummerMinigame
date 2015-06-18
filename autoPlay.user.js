@@ -437,7 +437,7 @@
 			currentClickRate = getWantedClicksPerSecond();
 			s().m_nClicks = currentClickRate;
 			s().m_nLastTick = false;
-			if (level % control.rainingRounds === 0) {
+			if (level % control.rainingRounds === 0 && hasItem(ABILITIES.WORMHOLE)) {
 				w.g_msTickRate = msTickRateWormhole;
 			} else {
 				w.g_msTickRate = 1000;
