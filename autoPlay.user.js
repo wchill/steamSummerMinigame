@@ -351,6 +351,12 @@
 	function fixActiveCapacityUI() {
 		if(praiseGoldHelm) {
 			w.$J('.tv_ui').css('background-image', 'url(' + goldHelmUI + ')');
+			
+			// PRAISE THE INTERFACES
+			var store = CUI.prototype.UpdateStats; 
+			
+			CUI.prototype.UpdateStats = function() { w.$J('#info_hp').text(w.$J('#info_hp').text().replace('HP', 'PRAISES')); store(); };
+			w.$J('.title_elements').text('SCRUB DAMAGE');
 		} else {
 			w.$J('.tv_ui').css('background-image', 'url(' + fixedUI + ')');
 		}
