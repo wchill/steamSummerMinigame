@@ -410,11 +410,12 @@
 			updatePlayersInGame();
 
 			if (level !== lastLevel) {
-				updateLevelInfoTitle(level, lastLevel);
-				lastLevel = level;
 				refreshPlayerData();
 			}
-
+			
+			updateLevelInfoTitle(level, lastLevel);
+			lastLevel = level;
+			
 			currentClickRate = getWantedClicksPerSecond();
 			s().m_nClicks = currentClickRate;
 			s().m_nLastTick = false;
