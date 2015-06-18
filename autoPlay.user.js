@@ -1292,7 +1292,7 @@
 			}
 			//Don't use wormhole if boss is going to die to napalm
 			if (getActiveAbilityLaneCount(ABILITIES.NAPALM)) {
-				var napalmDmg = getActiveAbilityDuration(ABILITIES.NAPALM) * 0.05
+				var napalmDmg = getActiveAbilityDuration(ABILITIES.NAPALM) * 0.05;
 				if (enemyBossHealthPercent < napalmDmg) {
 					return;
 				}
@@ -1518,13 +1518,13 @@
 		}
 		return count;
 	}
-	
+
 	function getActiveAbilityDuration(abilityId) {
 		var now = getCurrentTime();
 		var abilities = s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].active_player_abilities;
 		var highest = 0;
 		for (var i = 0; i < abilities.length; i++) {
-			if (abilities[i].ability != ability || abilities[i].timestamp_done < now) {
+			if (abilities[i].abilityId != abilityId || abilities[i].timestamp_done < now) {
 				continue;
 			}
 			var durationLeft = abilities[i].timestamp_done - now;
