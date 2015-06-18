@@ -430,11 +430,12 @@
 			updatePlayersInGame();
 
 			if (level !== lastLevel) {
-				lastLevel = level;
-				updateLevelInfoTitle(level);
 				refreshPlayerData();
 			}
-
+			
+			updateLevelInfoTitle(level, lastLevel);
+			lastLevel = level;
+			
 			currentClickRate = getWantedClicksPerSecond();
 			s().m_nClicks = currentClickRate;
 			s().m_nLastTick = false;
@@ -499,18 +500,6 @@
 						}
 					}
 				}
-			}
-
-			// Make sure to only include ticks that are relevant
-			var level_jump = getGameLevel() - oldLevel;
-			if (level_jump > 0) {
-				// Iterate down the levelskipped memory
-				for (var i = 4; i >= 0; i--) {
-					levelsSkipped[i+1] = levelsSkipped[i];
-				}
-				levelsSkipped[0] = level_jump;
-
-				oldLevel = getGameLevel();
 			}
 		}
 
@@ -856,12 +845,13 @@
 		return clickRate;
 	}
 
-	function getLevelsSkipped() {
+	function getLevelsSkipped(level, lastLevel) {
 		var total = 0;
 		for (var i = 3; i >= 0; i--) {
 			levelsSkipped[i+1] = levelsSkipped[i];
 			total += levelsSkipped[i];
 		}
+		levelsSkipped[0] = level - lastLevel;
 		total += levelsSkipped[0];
 		return total;
 	}
@@ -1695,11 +1685,11 @@
 		document.LevelsSkip = element;
 	}
 
-	function updateLevelInfoTitle(level)
+	function updateLevelInfoTitle(level, lastLevel)
 	{
 		var exp_lvl = expectedLevel(level);
 		var rem_time = countdown(exp_lvl.remaining_time);
-		var lvl_skip = getLevelsSkipped();
+		var lvl_skip = getLevelsSkipped(level, lastLevel);
 
 		document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected Level: ' + exp_lvl.expected_level + ', Likely Level: ' + exp_lvl.likely_level;
 		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
