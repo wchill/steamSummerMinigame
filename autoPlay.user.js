@@ -21,7 +21,7 @@
 	// OPTIONS
 	var clickRate = 20;
 	var logLevel = 1; // 5 is the most verbose, 0 disables all log
-    var msTickRate = 100;
+	var msTickRate = 100;
 
 	var enableAutoClicker = getPreferenceBoolean("enableAutoClicker", true);
 
@@ -1351,28 +1351,28 @@
 		if (hasItem(ABILITIES.WORMHOLE)) {
 			// Force usage of it regardless of cooldown. Will work if at least one NL was used suring the last second.
 			triggerAbility(ABILITIES.WORMHOLE);
-            wormholeTimeout(100);
-            wormholeTimeout(200);
-            wormholeTimeout(300);
-            wormholeTimeout(400);
-            wormholeTimeout(500);
-            wormholeTimeout(600);
-            wormholeTimeout(700);
-            wormholeTimeout(800);
-            wormholeTimeout(900);
+			wormholeTimeout(100);
+			wormholeTimeout(200);
+			wormholeTimeout(300);
+			wormholeTimeout(400);
+			wormholeTimeout(500);
+			wormholeTimeout(600);
+			wormholeTimeout(700);
+			wormholeTimeout(800);
+			wormholeTimeout(900);
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Triggering wormholes...', 2);
 		}
 	}
-    
+
     function wormholeTimeout(timeout) {
-        setTimeout(function(){
-            var level = getGameLevel();
-            if (level % control.rainingRounds !== 0) {
-                return;
-            }
-            triggerAbility(ABILITIES.WORMHOLE);
-        }, timeout);
-    }
+    	setTimeout(function(){
+    		var level = getGameLevel();
+    		if (level % control.rainingRounds !== 0) {
+    			return;
+    		}
+    		triggerAbility(ABILITIES.WORMHOLE);
+    	}, timeout);
+	}
 
 	function useLikeNewIfRelevant() {
 		// Allow Like New use for next farm boss round.
