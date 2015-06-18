@@ -1284,8 +1284,15 @@
 		if (!enemy || enemy.m_data.type != ENEMY_TYPE.BOSS) {
 			return;
 		}
+		// Don't use wormhole if boss is low HP
+		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
+			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
+			if (enemyBossHealthPercent < 0.1) {
+				return;
+			}
+		}
 		// Check if Wormhole is purchased
-		if (tryUsingItem(ABILITIES.WORMHOLE)) {
+		if (triggerItem(ABILITIES.WORMHOLE)) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Triggering wormholes...', 2);
 		} else if (isNearEndGame() && tryUsingItem(ABILITIES.THROW_MONEY_AT_SCREEN)) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Throwing money at screen for no particular reason...', 2);
