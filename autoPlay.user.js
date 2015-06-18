@@ -691,7 +691,7 @@
 		w[checkbox.name] = checkbox.checked;
 		return checkbox.checked;
 	}
-	
+
 	function togglePraise(event) {
 		if (event !== undefined) {
 			praiseGoldHelm = handleCheckBox(event);
@@ -1291,7 +1291,7 @@
 	function fireWormhole(itemId) {
 		//Wait 1/2 second and fire
 		s().TryAbility(document.getElementById('abilityitem_' + itemId).childElements()[0]);
-    }
+	}
 
 	function useWormholeIfRelevant() {
 		// Check the time before using wormhole.
