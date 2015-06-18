@@ -691,7 +691,7 @@
 		w[checkbox.name] = checkbox.checked;
 		return checkbox.checked;
 	}
-	
+
 	function togglePraise(event) {
 		if (event !== undefined) {
 			praiseGoldHelm = handleCheckBox(event);
@@ -1318,10 +1318,10 @@
 		var cLobbyTime = (getCurrentTime() - s().m_rgGameData.timestamp_game_start) / 3600;
 		var chanceMultiplier = 1; // Multiplier for likeNewChance based on ratio of LN:WH available
 		if (hasItem(ABILITIES.WORMHOLE)) {
-			chanceMultiplier = countItem(ABILITIES.LIKE_NEW) / countItem(ABILITIES.WORMHOLE) * control.wormholeLikeNewRatio; 
+			chanceMultiplier = countItem(ABILITIES.LIKE_NEW) / countItem(ABILITIES.WORMHOLE) * control.wormholeLikeNewRatio;
 		}
 		var likeNewChance = ((control.useLikeNewMaxChance - control.useLikeNewMinChance) * cLobbyTime/24.0 + control.useLikeNewMinChance) * chanceMultiplier;
-
+		
 		if (Math.random() > likeNewChance || level % control.rainingRounds !== 0) {
 			return;
 		}
