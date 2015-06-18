@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 4.6.5
+// @version 4.7.8
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '4.6.5';
+	var SCRIPT_VERSION = '4.7.8';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -33,6 +33,7 @@
 	var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined");
 	var enableFingering = getPreferenceBoolean("enableFingering", true);
 	var disableRenderer = getPreferenceBoolean("disableRenderer", false);
+	var praiseGoldHelm = getPreferenceBoolean("praiseGoldHelm", true);
 
 	var autoRefreshMinutes = 30; // refresh page after x minutes
 	var autoRefreshMinutesRandomDelay = 10;
@@ -43,6 +44,15 @@
 	var refreshTimer = null;
 	var currentClickRate = enableAutoClicker ? clickRate : 0;
 	var lastLevel = 0;
+	var goldHelmURLs = {
+		"Original Gold Helm": "https://i.imgur.com/1zRXQgm.png",
+		"Moving Gold Helm": "http://i.imgur.com/XgT8Us8.gif",
+		"Golden Gaben": "http://i.imgur.com/ueDBBrA.png",
+		"Gaben + Snoop Dogg": "http://i.imgur.com/9R0436k.gif",
+		"Wormhole Gaben": "http://i.imgur.com/6BuBgxY.png"
+	};
+	var goldHelmUI = getPreference("praiseGoldHelmImage", goldHelmURLs["Golden Gaben"]);
+	var fixedUI = "http://i.imgur.com/ieDoLnx.png";
 	var trt_oldCrit = function() {};
 	var trt_oldPush = function() {};
 	var trt_oldRender = function() {};
@@ -58,15 +68,17 @@
 		allowWormholeLevel: 180000,
 		githubVersion: SCRIPT_VERSION,
 		useAbilityChance: 0.03,
-		useLikeNewMinChance: 0.05,
-		useLikeNewMaxChance: 1.0,
-		useLikeNewTimeSpread: 100,
+		useLikeNewMinChance: 0.02,
+		useLikeNewMaxChance: 0.25,
+		useLikeNewMinTime: 0,
+		useLikeNewMaxTime: 500,
 		useGoldThreshold: 200
 	};
 
 	var canUseLikeNew = true;
 	var levelsSkipped = [0, 0, 0, 0, 0];
 	var oldLevel = 0;
+	var replacedCUI = false;
 
 	var showedUpdateInfo = getPreferenceBoolean("showedUpdateInfo", false);
 
@@ -295,6 +307,8 @@
 		}
 
 		options1.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer", enableFingering, handleEvent, true));
+		options1.appendChild(makeCheckBox("praiseGoldHelm", "Praise Gold Helm!", praiseGoldHelm, togglePraise, false));
+		options1.appendChild(makeDropdown("praiseGoldHelmImage", "", goldHelmUI, goldHelmURLs, changePraiseImage));
 		options1.appendChild(makeNumber("setLogLevel", "Change the log level", "25px", logLevel, 0, 5, updateLogLevel));
 
 		options_box.appendChild(options1);
@@ -318,7 +332,9 @@
 		leave_game_box.parentElement.removeChild(leave_game_box);
 
 		enhanceTooltips();
-		addBadgeItemPurchaseMultiplierButtons();
+		enableMultibuy();
+		waitForWelcomePanelLoad();
+
 	}
 
 	function updateLaneData() {
@@ -343,7 +359,11 @@
 	}
 
 	function fixActiveCapacityUI() {
-		w.$J('.tv_ui').css('background-image', 'url(http://i.imgur.com/ieDoLnx.png)');
+		if(praiseGoldHelm) {
+			w.$J('.tv_ui').css('background-image', 'url(' + goldHelmUI + ')');
+		} else {
+			w.$J('.tv_ui').css('background-image', 'url(' + fixedUI + ')');
+		}
 		w.$J('#activeinlanecontainer').css('height', '154px');
 		w.$J('#activitycontainer').css('height', '270px');
 		w.$J('#activityscroll').css('height', '270px');
@@ -478,7 +498,7 @@
 					}
 				}
 			}
-			
+
 			// Make sure to only include ticks that are relevant
 			var level_jump = getGameLevel() - oldLevel;
 			if (level_jump > 0) {
@@ -487,8 +507,86 @@
 					levelsSkipped[i+1] = levelsSkipped[i];
 				}
 				levelsSkipped[0] = level_jump;
-				
-				oldLevel = getGameLevel();	
+
+				oldLevel = getGameLevel();
+			}
+		}
+
+		if(w.CUI && !replacedCUI) {
+			replacedCUI = true;
+			advLog("Anti nuke in effect", 1);
+			w.CUI.prototype.UpdateLog = function( rgLaneLog )
+			{
+				var abilities = this.m_Game.m_rgTuningData.abilities;
+
+				if( !this.m_Game.m_rgPlayerTechTree ) {
+					return;
+				}
+
+				var nHighestTime = 0;
+
+				for( var i=rgLaneLog.length-1; i >= 0; i--) {
+					var rgEntry = rgLaneLog[i];
+
+					// If we got a bad time for some reason, assume it's n+1 since we'll be ahead of it by the next update anyway
+					if( isNaN( rgEntry.time ) ) {
+						rgEntry.time = this.m_nActionLogTime + 1;
+					}
+
+					if( rgEntry.time <= this.m_nActionLogTime ) {
+						continue;
+					}
+
+					switch( rgEntry.type ) {
+						case 'ability':
+							var ele = this.m_eleUpdateLogTemplate.clone();
+							if(getGameLevel() % 100 === 0 && [10, 11, 12, 15, 20].indexOf(rgEntry.ability) > -1) {
+								w.$J(ele).data('abilityid', rgEntry.ability );
+								w.$J('.name', ele).text( rgEntry.actor_name );
+								w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
+								w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
+
+								w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
+
+								this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
+								advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
+								w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
+							} else if(getGameLevel() % 100 !== 0 && getGameLevel() % 10 > 3 && rgEntry.ability === 26) {
+								w.$J(ele).data('abilityid', rgEntry.ability );
+								w.$J('.name', ele).text( rgEntry.actor_name );
+								w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
+								w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
+								w.$J('.name', ele).attr( "style", "color: yellow" );
+
+								w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
+
+								this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
+							}
+							break;
+
+						default:
+							console.log("Unknown action log type: %s", rgEntry.type);
+							console.log(rgEntry);
+					}
+
+					if( rgEntry.time > nHighestTime ) {
+						nHighestTime = rgEntry.time;
+					}
+				}
+
+				if( nHighestTime > this.m_nActionLogTime ) {
+					this.m_nActionLogTime = nHighestTime;
+				}
+
+				// Prune older entries
+				var e = this.m_eleUpdateLogContainer[0];
+				while(e.children.length > 20 )
+				{
+					e.children[e.children.length-1].remove();
+				}
+			};
+			if(this.m_eleUpdateLogContainer) {
+				this.m_eleUpdateLogContainer[0].innerHTML = "";
 			}
 		}
 	}
@@ -520,6 +618,31 @@
 			function() {},
 			true
 		);
+	}
+
+	function makeDropdown(name, desc, value, values, listener) {
+		var label = document.createElement("label");
+		var description = document.createTextNode(desc);
+		var drop = document.createElement("select");
+
+		for(var k in values) {
+			var choice = document.createElement("option");
+			choice.value = values[k];
+			choice.textContent = k;
+			if(values[k] == value) {
+				choice.selected = true;
+			}
+			drop.appendChild(choice);
+		}
+
+		drop.name = name;
+		drop.style.marginRight = "5px";
+		drop.onchange = listener;
+
+		label.appendChild(drop);
+		label.appendChild(description);
+		label.appendChild(document.createElement("br"));
+		return label;
 	}
 
 	function makeNumber(name, desc, width, value, min, max, listener) {
@@ -604,6 +727,28 @@
 
 		w[checkbox.name] = checkbox.checked;
 		return checkbox.checked;
+	}
+
+	function handleDropdown(event) {
+		var dropdown = event.target;
+		setPreference(dropdown.name, dropdown.value);
+
+		w[dropdown.name] = dropdown.value;
+		return dropdown.value;
+	}
+
+	function togglePraise(event) {
+		if (event !== undefined) {
+			praiseGoldHelm = handleCheckBox(event);
+		}
+		fixActiveCapacityUI();
+	}
+
+	function changePraiseImage(event) {
+		if (event !== undefined) {
+			goldHelmUI = handleDropdown(event);
+		}
+		fixActiveCapacityUI();
 	}
 
 	function toggleAutoClicker(event) {
@@ -1196,7 +1341,7 @@
 	function useWormholeIfRelevant() {
 		// Check the time before using wormhole.
 		var level = getGameLevel();
-		if (level < control.speedThreshold || level % control.rainingRounds !== 0) {
+		if (level % control.rainingRounds !== 0) {
 			return;
 		}
 		// Check if Wormhole is purchased
@@ -1209,25 +1354,28 @@
 
 	function useLikeNewIfRelevant() {
 		// Allow Like New use for next farm boss round.
-		var level = getGameLevel();
-		if (level % control.rainingRounds !== 0 && !canUseLikeNew) {
-			canUseLikeNew = true;
+		if (!hasItem(ABILITIES.LIKE_NEW)) {
 			return;
 		}
+
+		var level = getGameLevel();
+		//if (level % control.rainingRounds !== 0 && !canUseLikeNew) {
+		//	canUseLikeNew = true;
+		//	return;
+		//}
 		// Check if wormhole is on cooldown and roll the dice.
+
 		var cLobbyTime = (getCurrentTime() - s().m_rgGameData.timestamp_game_start) / 3600;
 		var likeNewChance = (control.useLikeNewMaxChance - control.useLikeNewMinChance) * cLobbyTime/24.0 + control.useLikeNewMinChance;
 
-		if (canUseItem(ABILITIES.WORMHOLE) || Math.random() > likeNewChance || level % control.rainingRounds !== 0) {
+		if (Math.random() > likeNewChance || level % control.rainingRounds !== 0) {
 			return;
 		}
 		// Start a timer between 1 and 5 seconds to try to use LikeNew.
-		if (canUseLikeNew) {
-			var rand = Math.floor(Math.random() * control.useLikeNewTimeSpread * 2 + (control.speedThreshold - control.useLikeNewTimeSpread));
-			setTimeout(useLikeNew, rand);
-			advLog('Attempting to use Like New after ' + rand + 'ms.', 2);
-			canUseLikeNew = false;
-		}
+		var rand = Math.floor(Math.random() * control.useLikeNewMaxTime - control.useLikeNewMinTime + control.useLikeNewMinTime);
+		setTimeout(useLikeNew, rand);
+		advLog('Attempting to use Like New after ' + rand + 'ms.', 2);
+		//canUseLikeNew = false;
 	}
 
 	function useLikeNew() {
@@ -1236,7 +1384,7 @@
 		if (level % control.rainingRounds === 0) {
 			if (tryUsingItem(ABILITIES.LIKE_NEW)) {
 				advLog('We can actually use Like New semi-reliably! Cooldowns-b-gone.', 2);
-				canUseLikeNew = true;
+				//canUseLikeNew = true;
 			}
 		}
 	}
@@ -1625,7 +1773,7 @@
 					strOut += '<br><br>Damage with one crit:';
 					strOut += '<br>DPS: ' + w.FormatNumberForDisplay(currentMultiplier * dps) + ' => ' + w.FormatNumberForDisplay(newMultiplier * dps);
 					strOut += '<br>Click: ' + w.FormatNumberForDisplay(currentMultiplier * clickDamage) + ' => ' + w.FormatNumberForDisplay(newMultiplier * clickDamage);
-					strOut += '<br><br>Base Increased By: ' + w.FormatNumberForDisplay(multiplier) + 'x';
+					strOut += '<br><br>Base Increased By: ' + multiplier.toFixed(1) + 'x';
 					break;
 				case 9: // Boss Loot Drop's type
 					strOut += '<br><br>Boss Loot Drop Rate:';
@@ -1641,49 +1789,114 @@
 		};
 	}
 
+	function enableMultibuy(){
+
+		// We have to add this to the scene so that we can access the "this" identifier.
+		s().trt_oldbuy = w.g_Minigame.m_CurrentScene.TrySpendBadgePoints;
+		w.g_Minigame.m_CurrentScene.TrySpendBadgePoints = function(ele, count){
+
+			if (count != 1){
+				s().trt_oldbuy(ele, count);
+				return;
+			}
+
+			var instance = this;
+			var $ele = w.$J(ele);
+
+			var name = w.$J('.name', ele).text();
+			var type = $ele.data('type');
+			var cost = $ele.data('cost');
+
+			var badge_points = instance.m_rgPlayerTechTree.badge_points;
+			var maxBuy = Math.floor(badge_points / cost);
+			var resp = prompt("How many "+ name + " do you want to buy? (max " + maxBuy + ")", 0);
+
+			if (!resp){
+				return;
+			}
+
+			var newCount = parseInt(resp);
+
+			if (isNaN(newCount) || newCount < 0) {
+				alert("Please enter a positive number.");
+				return;
+			}
+
+			if ( instance.m_rgPlayerTechTree.badge_points < (cost * newCount))
+			{
+				alert("Not enough badge points.");
+				return;
+			}
+
+			s().trt_oldbuy(ele, newCount);
+		};
+	}
+
 	function getGameLevel() {
 		return s().m_rgGameData.level + 1;
 	}
 
-	/** Add 3 button on the "Welcome Panel" to multiply starting item purchase */
-	function addBadgeItemPurchaseMultiplierButtons() {
-		// create multiplier buttons
-		var buttonX1 = w.$J('<button onclick="setBadgeItemByMultiplier(1)" type="button">x1</button>');
-		var buttonX10 = w.$J('<button onclick="setBadgeItemByMultiplier(10)" type="button">x10</button>');
-		var buttonX100 = w.$J('<button onclick="setBadgeItemByMultiplier(100)" type="button">x100</button>');
+	/** Check periodicaly if the welcome panel is visible
+	 * then trigger an event 'event:welcomePanelVisible' */
+	function waitForWelcomePanelLoad() {
+		var checkTicks = 20; // not very elegant but effective
+		var waitForWelcomePanelInterval = setInterval(function() {
+			var $welcomePanel = w.$J('.spend_badge_ponts_ctn');
+			var panelReady = !!($welcomePanel && $welcomePanel.length && $welcomePanel.is(':visible'));
 
-		// Add them to the badge point item purache panel
-		w.$J('#badge_items').append('<span>Batch purchase : </span>')
-			.append(buttonX1).append(buttonX10).append(buttonX100);
-
-		// hook to handle multiplier button clicks
-		var badgeItemByMultiplier = 1;
-
-		w.setBadgeItemByMultiplier = function(newMult) {
-			if(typeof newMult === 'number' && newMult >= 1) {
-				badgeItemByMultiplier = Math.floor(newMult);
+			if(panelReady) { // Got it! Tuning time!
+				window.document.dispatchEvent(new Event('event:welcomePanelVisible'));
+				clearInterval(waitForWelcomePanelInterval);
 			}
-		};
-
-		// Bind new click function on each item div/button
-		w.$J('#badge_items > .purchase_ability_item').each(function() {
-			var item = w.$J(this);
-			item.attr('onclick', '');
-			item.click(function(e) {
-				// Call the old function
-				w.g_Minigame.CurrentScene().TrySpendBadgePoints(this);
-				// Multiply the las added element
-				var queue = w.g_Minigame.CurrentScene().m_rgPurchaseItemsQueue;
-				if(badgeItemByMultiplier > 1 && queue.length > 0) {
-					var lastAddedItem = queue[queue.length - 1]; // top item
-					// do magic ... well... a for loop .. Ohmagad!
-					for(var i=1; i<badgeItemByMultiplier; i++) {
-						queue.push(lastAddedItem);
-					}
-				}
-				return false;
-			});
-		});
+			else if(w.g_Minigame && w.g_Minigame.CurrentScene() && w.g_Minigame.CurrentScene().m_rgPlayerTechTree
+					&& !w.g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points) { // techtree but no points
+				clearInterval(waitForWelcomePanelInterval);
+			}
+			else if(--checkTicks <= 0) { // give up
+				clearInterval(waitForWelcomePanelInterval);
+			}
+		}, 500);
 	}
+
+	// Wait for welcome panel then add more buttons for batch purchase
+	w.document.addEventListener('event:welcomePanelVisible', function() {
+		// Select existings x10 buttons
+		w.$J('#badge_items > .purchase_ability_item > .sub_item').each(function() {
+			var x10Button = w.$J(this);
+
+			// New button
+			var x100Button = w.$J('<div class="sub_item x100">x100</div>');
+			x100Button.click(function(event) { // same from steam script but x100 (incredible!)
+					w.g_Minigame.CurrentScene().TrySpendBadgePoints(this, 100);
+					event.stopPropagation();
+				});
+			x100Button.data(x10Button.data());
+
+			x10Button.css('margin-right', '50px'); // Shift the x10 button a little
+			x10Button.after(x100Button);
+		});
+
+		// Wrap panel update to unable/disable x100 buttons
+		var oldUpdate = w.g_Minigame.CurrentScene().m_UI.UpdateSpendBadgePointsDialog;
+		w.g_Minigame.CurrentScene().m_UI.UpdateSpendBadgePointsDialog = function() {
+			oldUpdate.apply(w.g_Minigame.CurrentScene().m_UI, arguments); // super call
+
+			// remaining badgepoints
+			var badgePoints = w.g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points;
+
+			// each x100 button
+			w.$J('#badge_items > .purchase_ability_item > .sub_item.x100').each(function() {
+				var button = w.$J(this);
+				// disable if not enougth points
+				if(badgePoints < button.data().cost * 100) {
+					button.addClass('disabled');
+				}
+				else {
+					button.removeClass('disabled');
+				}
+			});
+		};
+	}, false);
+
 
 }(window));
