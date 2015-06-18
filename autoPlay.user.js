@@ -33,6 +33,7 @@
 	var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined");
 	var enableFingering = getPreferenceBoolean("enableFingering", true);
 	var disableRenderer = getPreferenceBoolean("disableRenderer", false);
+	var conserveWH = getPreferenceBoolean("conserveWH", false);
 
 	var autoRefreshMinutes = 30; // refresh page after x minutes
 	var autoRefreshMinutesRandomDelay = 10;
@@ -291,6 +292,7 @@
 		options1.appendChild(makeCheckBox("removeGoldText", "Remove gold text", removeGoldText, handleEvent, false));
 		options1.appendChild(makeCheckBox("removeAllText", "Remove all text", removeAllText, toggleAllText, false));
 		options1.appendChild(makeCheckBox("disableRenderer", "Throttle game renderer", disableRenderer, toggleRenderer, true));
+		options1.appendChild(makeCheckBox("conserveWH", "Use wormholes more sparingly", conserveWH, toggleConserveWH, false));
 
 		if (typeof GM_info !== "undefined") {
 			options1.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh", enableAutoRefresh, toggleAutoRefresh, false));
@@ -726,6 +728,14 @@
 
 			w.g_Minigame.Render = function() {};
 		}
+	}
+
+	function toggleConserveWH(event) {
+		var value = conserveWH;
+		if (event !== undefined) {
+			value = handleCheckBox(event);
+		}
+		conserveWH = value;
 	}
 
 	function toggleCritText(event) {
@@ -1279,23 +1289,26 @@
 		if (level % control.rainingRounds !== 0) {
 			return;
 		}
-		// Don't use wormhole if boss is already dead.
-		var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
-		if (!enemy || enemy.m_data.type != ENEMY_TYPE.BOSS) {
-			return;
-		}
-		// Don't use wormhole if boss is low HP
-		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
-			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
-			if (enemyBossHealthPercent < 0.1) {
+		// We don't care about waste if we have plenty of wormholes
+		if (conserveWH) {
+			// Don't use wormhole if boss is already dead.
+			var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
+			if (!enemy || enemy.m_data.type != ENEMY_TYPE.BOSS) {
 				return;
 			}
-			//Don't use wormhole if boss is going to die to napalm
-			if (getActiveAbilityLaneCount(ABILITIES.NAPALM)) {
-				//Assume next update will happen in <5s from now
-				var napalmDmg = Math.min(getActiveAbilityDuration(ABILITIES.NAPALM), 5) * 0.05;
-				if (enemyBossHealthPercent < napalmDmg) {
+			// Don't use wormhole if boss is low HP
+			if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
+				var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
+				if (enemyBossHealthPercent < 0.1) {
 					return;
+				}
+				// Don't use wormhole if boss is going to die to napalm
+				if (getActiveAbilityLaneCount(ABILITIES.NAPALM)) {
+					//Assume next update will happen in <5s from now
+					var napalmDmg = Math.min(getActiveAbilityDuration(ABILITIES.NAPALM), 5) * 0.05;
+					if (enemyBossHealthPercent < napalmDmg) {
+						return;
+					}
 				}
 			}
 		}
