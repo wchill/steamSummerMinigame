@@ -1668,7 +1668,7 @@
 		element = document.createElement('span');
 		element.style.color = '#FFA07A';
 		element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
-		element.textContent = 'Level: 0, Expected Level: 0, Likely Level: 0';
+		element.textContent = 'Level: 0, Expected: 0, Likely: 0';
 		breadcrumbs.appendChild(element);
 		document.ExpectedLevel = element;
 
@@ -1701,7 +1701,7 @@
 		var rem_time = countdown(exp_lvl.remaining_time);
 		var lvl_skip = getLevelsSkipped();
 
-		document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected Level: ' + exp_lvl.expected_level + ', Likely Level: ' + exp_lvl.likely_level;
+		document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected: ' + exp_lvl.expected_level + ', Likely: ' + exp_lvl.likely_level;
 		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
 		document.LevelsSkip.textContent = 'Skipped ' + lvl_skip + ' levels in last 5s.';
 	}
