@@ -1694,6 +1694,10 @@
 		breadcrumbs.appendChild(element);
 		document.LevelsSkip = element;
 	}
+	
+	function numberThousandsFormat(x){
+		return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+	}
 
 	function updateLevelInfoTitle(level)
 	{
@@ -1701,9 +1705,9 @@
 		var rem_time = countdown(exp_lvl.remaining_time);
 		var lvl_skip = getLevelsSkipped();
 
-		document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected Level: ' + exp_lvl.expected_level + ', Likely Level: ' + exp_lvl.likely_level;
+		document.ExpectedLevel.textContent = 'Level: ' + numberThousandsFormat(level) + ', Expected Level: ' + numberThousandsFormat(exp_lvl.expected_level) + ', Likely Level: ' + numberThousandsFormat(exp_lvl.likely_level);
 		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
-		document.LevelsSkip.textContent = 'Skipped ' + lvl_skip + ' levels in last 5s.';
+		document.LevelsSkip.textContent = 'Skipped ' +  numberThousandsFormat(lvl_skip) + ' levels in last 5s.';
 	}
 
 	// Helpers to access player stats.
