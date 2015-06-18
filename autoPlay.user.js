@@ -548,9 +548,9 @@
 									w.$J('.name', ele).text( rgEntry.actor_name );
 									w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
 									w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
-	
+
 									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
-	
+
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 									advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
 									w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
@@ -560,9 +560,9 @@
 									w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
 									w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
 									w.$J('.name', ele).attr( "style", "color: yellow" );
-	
+
 									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
-	
+
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 								}
 							} else {
