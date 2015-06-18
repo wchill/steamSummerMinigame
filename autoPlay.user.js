@@ -1286,8 +1286,8 @@
 		}
 
 		var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
-		// check if current target is a boss, otherwise its not worth using the gold rain
-		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
+		// check if current target is a boss, and that autoclicks are happening, otherwise its not worth using the gold rain
+		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS && getWantedClicksPerSecond() > 0) {
 			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 
 			if (enemyBossHealthPercent >= 0.6) { // We want sufficient time for the gold rain to be applicable
