@@ -691,7 +691,7 @@
 		w[checkbox.name] = checkbox.checked;
 		return checkbox.checked;
 	}
-	
+
 	function togglePraise(event) {
 		if (event !== undefined) {
 			praiseGoldHelm = handleCheckBox(event);
@@ -780,7 +780,7 @@
 			if (hasItem(ABILITIES.WORMHOLE)) {
 				return 0;
 			}
-			if (getActiveAbilityLaneCount(ABILITIES.WORMHOLE) > control.rainingRounds) {
+			if (getActiveAbilityLaneCount(ABILITIES.WORMHOLE) > 1000) {
 				return 0;
 			} else {
 				return Math.floor(clickRate/2);
