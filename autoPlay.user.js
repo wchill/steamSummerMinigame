@@ -1321,7 +1321,7 @@
 			chanceMultiplier = countItem(ABILITIES.LIKE_NEW) / countItem(ABILITIES.WORMHOLE) * control.wormholeLikeNewRatio;
 		}
 		var likeNewChance = ((control.useLikeNewMaxChance - control.useLikeNewMinChance) * cLobbyTime/24.0 + control.useLikeNewMinChance) * chanceMultiplier;
-		
+
 		if (Math.random() > likeNewChance || level % control.rainingRounds !== 0) {
 			return;
 		}
