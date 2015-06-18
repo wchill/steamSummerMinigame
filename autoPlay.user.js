@@ -1341,17 +1341,11 @@
 	}
 
 	function useWormholeIfRelevant() {
-		// Check the time before using wormhole.
 		var level = getGameLevel();
 		if (level % control.rainingRounds !== 0) {
 			return;
 		}
-		// Check if Wormhole is purchased
-		if (tryUsingItem(ABILITIES.WORMHOLE)) {
-			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Triggering wormholes...', 2);
-		} else if (isNearEndGame() && tryUsingItem(ABILITIES.THROW_MONEY_AT_SCREEN)) {
-			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Throwing money at screen for no particular reason...', 2);
-		}
+		triggerAbility(ABILITIES.WORMHOLE)
 	}
 
 	function useLikeNewIfRelevant() {
