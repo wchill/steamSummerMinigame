@@ -842,11 +842,7 @@
 			return 0;
 		}
 		if (level % control.rainingRounds === 0) {
-			if (hasItem(ABILITIES.WORMHOLE)) {
-				return 0;
-			} else {
-				return Math.floor(clickRate/2);
-			}
+            return 0;
 		}
 		if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds) {
 			return Math.floor(clickRate/10);
