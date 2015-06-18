@@ -33,6 +33,7 @@
 	var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined");
 	var enableFingering = getPreferenceBoolean("enableFingering", true);
 	var disableRenderer = getPreferenceBoolean("disableRenderer", false);
+	var conserveWH = getPreferenceBoolean("conserveWH", false);
 	var praiseGoldHelm = getPreferenceBoolean("praiseGoldHelm", true);
 
 	var autoRefreshMinutes = 30; // refresh page after x minutes
@@ -301,6 +302,7 @@
 		options1.appendChild(makeCheckBox("removeGoldText", "Remove gold text", removeGoldText, handleEvent, false));
 		options1.appendChild(makeCheckBox("removeAllText", "Remove all text", removeAllText, toggleAllText, false));
 		options1.appendChild(makeCheckBox("disableRenderer", "Throttle game renderer", disableRenderer, toggleRenderer, true));
+		options1.appendChild(makeCheckBox("conserveWH", "Use wormholes more sparingly", conserveWH, toggleConserveWH, false));
 
 		if (typeof GM_info !== "undefined") {
 			options1.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh", enableAutoRefresh, toggleAutoRefresh, false));
@@ -793,6 +795,14 @@
 
 			w.g_Minigame.Render = function() {};
 		}
+	}
+
+	function toggleConserveWH(event) {
+		var value = conserveWH;
+		if (event !== undefined) {
+			value = handleCheckBox(event);
+		}
+		conserveWH = value;
 	}
 
 	function toggleCritText(event) {
@@ -1346,8 +1356,32 @@
 		if (level % control.rainingRounds !== 0) {
 			return;
 		}
+		// We don't care about waste if we have plenty of wormholes
+		if (conserveWH) {
+			// Don't use wormhole if boss is already dead.
+			var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
+			if (!enemy || enemy.m_data.type != ENEMY_TYPE.BOSS) {
+				return;
+			}
+			// Don't use wormhole if boss is low HP
+			if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
+				var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
+				if (enemyBossHealthPercent < 0.1) {
+					return;
+				}
+				// Don't use wormhole if boss is going to die to napalm
+				if (getActiveAbilityLaneCount(ABILITIES.NAPALM)) {
+					//Assume next update will happen in <5s from now
+					var napalmDmg = Math.min(getActiveAbilityDuration(ABILITIES.NAPALM), 5) * 0.05;
+					if (enemyBossHealthPercent < napalmDmg) {
+						return;
+					}
+				}
+			}
+		}
 		// Check if Wormhole is purchased
-		if (tryUsingItem(ABILITIES.WORMHOLE)) {
+		if (hasItem(ABILITIES.WORMHOLE)) {
+			triggerAbility(ABILITIES.WORMHOLE);
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Triggering wormholes...', 2);
 		} else if (isNearEndGame() && tryUsingItem(ABILITIES.THROW_MONEY_AT_SCREEN)) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Throwing money at screen for no particular reason...', 2);
@@ -1565,6 +1599,22 @@
 			count++;
 		}
 		return count;
+	}
+
+	function getActiveAbilityDuration(abilityId) {
+		var now = getCurrentTime();
+		var abilities = s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].active_player_abilities;
+		var highest = 0;
+		for (var i = 0; i < abilities.length; i++) {
+			if (abilities[i].abilityId != abilityId || abilities[i].timestamp_done < now) {
+				continue;
+			}
+			var durationLeft = abilities[i].timestamp_done - now;
+			if (durationLeft > highest){
+				highest = durationLeft;
+			}
+		}
+		return highest;
 	}
 
 	function isAbilityItemEnabled(abilityId) {
