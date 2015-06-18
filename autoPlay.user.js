@@ -1293,7 +1293,7 @@
 
 	function fireWormhole(itemId) {
 		//Wait 1/2 second and fire
-		return setInterval(function(){s().g_Minigame.m_CurrentScene.TryAbility(document.getElementById('abilityitem_' + 26).childElements()[0]);}, 100);
+		return setInterval(function(){s().g_Minigame.m_CurrentScene.TryAbility(document.getElementById('abilityitem_' + 26).childElements()[0]); }, 100);
 	}
 
 	function useWormholeIfRelevant() {
