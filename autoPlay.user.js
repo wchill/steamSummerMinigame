@@ -1292,7 +1292,8 @@
 			}
 			//Don't use wormhole if boss is going to die to napalm
 			if (getActiveAbilityLaneCount(ABILITIES.NAPALM)) {
-				var napalmDmg = getActiveAbilityDuration(ABILITIES.NAPALM) * 0.05;
+				//Assume next update will happen in <5s from now
+				var napalmDmg = Math.min(getActiveAbilityDuration(ABILITIES.NAPALM), 5) * 0.05;
 				if (enemyBossHealthPercent < napalmDmg) {
 					return;
 				}
