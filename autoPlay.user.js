@@ -1793,12 +1793,11 @@
 
 	function enableMultibuy(){
 
-		// We have to add this to the scene so that we can access the "this" identifier.
-		s().trt_oldbuy = w.g_Minigame.m_CurrentScene.TrySpendBadgePoints;
+		var trt_oldbuy = w.g_Minigame.m_CurrentScene.TrySpendBadgePoints;
 		w.g_Minigame.m_CurrentScene.TrySpendBadgePoints = function(ele, count){
 
 			if (count != 1){
-				s().trt_oldbuy(ele, count);
+				trt_oldbuy.call(w.g_Minigame.m_CurrentScene, ele, count);
 				return;
 			}
 
@@ -1830,7 +1829,7 @@
 				return;
 			}
 
-			s().trt_oldbuy(ele, newCount);
+			trt_oldbuy.call(w.g_Minigame.m_CurrentScene, ele, newCount);
 		};
 	}
 
