@@ -1293,7 +1293,7 @@
 
 	function fireWormhole(itemId) {
 		//Wait 1/2 second and fire
-		return setInterval(function(){g_Minigame.m_CurrentScene.TryAbility(document.getElementById('abilityitem_' + 26).childElements()[0])}, 100);
+		return setInterval(function(){s().g_Minigame.m_CurrentScene.TryAbility(document.getElementById('abilityitem_' + 26).childElements()[0]);}, 100);
 	}
 
 	function useWormholeIfRelevant() {
@@ -1310,7 +1310,7 @@
 		if (isFiring == false) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Triggering wormholes...', 2);
 			firingSolution = fireWormhole(ABILITIES.WORMHOLE);
-			isFiring == true;
+			isFiring = true;
 		} else if (isNearEndGame() && tryUsingItem(ABILITIES.THROW_MONEY_AT_SCREEN)) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Throwing money at screen for no particular reason...', 2);
 		}
