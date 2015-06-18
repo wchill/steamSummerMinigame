@@ -430,10 +430,11 @@
 			updatePlayersInGame();
 
 			if (level !== lastLevel) {
-				lastLevel = level;
-				updateLevelInfoTitle(level);
 				refreshPlayerData();
 			}
+
+			lastLevel = level;
+			updateLevelInfoTitle(level,lastLevel);
 
 			currentClickRate = getWantedClicksPerSecond();
 			s().m_nClicks = currentClickRate;
@@ -501,17 +502,6 @@
 				}
 			}
 
-			// Make sure to only include ticks that are relevant
-			var level_jump = getGameLevel() - oldLevel;
-			if (level_jump > 0) {
-				// Iterate down the levelskipped memory
-				for (var i = 4; i >= 0; i--) {
-					levelsSkipped[i+1] = levelsSkipped[i];
-				}
-				levelsSkipped[0] = level_jump;
-
-				oldLevel = getGameLevel();
-			}
 		}
 
 		if(w.CUI && !replacedCUI) {
@@ -552,6 +542,9 @@
 									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
 	
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
+								var key = "baduser-"+rgEntry.actor_name;
+								var current = parseInt(localStorage.getItem( key ) || 0, 10);
+								localStorage.setItem( key, (current+1)+"" );
 									advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
 									w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
 								} else if(getGameLevel() % 100 !== 0 && getGameLevel() % 10 > 3 && rgEntry.ability === 26) {
@@ -562,6 +555,9 @@
 									w.$J('.name', ele).attr( "style", "color: yellow" );
 	
 									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
+								var key = "laguser-"+rgEntry.actor_name;
+								var current = parseInt(localStorage.getItem( key ) || 0, 10);
+								localStorage.setItem( key, (current+1)+"" );
 	
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 								}
@@ -856,12 +852,13 @@
 		return clickRate;
 	}
 
-	function getLevelsSkipped() {
+	function getLevelsSkipped(level, lastLevel) {
 		var total = 0;
 		for (var i = 3; i >= 0; i--) {
 			levelsSkipped[i+1] = levelsSkipped[i];
 			total += levelsSkipped[i];
 		}
+		levelsSkipped[0] = level - lastLevel;
 		total += levelsSkipped[0];
 		return total;
 	}
@@ -1695,11 +1692,11 @@
 		document.LevelsSkip = element;
 	}
 
-	function updateLevelInfoTitle(level)
+	function updateLevelInfoTitle(level, lastLevel)
 	{
 		var exp_lvl = expectedLevel(level);
 		var rem_time = countdown(exp_lvl.remaining_time);
-		var lvl_skip = getLevelsSkipped();
+		var lvl_skip = getLevelsSkipped(level, lastLevel);
 
 		document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected Level: ' + exp_lvl.expected_level + ', Likely Level: ' + exp_lvl.likely_level;
 		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
