@@ -781,7 +781,7 @@
 				return 0;
 			}
 			if (getActiveAbilityLaneCount(ABILITIES.WORMHOLE) > control.rainingRounds) {
-+				return 0;
+				return 0;
 			} else {
 				return Math.floor(clickRate/2);
 			}
