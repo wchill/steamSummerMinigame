@@ -779,7 +779,6 @@
 	function getLevelsSkipped() {
 		var total = 0;
 		for (var i = 3; i >= 0; i--) {
-			levelsSkipped[i+1] = levelsSkipped[i];
 			total += levelsSkipped[i];
 		}
 		total += levelsSkipped[0];
