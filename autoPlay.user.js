@@ -1279,6 +1279,11 @@
 		if (level % control.rainingRounds !== 0) {
 			return;
 		}
+		// Don't use wormhole if boss is already dead.
+		var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
+		if (!enemy || enemy.m_data.type != ENEMY_TYPE.BOSS) {
+			return;
+		}
 		// Check if Wormhole is purchased
 		if (tryUsingItem(ABILITIES.WORMHOLE)) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Triggering wormholes...', 2);
