@@ -567,7 +567,9 @@
 					e.children[e.children.length-1].remove();
 				}
 			};
-			this.m_eleUpdateLogContainer[0].innerHTML = "";
+			if (this.m_eleUpdateLogContainer.length) {
+				this.m_eleUpdateLogContainer[0].innerHTML = "";
+			}
 		}
 	}
 
