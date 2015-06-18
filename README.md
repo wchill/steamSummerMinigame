@@ -1,6 +1,6 @@
 #Steam Summer 2015 Monster Minigame AutoScript#
 
-#Buy at least 1 "Auto-fire Cannon" for lane switching to work.#
+[![forthebadge](http://forthebadge.com/images/badges/fuck-it-ship-it.svg)](http://forthebadge.com) [![Build Status](https://travis-ci.org/wchill/steamSummerMinigame.svg)](https://travis-ci.org/wchill/steamSummerMinigame)
 
 ## Purpose ##
 
@@ -8,7 +8,7 @@ It cheats for you.
 
 This fork has:
 * Elemental damage and gold prioritization
-* Auto clicking (change `clickRate` in console)
+* Auto clicking
 * Tickrate set to 1000ms every second
 * Disable most particles
 * Auto use abilities
@@ -16,10 +16,6 @@ This fork has:
 
 **This fork is designed for use as a group (specifically the [MSG2015 Steam Group](http://steamcommunity.com/groups/MSG2015)).**
 
-
-**DISCLAIMER:** This autoscript *will* include an auto-clicker. Automatic clicking pushes into the area of cheating, and this script is designed for cheating and automating the process of collecting gold.
-
-**Notice:** The script 'auto-clicks' a combined amount once a second, so it may seems as if it isn't auto-clicking. The Raining Gold and damage values are combined and processed once a second to be more efficient and reduce client load (as compared to the previous method of simulating 20 clicks-per-second). As long as the 'Enable autoclicker' is checked at the bottom of the screen in the options box, it is autoclicking.
 
 ## Features ##
 
@@ -46,14 +42,12 @@ This fork has:
 
 ### [Tampermonkey](https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo?hl=en) ###
 
-1. Open Tapermonkey's dashboard.
-2. Click on the `Utilites` tab on the right.
-3. Paste `https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js` into the text area, and click `Import`.
-4. When the editor has loaded, click `Install` (*NOT* `Process with Chrome`).
+1. Navigate to `https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js` or click [here](https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js).
+2. When the editor has loaded, click `Install` (*NOT* `Process with Chrome`).
 
 ### [Greasemonkey](https://addons.mozilla.org/en-us/firefox/addon/greasemonkey/) ###
 
-1. Navigate to `https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js`.
+1. Navigate to `https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js` or click [here](https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js).
 2. Right click on the page, and click `Save Page As`.
 3. While Firefox is still open, open a File Manager of any sort, and navigate to the directory you saved the script.
 4. Drag & drop the script file onto the Firefox window.

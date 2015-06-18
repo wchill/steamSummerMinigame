@@ -1,14 +1,9 @@
 language: node_js
-
-branches:
-  only:
-    - master
-
+node_js:
+  - "0.11"
 notifications:
   email: false
-
-before_script:
-  - npm install -g codeclimate-test-reporter
-
-after_script:
-  - codeclimate < lcov.info
+install:
+ - npm install eslint -g
+script:
+ - eslint autoPlay.user.js
