@@ -1291,9 +1291,9 @@
 		}
 	}
 
-	function fireWormhole(itemId) {
+	function fireWormhole() {
 		//Wait 1/2 second and fire
-		return setInterval(function(){setInterval(function(){s().g_Minigame.m_CurrentScene.m_rgAbilityQueue.push({'ability': 26})}, 100); }, 100);
+		setInterval(function(){g_Minigame.m_CurrentScene.m_rgAbilityQueue.push({'ability': 26})}, 100);
 	}
 
 	function useWormholeIfRelevant() {
@@ -1309,7 +1309,7 @@
 		// Check if Wormhole is purchased
 		if (isFiring == false) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Triggering wormholes...', 2);
-			firingSolution = fireWormhole(ABILITIES.WORMHOLE);
+			firingSolution = fireWormhole();
 			isFiring = true;
 		} else if (isNearEndGame() && tryUsingItem(ABILITIES.THROW_MONEY_AT_SCREEN)) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Throwing money at screen for no particular reason...', 2);
