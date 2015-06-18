@@ -178,7 +178,8 @@
 		trt_oldPush = s().m_rgClickNumbers.push;
 		trt_oldRender = w.g_Minigame.Render;
 		lockElements();
-
+        lockAFC();
+        
 		// disable particle effects - this drastically reduces the game's memory leak
 		if (removeParticles) {
 			disableParticles();
@@ -895,7 +896,13 @@
 			elems[i].style.visibility = "hidden";
 		}
 	}
+    
+    function lockAFC() {
+		var auto_fire_cannon = document.querySelector("div[id=\"upgr_1\"]");
+        auto_fire_cannon.style.display = "none";
+	}
 
+    
 	function displayText(x, y, strText, color) {
 		var text = new w.PIXI.Text(strText, {
 			font: "35px 'Press Start 2P'",
