@@ -62,7 +62,7 @@
 	var control = {
 		speedThreshold: 2000,
 		// Stop using offensive abilities shortly before rain/wormhole rounds.
-		rainingSafeRounds: 9,
+		rainingSafeRounds: 5,
 		rainingRounds: 100,
 		timePerUpdate: 60000,
 		useSlowMode: false,
@@ -1477,7 +1477,7 @@
 		var level = getGameLevel();
 		var levelmod = level % control.rainingRounds;
 		// Early in the game, or we're a safe distance away from raining rounds.
-		return (levelmod > 0 && levelmod < control.rainingRounds - control.rainingSafeRounds);
+		return (levelmod > 0 && levelmod < control.rainingRounds - ( control.rainingSafeRounds + 4 ));
 	}
 
 	function tryUsingAbility(abilityId) {
