@@ -1300,7 +1300,7 @@
 			}
 		}
 		// Check if Wormhole is purchased
-		if (triggerItem(ABILITIES.WORMHOLE)) {
+		if (triggerAbility(ABILITIES.WORMHOLE)) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Triggering wormholes...', 2);
 		} else if (isNearEndGame() && tryUsingItem(ABILITIES.THROW_MONEY_AT_SCREEN)) {
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Throwing money at screen for no particular reason...', 2);
