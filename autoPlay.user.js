@@ -350,7 +350,7 @@
 
 	function fixActiveCapacityUI() {
 		if(praiseGoldHelm) {
-			w.$J('.tv_ui').css('background-image', 'url(' + goldHelmUI + '')');
+			w.$J('.tv_ui').css('background-image', 'url(' + goldHelmUI + ')');
 		} else {
 			w.$J('.tv_ui').css('background-image', 'url(' + fixedUI + ')');
 		}
