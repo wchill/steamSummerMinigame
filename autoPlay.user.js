@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 4.7.3
+// @version 4.7.4
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '4.7.3';
+	var SCRIPT_VERSION = '4.7.4';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -350,7 +350,7 @@
 
 	function fixActiveCapacityUI() {
 		if(praiseGoldHelm) {
-			w.$J('.tv_ui').css('background-image', 'url(https://i.imgur.com/1zRXQgm.png)');
+			w.$J('.tv_ui').css('background-image', 'url(http://i.imgur.com/ANl0UCb.png)');
 		} else {
 			w.$J('.tv_ui').css('background-image', 'url(http://i.imgur.com/ieDoLnx.png)');
 		}
