@@ -1701,7 +1701,7 @@
 		var rem_time = countdown(exp_lvl.remaining_time);
 		var lvl_skip = getLevelsSkipped();
 
-		document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected Level: ' + exp_lvl.expected_level + ', Likely Level: ' + exp_lvl.likely_level;
+		document.ExpectedLevel.textContent = 'Level: ' + w.FormatNumberForDisplay(level) + ', Expected Level: ' + w.FormatNumberForDisplay(exp_lvl.expected_level) + ', Likely Level: ' + w.FormatNumberForDisplay(exp_lvl.likely_level);
 		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
 		document.LevelsSkip.textContent = 'Skipped ' + lvl_skip + ' levels in last 5s.';
 	}
