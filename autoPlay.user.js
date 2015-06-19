@@ -1208,30 +1208,19 @@
 
 	function useTacticalNukeIfRelevant() {
 		// Check if Tactical Nuke is purchased
-		if (!canUseAbility(ABILITIES.TACTICAL_NUKE) || !canUseOffensiveAbility()) {
+		if (!canUseOffensiveAbility()) {
 			return;
 		}
 
-		//Check that the lane has a spawner and record it's health percentage
-		var currentLane = s().m_nExpectedLane;
-		var enemySpawnerExists = false;
-		var enemySpawnerHealthPercent = 0.0;
+		// Check the time before using like new.
 		var level = getGameLevel();
-		//Count each slot in lane
-		for (var i = 0; i < 4; i++) {
-			var enemy = s().GetEnemy(currentLane, i);
-			if (enemy) {
-				if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds !== 0)) {
-					enemySpawnerExists = true;
-					enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
-				}
-			}
+		if (level % control.rainingRounds === 0) {
+			return;
 		}
 
-		// If there is a spawner and it's health is between 60% and 30%, nuke it!
-		if (enemySpawnerExists && enemySpawnerHealthPercent < 0.6 && enemySpawnerHealthPercent > 0.3) {
-			advLog("Tactical Nuke is purchased, cooled down, and needed. Nuke 'em.", 2);
-			triggerAbility(ABILITIES.TACTICAL_NUKE);
+		if (triggerAbility(ABILITIES.TACTICAL_NUKE)) {
+			// Max Elemental Damage is purchased, cooled down, and needed. Trigger it.
+			advLog('Tactical Nuke is purchased and cooled down, triggering it.', 2);
 		}
 	}
 
@@ -1270,7 +1259,7 @@
 	function useGoldRainIfRelevant() {
 		if (triggerItem(ABILITIES.RAINING_GOLD)) {
 			// Max Elemental Damage is purchased, cooled down, and needed. Trigger it.
-			advLog('Max Elemental Damage is purchased and cooled down, triggering it.', 2);
+			advLog('Gold Rain is purchased and cooled down, triggering it.', 2);
 		}
 	}
 
