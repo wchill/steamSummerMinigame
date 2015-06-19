@@ -69,6 +69,9 @@
 		allowWormholeLevel: 180000,
 		githubVersion: SCRIPT_VERSION,
 		useAbilityChance: 0.03,
+		wormholeLikeNewRatio: 10,
+		//Number of suggested WHs to buy for every LN
+		useLikeNewExponent: 1.5,
 		useLikeNewMinChance: 0.02,
 		useLikeNewMaxChance: 0.25,
 		useLikeNewMinTime: 0,
@@ -1372,7 +1375,11 @@
 		// Check if wormhole is on cooldown and roll the dice.
 
 		var cLobbyTime = (getCurrentTime() - s().m_rgGameData.timestamp_game_start) / 3600;
-		var likeNewChance = (control.useLikeNewMaxChance - control.useLikeNewMinChance) * cLobbyTime/24.0 + control.useLikeNewMinChance;
+		var chanceMultiplier = 1; // Multiplier for likeNewChance based on ratio of LN:WH available
+		if (hasItem(ABILITIES.WORMHOLE)) {
+			chanceMultiplier = countItem(ABILITIES.LIKE_NEW) / countItem(ABILITIES.WORMHOLE) * control.wormholeLikeNewRatio;
+		}
+		var likeNewChance = ((control.useLikeNewMaxChance - control.useLikeNewMinChance) * Math.pow(cLobbyTime/24.0, control.useLikeNewExponent) + control.useLikeNewMinChance) * chanceMultiplier;
 
 		if (Math.random() > likeNewChance || level % control.rainingRounds !== 0) {
 			return;
@@ -1509,6 +1516,16 @@
 			}
 		}
 		return false;
+	}
+
+	function countItem(itemId) {
+		for (var i = 0; i < s().m_rgPlayerTechTree.ability_items.length; ++i) {
+			var abilityItem = s().m_rgPlayerTechTree.ability_items[i];
+			if (abilityItem.ability == itemId) {
+				return abilityItem.quantity;
+			}
+		}
+		return 0;
 	}
 
 	function tryUsingItem(itemId, checkInLane) {
