@@ -342,18 +342,12 @@
 		waitForWelcomePanelLoad();
 
 		var badgePoints = w.g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points;
-		//Buy up to 90 crit
-		if(badgePoints < 900){
-			w.g_Minigame.CurrentScene().TrySpendBadgePoints(w.$J("<a data-type='18' data-cost='10'></a>"), Math.floor(badgePoints / 10));
-			badgePoints %= 10;
-		}
-		else {
-			w.g_Minigame.CurrentScene().TrySpendBadgePoints(w.$J("<a data-type='18' data-cost='10'></a>"), 90);
-			badgePoints -= 900;
-		}
-		//Buy 90% WH 10% LN
-		w.g_Minigame.CurrentScene().TrySpendBadgePoints(w.$J("<a data-type='26' data-cost='100'></a>"), Math.floor((badgePoints / 100) * 0.9));
-		w.g_Minigame.CurrentScene().TrySpendBadgePoints(w.$J("<a data-type='27' data-cost='100'></a>"), Math.floor((badgePoints / 100) * 0.1));
+
+		//4% Like New, 96% Wormholes - 26 For Wormhole, 27 for Like New
+		if ({((w.g_steamID)%100)%25)==5)}{
+			w.g_Minigame.CurrentScene().TrySpendBadgePoints(w.$J("<a data-type='27' data-cost='100'></a>"), Math.floor((badgePoints / 100))); }
+		else{
+			w.g_Minigame.CurrentScene().TrySpendBadgePoints(w.$J("<a data-type='26' data-cost='100'></a>"), Math.floor((badgePoints / 100))); }
 		badgePoints %= 100;
 		//Rest is Pumped Up
 		w.g_Minigame.CurrentScene().TrySpendBadgePoints(w.$J("<a data-type='19' data-cost='1'></a>"), badgePoints);
