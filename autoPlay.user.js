@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ auto-click
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 4.8.2
+// @version 6.0
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '4.8.2';
+	var SCRIPT_VERSION = '6.0';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -41,6 +41,7 @@
 	var autoRefreshSecondsCheckLoadedDelay = 30;
 
 	// DO NOT MODIFY
+	var wormHoleConstantUse = false;
 	var isAlreadyRunning = false;
 	var refreshTimer = null;
 	var currentClickRate = enableAutoClicker ? clickRate : 0;
@@ -70,16 +71,14 @@
 		githubVersion: SCRIPT_VERSION,
 		useAbilityChance: 0.03,
 		useLikeNewMinChance: 0.02,
-		useLikeNewMaxChance: 0.25,
-		useLikeNewMinTime: 0,
-		useLikeNewMaxTime: 500,
+		useLikeNewMaxChance: 0.10,
 		useGoldThreshold: 200
 	};
 
-	var canUseLikeNew = true;
-	var levelsSkipped = [0, 0, 0, 0, 0];
-	var oldLevel = 0;
 	var replacedCUI = false;
+	var predictTicks = 0;
+	var predictJumps = 0;
+	var predictLastWormholesUpdate = 0;
 
 	var showedUpdateInfo = getPreferenceBoolean("showedUpdateInfo", false);
 
@@ -408,6 +407,7 @@
 			updateLaneData();
 
 			attemptRespawn();
+			useLikeNew();
 			useWormholeIfRelevant();
 			goToLaneWithBestTarget();
 			useCooldownIfRelevant();
@@ -426,14 +426,15 @@
 			useCrippleMonsterIfRelevant(level);
 			useReviveIfRelevant(level);
 			useMaxElementalDmgIfRelevant();
-			useLikeNewIfRelevant();
 			updatePlayersInGame();
 
 			if (level !== lastLevel) {
 				lastLevel = level;
-				updateLevelInfoTitle(level);
 				refreshPlayerData();
 			}
+
+			// This belongs here so we can update the header during boss fights
+			updateLevelInfoTitle(level);
 
 			currentClickRate = getWantedClicksPerSecond();
 			s().m_nClicks = currentClickRate;
@@ -500,18 +501,6 @@
 					}
 				}
 			}
-
-			// Make sure to only include ticks that are relevant
-			var level_jump = getGameLevel() - oldLevel;
-			if (level_jump > 0) {
-				// Iterate down the levelskipped memory
-				for (var i = 4; i >= 0; i--) {
-					levelsSkipped[i+1] = levelsSkipped[i];
-				}
-				levelsSkipped[0] = level_jump;
-
-				oldLevel = getGameLevel();
-			}
 		}
 
 		if(w.CUI && !replacedCUI) {
@@ -548,9 +537,9 @@
 									w.$J('.name', ele).text( rgEntry.actor_name );
 									w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
 									w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
-	
+
 									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
-	
+
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 									advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
 									w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
@@ -560,9 +549,9 @@
 									w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
 									w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
 									w.$J('.name', ele).attr( "style", "color: yellow" );
-	
+
 									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
-	
+
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 								}
 							} else {
@@ -842,7 +831,7 @@
 			return 0;
 		}
 		if (level % control.rainingRounds === 0) {
-            return 0;
+			return 0;
 		}
 		if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds) {
 			return Math.floor(clickRate/10);
@@ -850,16 +839,6 @@
 			return Math.floor(clickRate/5);
 		}
 		return clickRate;
-	}
-
-	function getLevelsSkipped() {
-		var total = 0;
-		for (var i = 3; i >= 0; i--) {
-			levelsSkipped[i+1] = levelsSkipped[i];
-			total += levelsSkipped[i];
-		}
-		total += levelsSkipped[0];
-		return total;
 	}
 
 	function updateLogLevel(event) {
@@ -1352,9 +1331,10 @@
 	function useWormholeIfRelevant() {
 		// Check the time before using wormhole.
 		var level = getGameLevel();
-		if (level % control.rainingRounds !== 0) {
+		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse) {
 			return;
 		}
+
 		// Check if Wormhole is purchased
 		if (hasItem(ABILITIES.WORMHOLE)) {
 			// Force usage of it regardless of cooldown. Will work if at least one NL was used suring the last second.
@@ -1363,39 +1343,25 @@
 		}
 	}
 
-	function useLikeNewIfRelevant() {
-		// Allow Like New use for next farm boss round.
-		if (!hasItem(ABILITIES.LIKE_NEW)) {
+	function useLikeNew() {
+		// Check the time before using like new.
+		var level = getGameLevel();
+		if (level % control.rainingRounds !== 0) {
 			return;
 		}
 
-		var level = getGameLevel();
-		//if (level % control.rainingRounds !== 0 && !canUseLikeNew) {
-		//	canUseLikeNew = true;
-		//	return;
-		//}
-		// Check if wormhole is on cooldown and roll the dice.
-
+		// Quit if we dont satisfy the chance
 		var cLobbyTime = (getCurrentTime() - s().m_rgGameData.timestamp_game_start) / 3600;
 		var likeNewChance = (control.useLikeNewMaxChance - control.useLikeNewMinChance) * cLobbyTime/24.0 + control.useLikeNewMinChance;
-
-		if (Math.random() > likeNewChance || level % control.rainingRounds !== 0) {
+		if (Math.random() > likeNewChance) {
 			return;
 		}
-		// Start a timer between 1 and 5 seconds to try to use LikeNew.
-		var rand = Math.floor(Math.random() * control.useLikeNewMaxTime - control.useLikeNewMinTime + control.useLikeNewMinTime);
-		setTimeout(useLikeNew, rand);
-		advLog('Attempting to use Like New after ' + rand + 'ms.', 2);
-		//canUseLikeNew = false;
-	}
 
-	function useLikeNew() {
 		// Make sure that we're still in the boss round when we actually use it.
-		var level = getGameLevel();
+		level = getGameLevel();
 		if (level % control.rainingRounds === 0) {
-			if (tryUsingItem(ABILITIES.LIKE_NEW)) {
+			if (triggerAbility(ABILITIES.LIKE_NEW)) {
 				advLog('We can actually use Like New semi-reliably! Cooldowns-b-gone.', 2);
-				//canUseLikeNew = true;
 			}
 		}
 	}
@@ -1631,21 +1597,6 @@
 		return {hours : hours, minutes : minutes};
 	}
 
-	function expectedLevel(level) {
-		var time = Math.floor(s().m_nTime) % 86400;
-		time = time - 16*3600;
-		if (time < 0) {
-			time = time + 86400;
-		}
-
-		var remaining_time = 86400 - time;
-		var passed_time = getCurrentTime() - s().m_rgGameData.timestamp_game_start;
-		var expected_level = Math.floor(((level/passed_time)*remaining_time)+level);
-		var likely_level = Math.floor((expected_level - level)/Math.log(3))+ level;
-
-		return {expected_level : expected_level, likely_level : likely_level, remaining_time : remaining_time};
-	}
-
 	if (breadcrumbs) {
 		var element = document.createElement('span');
 		element.textContent = ' > ';
@@ -1678,28 +1629,22 @@
 		element.textContent = 'Remaining Time: 0 hours, 0 minutes.';
 		breadcrumbs.appendChild(element);
 		document.RemainingTime = element;
-
-		element = document.createElement('span');
-		element.textContent = ' > ';
-		breadcrumbs.appendChild(element);
-
-		element = document.createElement('span');
-		element.style.color = '#33FF33';
-		element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
-		element.textContent = 'Skipped 0 levels in last 5s.';
-		breadcrumbs.appendChild(element);
-		document.LevelsSkip = element;
 	}
 
 	function updateLevelInfoTitle(level)
 	{
-		var exp_lvl = expectedLevel(level);
-		var rem_time = countdown(exp_lvl.remaining_time);
-		var lvl_skip = getLevelsSkipped();
+		var time = Math.floor(s().m_nTime) % 86400;
+		time = time - 16*3600;
+		if (time < 0) {
+			time = time + 86400;
+		}
 
-		document.ExpectedLevel.textContent = 'Level: ' + level + ', Expected Level: ' + exp_lvl.expected_level + ', Likely Level: ' + exp_lvl.likely_level;
+		var remaining_time = 86400 - time;
+
+		var rem_time = countdown(remaining_time);
+
+		document.ExpectedLevel.textContent = 'Level: ' + w.FormatNumberForDisplay(level, 5) + ', Expected Jump: ' + w.FormatNumberForDisplay(estimateJumps(), 5);
 		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
-		document.LevelsSkip.textContent = 'Skipped ' + lvl_skip + ' levels in last 5s.';
 	}
 
 	// Helpers to access player stats.
@@ -1847,6 +1792,38 @@
 		return s().m_rgGameData.level + 1;
 	}
 
+	//I'm sorry of the way I name things. This function predicts jumps on a warp boss level, returns the value.
+	function estimateJumps() {
+		var level = getGameLevel();
+		var wormholesNow = 0;
+
+		//Gather total wormholes active.
+		for (var i = 0; i <= 2; i++) {
+			if (typeof w.g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26] !== 'undefined') {
+				wormholesNow += w.g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26];
+			}
+		}
+
+		//During baws round fc
+		if (level % control.rainingRounds == 0) 
+		{
+			if (predictLastWormholesUpdate !== wormholesNow) 
+			{
+				predictTicks++;
+				predictJumps += wormholesNow;
+				predictLastWormholesUpdate = wormholesNow;
+			}
+		} 
+		else 
+		{
+			predictTicks = 0;
+			predictJumps = 0;
+			predictLastWormholesUpdate = 0;
+			return 0;
+		}
+		return predictJumps / predictTicks * (s().m_rgGameData.timestamp - s().m_rgGameData.timestamp_level_start);
+	}
+
 	/** Check periodicaly if the welcome panel is visible
 	 * then trigger an event 'event:welcomePanelVisible' */
 	function waitForWelcomePanelLoad() {
@@ -1860,7 +1837,7 @@
 				clearInterval(waitForWelcomePanelInterval);
 			}
 			else if(w.g_Minigame && w.g_Minigame.CurrentScene() && w.g_Minigame.CurrentScene().m_rgPlayerTechTree
-					&& !w.g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points) { // techtree but no points
+				&& !w.g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points) { // techtree but no points
 				clearInterval(waitForWelcomePanelInterval);
 			}
 			else if(--checkTicks <= 0) { // give up
@@ -1878,9 +1855,9 @@
 			// New button
 			var x100Button = w.$J('<div class="sub_item x100">x100</div>');
 			x100Button.click(function(event) { // same from steam script but x100 (incredible!)
-					w.g_Minigame.CurrentScene().TrySpendBadgePoints(this, 100);
-					event.stopPropagation();
-				});
+				w.g_Minigame.CurrentScene().TrySpendBadgePoints(this, 100);
+				event.stopPropagation();
+			});
 			x100Button.data(x10Button.data());
 
 			x10Button.css('margin-right', '50px'); // Shift the x10 button a little
@@ -1908,6 +1885,4 @@
 			});
 		};
 	}, false);
-
-
 }(window));
