@@ -57,6 +57,7 @@
 	var trt_oldCrit = function() {};
 	var trt_oldPush = function() {};
 	var trt_oldRender = function() {};
+	var spamEnabledAbilities = [];
 
 	var control = {
 		speedThreshold: 2000,
@@ -336,7 +337,7 @@
 		enhanceTooltips();
 		enableMultibuy();
 		waitForWelcomePanelLoad();
-
+		enhanceAbilities();
 	}
 
 	function updateLaneData() {
@@ -428,6 +429,7 @@
 			useMaxElementalDmgIfRelevant();
 			useLikeNewIfRelevant();
 			updatePlayersInGame();
+			useSpamEnabledAbilities();
 
 			if (level !== lastLevel) {
 				lastLevel = level;
@@ -1411,6 +1413,17 @@
 		}
 	}
 
+	function useSpamEnabledAbilities() {
+		var arrayLength = spamEnabledAbilities.length;
+		for (var i = 0; i < arrayLength; i++) {
+			if (tryUsingAbility(spamEnabledAbilities[i])) {
+				advLog('Ability ' + spamEnabledAbilities[i] + ' is purchased, cooled down, and enabled for spam. Trigger it.', 2);
+			} else if (tryUsingItem(spamEnabledAbilities[i], false)) {
+				advLog('Item ' + spamEnabledAbilities[i] + ' is purchased, cooled down, and enabled for spam. Trigger it.', 2);
+			}
+		}
+	}
+
 	function attemptRespawn() {
 		if ((s().m_bIsDead) &&
 			((s().m_rgPlayerData.time_died) + 5) < (s().m_nTime)) {
@@ -1802,6 +1815,32 @@
 
 			return strOut;
 		};
+	}
+
+	function enhanceAbilities() {
+		var abilitiescontainer = document.getElementById("abilitiescontainer");
+		abilitiescontainer.addEventListener('contextmenu', function(e) {
+			var ability = e.target;
+			while (ability && !(ability.id.startsWith("abilityitem_") || ability.id.startsWith("ability_")))
+				ability = ability.parentElement;
+
+			if(ability && ability.childElements() && ability.childElements().length >= 1) {
+				var id = ability.id.startsWith("abilityitem_") ? ability.id.substring("abilityitem_".length) : ability.id.substring("ability_".length);
+				if (!isNaN(id)) {
+					var index = spamEnabledAbilities.indexOf(id);
+					var enable = index == -1;
+					var color = enable === true ? "rgba(255, 255, 255, 0.5)" : "transparent";
+					if(enable)
+						spamEnabledAbilities.push(id);
+					else
+						spamEnabledAbilities.splice(index, 1);
+
+					ability.childElements()[0].style.backgroundColor = color;
+					advLog((enable ? 'En' : 'Dis') + 'abled spam for ability ' + id + '.', 2);
+				}
+				e.preventDefault();
+			}
+		});
 	}
 
 	function enableMultibuy(){
