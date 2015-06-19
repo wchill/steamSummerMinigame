@@ -427,13 +427,13 @@
 			updateLaneData();
 
 			attemptRespawn();
-			useLikeNew();
-			useWormholeIfRelevant();
 			if (level % control.rainingRounds === 0) {
 				goToRainingLane();
 			} else {
 				goToLaneWithBestTarget();
 			}
+			useLikeNew();
+			useWormholeIfRelevant();
 			useCooldownIfRelevant();
 			useGoodLuckCharmIfRelevant();
 			useMedicsIfRelevant();
