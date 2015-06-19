@@ -1417,9 +1417,9 @@
 		var arrayLength = spamEnabledAbilities.length;
 		for (var i = 0; i < arrayLength; i++) {
 			if (tryUsingAbility(spamEnabledAbilities[i])) {
-				advLog('Ability ' + spamEnabledAbilities[i] + ' is purchased, cooled down, and enabled for spam. Trigger it.', 2);
+				advLog('Ability ' + getAbilityName(spamEnabledAbilities[i]) + ' is purchased, cooled down, and enabled for spam. Trigger it.', 2);
 			} else if (tryUsingItem(spamEnabledAbilities[i], false)) {
-				advLog('Item ' + spamEnabledAbilities[i] + ' is purchased, cooled down, and enabled for spam. Trigger it.', 2);
+				advLog('Item ' + getAbilityName(spamEnabledAbilities[i]) + ' is purchased, cooled down, and enabled for spam. Trigger it.', 2);
 			}
 		}
 	}
@@ -1429,6 +1429,13 @@
 			((s().m_rgPlayerData.time_died) + 5) < (s().m_nTime)) {
 			w.RespawnPlayer();
 		}
+	}
+
+	function getAbilityName(abilityId) {
+		for (var key in ABILITIES)
+			if (ABILITIES[key] == abilityId)
+				return key;
+		return undefined;
 	}
 
 	function disableAbility(abilityId) {
@@ -1818,10 +1825,9 @@
 	}
 
 	function enhanceAbilities() {
-		var abilitiescontainer = document.getElementById("abilitiescontainer");
-		abilitiescontainer.addEventListener('contextmenu', function(e) {
+		document.getElementById("abilitiescontainer").addEventListener('contextmenu', function(e) {
 			var ability = e.target;
-			while (ability && !(ability.id.startsWith("abilityitem_") || ability.id.startsWith("ability_")))
+			while (ability && !ability.id.startsWith("ability"))
 				ability = ability.parentElement;
 
 			if(ability && ability.childElements() && ability.childElements().length >= 1) {
@@ -1829,13 +1835,12 @@
 				if (!isNaN(id)) {
 					var index = spamEnabledAbilities.indexOf(id);
 					var enable = index == -1;
-					var color = enable === true ? "rgba(255, 255, 255, 0.5)" : "transparent";
 					if(enable)
 						spamEnabledAbilities.push(id);
 					else
 						spamEnabledAbilities.splice(index, 1);
 
-					ability.childElements()[0].style.backgroundColor = color;
+					ability.childElements()[0].style.backgroundColor = enable ? "rgba(255, 255, 255, 0.5)" : "transparent";
 					advLog((enable ? 'En' : 'Dis') + 'abled spam for ability ' + id + '.', 2);
 				}
 				e.preventDefault();
