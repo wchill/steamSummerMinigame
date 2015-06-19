@@ -424,7 +424,7 @@
 			updateLaneData();
 			attemptRespawn();
 
-			if (level % control.rainingRounds < 100 - control.rainingSafeRounds) {
+			if ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds)) {
 				if (level % control.rainingRounds === 0) {
 					goToRainingLane();
 				} else {
