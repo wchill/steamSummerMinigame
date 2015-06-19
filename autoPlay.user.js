@@ -1281,15 +1281,29 @@
 		}
 		if (!wormholeInterval) {
 			wormholeInterval = w.setInterval(function(){
-				w.g_Minigame.m_CurrentScene.m_rgAbilityQueue.push({'ability': 27}); //like new
 				w.g_Minigame.m_CurrentScene.m_rgAbilityQueue.push({'ability': 26}); //wormhole
 				w.g_Minigame.m_CurrentScene.m_nLastTick = 0;
 				w.g_Minigame.m_CurrentScene.Tick();
-			}, 100);
+			}, 200);
 		}
 	}
 
 	function useLikeNew() {
+		var level = getGameLevel();
+		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse) {
+			if (likenewInterval) {
+				w.clearInterval(likenewInterval);
+				likenewInterval = false;
+			}
+			return;
+		}
+		if (!likenewInterval) {
+			likenewInterval = w.setInterval(function(){
+				w.g_Minigame.m_CurrentScene.m_rgAbilityQueue.push({'ability': 27}); //like new
+				w.g_Minigame.m_CurrentScene.m_nLastTick = 0;
+				w.g_Minigame.m_CurrentScene.Tick();
+			}, 200);
+		}
 	}
 
 	function useReviveIfRelevant(level) {
