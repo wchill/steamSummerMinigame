@@ -437,6 +437,8 @@
 			
 			// This belongs here so we can update the header during boss fights
 			updateLevelInfoTitle(level);
+			
+			removeAutoDPSUpgrades();
 
 			currentClickRate = getWantedClicksPerSecond();
 			s().m_nClicks = currentClickRate;
@@ -900,6 +902,20 @@
 		for (var i = 0; i < elems.length; i++) {
 			elems[i].style.visibility = "hidden";
 		}
+	}
+	
+	function removeAutoDPSUpgrades() {
+		var upgrades = w.g_Minigame.CurrentScene().m_rgTuningData.upgrades;
+
+		jQuery('.container_upgrades > div').each(function (index) {
+			// Step through each upgrade in the list, find the button and get the type of upgrade (index of upgrade list)
+			var upgradeIndex = jQuery(this).find('a').data('type');
+
+			// If the upgrade is an auto DPS type, remove the div from the list so we remove all chances of it being clicked
+			if (upgradeIndex < upgrades.length && upgrades[upgradeIndex].type === 1) {
+				jQuery(this).remove();
+			}
+		});
 	}
 
 	function displayText(x, y, strText, color) {
