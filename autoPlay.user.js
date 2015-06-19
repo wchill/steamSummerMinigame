@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name /u/wchill Monster Minigame Auto-script w/ auto-click
+// @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @version 6.0.8
