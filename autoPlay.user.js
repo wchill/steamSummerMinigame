@@ -42,7 +42,7 @@
 
 	// DO NOT MODIFY
 	var wormHoleConstantUse = false;
-	var wormHoleConstantUseOverride = true;
+	var wormHoleConstantUseOverride = false;
 	var isAlreadyRunning = false;
 	var refreshTimer = null;
 	var currentClickRate = enableAutoClicker ? clickRate : 0;
@@ -419,7 +419,7 @@
 				return;
 			}
 
-			wormHoleConstantUse = ((level < 100000) || wormHoleConstantUseOverride);
+			wormHoleConstantUse = ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds)) || wormHoleConstantUseOverride;
 
 			updateLaneData();
 			attemptRespawn();
@@ -452,6 +452,12 @@
 				} else {
 					goToLaneWithBestTarget();
 				}
+				useCooldownIfRelevant();
+				useMedicsIfRelevant();
+				useMoraleBoosterIfRelevant();
+				useMetalDetectorIfRelevant();
+				useMaxElementalDmgIfRelevant();
+
 				useLikeNew();
 				useWormholeIfRelevant();
 				useReviveIfRelevant(level);
