@@ -432,7 +432,7 @@
 				lastLevel = level;
 				refreshPlayerData();
 			}
-			
+
 			// This belongs here so we can update the header during boss fights
 			updateLevelInfoTitle(level);
 
@@ -537,9 +537,9 @@
 									w.$J('.name', ele).text( rgEntry.actor_name );
 									w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
 									w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
-	
+
 									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
-	
+
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 									advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
 									w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
@@ -549,9 +549,9 @@
 									w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
 									w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
 									w.$J('.name', ele).attr( "style", "color: yellow" );
-	
+
 									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
-	
+
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 								}
 							} else {
@@ -1348,7 +1348,7 @@
 		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse) {
 			return;
 		}
-		
+
 		// Check if Wormhole is purchased
 		if (hasItem(ABILITIES.WORMHOLE)) {
 			// Force usage of it regardless of cooldown. Will work if at least one NL was used suring the last second.
@@ -1363,14 +1363,14 @@
 		if (level % control.rainingRounds !== 0) {
 			return;
 		}
-		
+
 		// Quit if we dont satisfy the chance
 		var cLobbyTime = (getCurrentTime() - s().m_rgGameData.timestamp_game_start) / 3600;
 		var likeNewChance = (control.useLikeNewMaxChance - control.useLikeNewMinChance) * cLobbyTime/24.0 + control.useLikeNewMinChance;
 		if (Math.random() > likeNewChance) {
 			return;
 		}
-		
+
 		// Make sure that we're still in the boss round when we actually use it.
 		var level = getGameLevel();
 		if (level % control.rainingRounds === 0) {
@@ -1805,12 +1805,12 @@
 	function getGameLevel() {
 		return s().m_rgGameData.level + 1;
 	}
-	
+
 	//I'm sorry of the way I name things. This function predicts jumps on a warp boss level, returns the value.
 	function estimateJumps() {
 	    var level = getGameLevel();
 	    var wormholesNow = 0;
-	 
+
 	    //Gather total wormholes active.
 	    for (var i = 0; i <= 2; i++) {
 	                //advLog('L' + i + ':' + g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26], 1);
@@ -1818,7 +1818,7 @@
 	                        wormholesNow += g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26];
 	                }
 	        }
-	 
+
 	        //During baws round fc
 	    if (level % control.rainingRounds == 0) {
 	        if (predictLastWormholesUpdate !== wormholesNow) {
@@ -1832,7 +1832,7 @@
 	        predictLastWormholesUpdate = 0;
 	        return 0;
 	    }
-	 
+
 	    return predictJumps / predictTicks * (s().m_rgGameData.timestamp - s().m_rgGameData.timestamp_level_start);
 	    //advLog('PT:' + predictTicks + ' PJ:' + predictJumps + ' PLWU:' + predictLastWormholesUpdate, 1);
 	}
@@ -1898,7 +1898,4 @@
 			});
 		};
 	}, false);
-
-
 }(window));
-
