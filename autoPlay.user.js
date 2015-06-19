@@ -57,6 +57,7 @@
 	var trt_oldCrit = function() {};
 	var trt_oldPush = function() {};
 	var trt_oldRender = function() {};
+	var spamEnabledAbilities = [];
 
 	var control = {
 		speedThreshold: 2000,
@@ -337,7 +338,7 @@
 		enhanceTooltips();
 		enableMultibuy();
 		waitForWelcomePanelLoad();
-
+		enhanceAbilities();
 	}
 
 	function updateLaneData() {
@@ -429,6 +430,7 @@
 			useMaxElementalDmgIfRelevant();
 			useLikeNewIfRelevant();
 			updatePlayersInGame();
+			useSpamEnabledAbilities();
 
 			if (level !== lastLevel) {
 				lastLevel = level;
@@ -539,9 +541,9 @@
 									w.$J('.name', ele).text( rgEntry.actor_name );
 									w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
 									w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
-	
+
 									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
-	
+
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 									advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
 									w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
@@ -551,9 +553,9 @@
 									w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
 									w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
 									w.$J('.name', ele).attr( "style", "color: yellow" );
-	
+
 									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
-	
+
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 								}
 							} else {
@@ -1402,11 +1404,31 @@
 		}
 	}
 
+	function useSpamEnabledAbilities() {
+		var arrayLength = spamEnabledAbilities.length;
+		for (var i = 0; i < arrayLength; i++) {
+			if (tryUsingAbility(spamEnabledAbilities[i])) {
+				advLog('Ability ' + getAbilityName(spamEnabledAbilities[i]) + ' is purchased, cooled down, and enabled for spam. Trigger it.', 2);
+			} else if (tryUsingItem(spamEnabledAbilities[i], false)) {
+				advLog('Item ' + getAbilityName(spamEnabledAbilities[i]) + ' is purchased, cooled down, and enabled for spam. Trigger it.', 2);
+			}
+		}
+	}
+
 	function attemptRespawn() {
 		if ((s().m_bIsDead) &&
 			((s().m_rgPlayerData.time_died) + 5) < (s().m_nTime)) {
 			w.RespawnPlayer();
 		}
+	}
+
+	function getAbilityName(abilityId) {
+		for (var key in ABILITIES) {
+			if (ABILITIES[key] == abilityId) {
+				return key;
+			}
+		}
+		return undefined;
 	}
 
 	function disableAbility(abilityId) {
@@ -1772,6 +1794,32 @@
 
 			return strOut;
 		};
+	}
+
+	function enhanceAbilities() {
+		document.getElementById("abilitiescontainer").addEventListener('contextmenu', function(e) {
+			var ability = e.target;
+			while (ability && !ability.id.startsWith("ability")) {
+				ability = ability.parentElement;
+			}
+
+			if(ability && ability.childElements() && ability.childElements().length >= 1) {
+				var id = ability.id.startsWith("abilityitem_") ? ability.id.substring("abilityitem_".length) : ability.id.substring("ability_".length);
+				if (!isNaN(id)) {
+					var index = spamEnabledAbilities.indexOf(id);
+					var enable = index == -1;
+					if(enable) {
+						spamEnabledAbilities.push(id);
+					} else {
+						spamEnabledAbilities.splice(index, 1);
+					}
+
+					ability.childElements()[0].style.backgroundColor = enable ? "rgba(255, 255, 255, 0.5)" : "transparent";
+					advLog((enable ? 'En' : 'Dis') + 'abled spam for ability ' + id + '.', 2);
+				}
+				e.preventDefault();
+			}
+		});
 	}
 
 	function enableMultibuy(){
