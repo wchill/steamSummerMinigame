@@ -345,7 +345,7 @@
 		var purchaseCount = Math.floor(badgePoints / 100);
 		
 		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='26' data-cost='100'></a>"), 5 * purchaseCount / 6 );
-		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='27' data-cost='100'></a>"), 1 * purchaseCount / 6) );
+		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='27' data-cost='100'></a>"), 1 * purchaseCount / 6 );
 		
 		badgePoints %= 100;
 		//Rest is Pumped Up
