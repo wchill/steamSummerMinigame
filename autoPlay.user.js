@@ -1805,16 +1805,16 @@
 		}
 
 		//During baws round fc
-		if (level % control.rainingRounds == 0) 
+		if (level % control.rainingRounds == 0)
 		{
-			if (predictLastWormholesUpdate !== wormholesNow) 
+			if (predictLastWormholesUpdate !== wormholesNow)
 			{
 				predictTicks++;
 				predictJumps += wormholesNow;
 				predictLastWormholesUpdate = wormholesNow;
 			}
-		} 
-		else 
+		}
+		else
 		{
 			predictTicks = 0;
 			predictJumps = 0;
@@ -1825,7 +1825,7 @@
 	}
 
 	/** Check periodicaly if the welcome panel is visible
-	 * then trigger an event 'event:welcomePanelVisible' */
+	* then trigger an event 'event:welcomePanelVisible' */
 	function waitForWelcomePanelLoad() {
 		var checkTicks = 20; // not very elegant but effective
 		var waitForWelcomePanelInterval = setInterval(function() {
