@@ -76,6 +76,8 @@
 		useGoldThreshold: 200
 	};
 
+	var SEC_PER_HR = 60 /*min/hr*/ * 60 /*sec/min*/;
+
 	var canUseLikeNew = true;
 	var replacedCUI = false;
 	var predictTicks = 0;
@@ -827,12 +829,53 @@
 		}
 	}
 
+	function getEDPC() {
+		var CritMult = getCritMultiplier();
+		var DPC = getClickDamage();
+		var CritPercent = Math.min(s().m_rgPlayerTechTree.crit_percentage, 1.0);
+
+		var EDPC = (CritMult * DPC * CritPercent) + (DPC * (1 - CritPercent));
+		return EDPC;
+	}
+
+	function getTargetEnemy() {
+		var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
+		return enemy;
+	}
+
+	function isTargetBoss(enemy) {
+		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
+			return true;
+		}
+		return false;
+	}
+
+	function getTargetHP(enemy) {
+		return enemy.m_flDisplayedHP;
+	}
+
+	function getAllowedBossClicksPerSec(enemy) {
+		// calculate how much dmg per sec we're allowed to do if we want to monster to last 1 hr
+		var myShare = getTargetHP(enemy) / 1500;
+		var dmgPerSec = myShare / SEC_PER_HR;
+		var clickDmgPerSec = dmgPerSec - getDPS();
+		var clicksPerSec = Math.floor(clickDmgPerSec / getEDPC());
+		var clicksPerSecClamped = Math.min(clicksPerSec, clickRate);
+		advLog("Allowed clicksPerSec: " + clicksPerSec + " (clamped: " + clicksPerSecClamped + ")", 5);
+		return clicksPerSecClamped;
+	}
+
 	function getWantedClicksPerSecond() {
 		var level = getGameLevel();
 		if (!enableAutoClicker) {
 			return 0;
 		}
 		if (level % control.rainingRounds === 0) {
+			var targetEnemy = getTargetEnemy();
+			if(isTargetBoss(targetEnemy)) {
+				return getAllowedBossClicksPerSec(targetEnemy);
+			}
+
 			if (hasItem(ABILITIES.WORMHOLE)) {
 				return 0;
 			} else {
