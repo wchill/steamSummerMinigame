@@ -343,14 +343,9 @@
 
 		var badgePoints = w.g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points;
 		var purchaseCount = Math.floor(badgePoints / 100);
-
-		//4% Like New, 96% Wormholes - 26 For Wormhole, 27 for Like New
-		if ( (w.g_steamID%100) % 10 == 5) {
-			w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='27' data-cost='100'></a>"), purchaseCount );
-		}
-		else {
-			w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='26' data-cost='100'></a>"), purchaseCount );
-		}
+		
+		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='26' data-cost='100'></a>"), 5 * purchaseCount / 6 );
+		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='27' data-cost='100'></a>"), 1 * purchaseCount / 6) );
 		
 		badgePoints %= 100;
 		//Rest is Pumped Up
@@ -1284,7 +1279,7 @@
 				w.g_Minigame.m_CurrentScene.m_rgAbilityQueue.push({'ability': 26}); //wormhole
 				w.g_Minigame.m_CurrentScene.m_nLastTick = 0;
 				w.g_Minigame.m_CurrentScene.Tick();
-			}, 200);
+			}, 100);
 		}
 	}
 
@@ -1302,7 +1297,7 @@
 				w.g_Minigame.m_CurrentScene.m_rgAbilityQueue.push({'ability': 27}); //like new
 				w.g_Minigame.m_CurrentScene.m_nLastTick = 0;
 				w.g_Minigame.m_CurrentScene.Tick();
-			}, 200);
+			}, 500);
 		}
 	}
 
