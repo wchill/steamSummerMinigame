@@ -66,7 +66,7 @@
 	var control = {
 		speedThreshold: 2000,
 		// Stop using offensive abilities shortly before rain/wormhole rounds.
-		rainingSafeRounds: 10,
+		rainingSafeRounds: 25,
 		rainingRounds: 100,
 		timePerUpdate: 60000,
 		useSlowMode: false,
@@ -422,31 +422,41 @@
 			wormHoleConstantUse = ((level < 100000) || wormHoleConstantUseOverride);
 
 			updateLaneData();
-
 			attemptRespawn();
-			useLikeNew();
-			useWormholeIfRelevant();
-			if (level % control.rainingRounds === 0) {
-				goToRainingLane();
-			} else {
-				goToLaneWithBestTarget();
+
+			if (level % control.rainingRounds < 100 - control.rainingSafeRounds) {
+				if (level % control.rainingRounds === 0) {
+					goToRainingLane();
+				} else {
+					goToLaneWithBestTarget();
+				}
+				useCooldownIfRelevant();
+				useGoodLuckCharmIfRelevant();
+				useMedicsIfRelevant();
+				useMoraleBoosterIfRelevant();
+				useMetalDetectorIfRelevant();
+				useClusterBombIfRelevant();
+				useNapalmIfRelevant();
+				useTacticalNukeIfRelevant();
+				useCrippleMonsterIfRelevant();
+				useCrippleSpawnerIfRelevant();
+				if ((level < control.speedThreshold || level % control.rainingRounds === 0) && level > control.useGoldThreshold) {
+					useGoldRainIfRelevant();
+				}
+				useCrippleMonsterIfRelevant(level);
+				useMaxElementalDmgIfRelevant();
 			}
-			useCooldownIfRelevant();
-			useGoodLuckCharmIfRelevant();
-			useMedicsIfRelevant();
-			useMoraleBoosterIfRelevant();
-			useMetalDetectorIfRelevant();
-			useClusterBombIfRelevant();
-			useNapalmIfRelevant();
-			useTacticalNukeIfRelevant();
-			useCrippleMonsterIfRelevant();
-			useCrippleSpawnerIfRelevant();
-			if ((level < control.speedThreshold || level % control.rainingRounds === 0) && level > control.useGoldThreshold) {
-				useGoldRainIfRelevant();
+			else {
+				if (level % control.rainingRounds === 0) {
+					goToRainingLane();
+				} else {
+					goToLaneWithBestTarget();
+				}
+				useLikeNew();
+				useWormholeIfRelevant();
+				useReviveIfRelevant(level);
 			}
-			useCrippleMonsterIfRelevant(level);
-			useReviveIfRelevant(level);
-			useMaxElementalDmgIfRelevant();
+
 			updatePlayersInGame();
 
 			if (level !== lastLevel) {
