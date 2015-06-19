@@ -35,6 +35,7 @@
 	var disableRenderer = getPreferenceBoolean("disableRenderer", false);
 	var useTrollTracker = getPreferenceBoolean("useTrollTracker", false);
 	var praiseGoldHelm = getPreferenceBoolean("praiseGoldHelm", true);
+	var disableNukes = getPreferenceBoolean("disableNukes", false);
 
 	var autoRefreshMinutes = 30; // refresh page after x minutes
 	var autoRefreshMinutesRandomDelay = 10;
@@ -237,6 +238,9 @@
 		if (disableRenderer) {
 			toggleRenderer();
 		}
+		if (disableNukes) {
+			toggleNukes();
+		}
 
 		if (w.CSceneGame !== undefined) {
 			w.CSceneGame.prototype.DoScreenShake = function() {};
@@ -301,6 +305,7 @@
 		options1.appendChild(makeCheckBox("removeGoldText", "Remove gold text", removeGoldText, handleEvent, false));
 		options1.appendChild(makeCheckBox("removeAllText", "Remove all text", removeAllText, toggleAllText, false));
 		options1.appendChild(makeCheckBox("disableRenderer", "Throttle game renderer", disableRenderer, toggleRenderer, true));
+		options1.appendChild(makeCheckBox("disableNukes", "Disable Nukes and Napalm", disableNukes, toggleNukes, false));
 
 		if (typeof GM_info !== "undefined") {
 			options1.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh", enableAutoRefresh, toggleAutoRefresh, false));
@@ -797,6 +802,12 @@
 		}
 	}
 
+	function toggleNukes(event) {
+		if (event !== undefined) {
+			disableNukes = handleCheckBox(event);
+		}
+	}
+
 	function toggleCritText(event) {
 		var value = removeCritText;
 		if (event !== undefined) {
@@ -1078,6 +1089,11 @@
 				enableAbility(ABILITIES.WORMHOLE);
 			}
 		}
+		//hides nuke button
+		if ( disableNukes ){
+			disableAbility(ABILITIES.TACTICAL_NUKE);
+			disableAbility(ABILITIES.NAPALM);
+		}
 	}
 
 	function useCooldownIfRelevant() {
@@ -1158,7 +1174,7 @@
 
 	function useNapalmIfRelevant() {
 		//Check if Napalm is purchased and cooled down
-		if (!canUseAbility(ABILITIES.NAPALM) || !canUseOffensiveAbility() || Math.random() > control.useAbilityChance) {
+		if (!canUseAbility(ABILITIES.NAPALM) || !canUseOffensiveAbility() || Math.random() > control.useAbilityChance || disableNukes) {
 			return;
 		}
 
@@ -1169,7 +1185,7 @@
 		var level = getGameLevel();
 
 		// Prevent this outright if its within control.rainingSafeRounds of the next rainingRound
-		if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds) {
+		if (level % control.rainingRounds > control.rainingRounds - ( control.rainingSafeRounds + 20 ) ) {
 			return;
 		}
 
@@ -1212,7 +1228,7 @@
 
 	function useTacticalNukeIfRelevant() {
 		// Check if Tactical Nuke is purchased
-		if (!canUseAbility(ABILITIES.TACTICAL_NUKE) || !canUseOffensiveAbility() || Math.random() > control.useAbilityChance) {
+		if (!canUseAbility(ABILITIES.TACTICAL_NUKE) || !canUseOffensiveAbility() || Math.random() > control.useAbilityChance || disableNukes) {
 			return;
 		}
 
@@ -1427,7 +1443,7 @@
 		var level = getGameLevel();
 		var levelmod = level % control.rainingRounds;
 		// Early in the game, or we're a safe distance away from raining rounds.
-		return (levelmod > 0 && levelmod < control.rainingRounds - control.rainingSafeRounds);
+		return (levelmod > 0 && levelmod < control.rainingRounds - ( control.rainingSafeRounds + 4 ));
 	}
 
 	function tryUsingAbility(abilityId) {
