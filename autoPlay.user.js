@@ -1703,7 +1703,7 @@
 
 		document.ExpectedLevel.textContent = 'Level: ' + w.FormatNumberForDisplay(level) + ', Expected Level: ' + w.FormatNumberForDisplay(exp_lvl.expected_level) + ', Likely Level: ' + w.FormatNumberForDisplay(exp_lvl.likely_level);
 		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
-		document.LevelsSkip.textContent = 'Skipped ' + lvl_skip + ' levels in last 5s.';
+		document.LevelsSkip.textContent = 'Skipped ' + w.FormatNumberForDisplay(lvl_skip) + ' levels in last 5s.';
 	}
 
 	// Helpers to access player stats.
