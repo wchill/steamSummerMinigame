@@ -342,13 +342,14 @@
 		waitForWelcomePanelLoad();
 
 		var badgePoints = w.g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points;
+		var purchaseCount = Math.floor(badgePoints / 100);
 
 		//4% Like New, 96% Wormholes - 26 For Wormhole, 27 for Like New
 		if ( (w.g_steamID%100) % 25 == 5) {
-			w.g_Minigame.CurrentScene().TrySpendBadgePoints(w.$J("<a data-type='27' data-cost='100'></a>"), Math.floor(badgePoints / 100)));
+			w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='27' data-cost='100'></a>"), purchaseCount) );
 		}
 		else {
-			w.g_Minigame.CurrentScene().TrySpendBadgePoints(w.$J("<a data-type='26' data-cost='100'></a>"), Math.floor(badgePoints / 100)));
+			w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='26' data-cost='100'></a>"), purchaseCount ) );
 		}
 		
 		badgePoints %= 100;
