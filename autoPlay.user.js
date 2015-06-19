@@ -869,6 +869,7 @@
 		return clickRate;
 	}
 
+	/* not being referenced at the moment
 	function getLevelsSkipped() {
 		var total = 0;
 		for (var i = 3; i >= 0; i--) {
@@ -878,6 +879,7 @@
 		total += levelsSkipped[0];
 		return total;
 	}
+	*/
 
 	function updateLogLevel(event) {
 		if (event !== undefined) {
@@ -1855,8 +1857,8 @@
 		//Gather total wormholes active.
 		for (var i = 0; i <= 2; i++) {
 			//advLog('L' + i + ':' + g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26], 1);
-			if (typeof g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26] !== 'undefined') {
-				wormholesNow += g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26];
+			if (typeof w.g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26] !== 'undefined') {
+				wormholesNow += w.g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26];
 			}
 		}
 
