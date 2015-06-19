@@ -66,7 +66,7 @@
 	var control = {
 		speedThreshold: 2000,
 		// Stop using offensive abilities shortly before rain/wormhole rounds.
-		rainingSafeRounds: 5,
+		rainingSafeRounds: 10,
 		rainingRounds: 100,
 		timePerUpdate: 60000,
 		useSlowMode: false,
@@ -75,7 +75,7 @@
 		githubVersion: SCRIPT_VERSION,
 		useAbilityChance: 0.03,
 		useLikeNewMinChance: 0.02,
-		useLikeNewMaxChance: 0.10,
+		useLikeNewMaxChance: 1.0,
 		useGoldThreshold: 200
 	};
 
@@ -1198,57 +1198,13 @@
 	}
 
 	function useNapalmIfRelevant() {
-		//Check if Napalm is purchased and cooled down
-		if (!canUseAbility(ABILITIES.NAPALM) || !canUseOffensiveAbility() || Math.random() > control.useAbilityChance) {
-			return;
-		}
-
-		//Check lane has monsters to burn
-		var currentLane = s().m_nExpectedLane;
-		var enemyCount = 0;
-		var enemySpawnerExists = false;
-		var level = getGameLevel();
-
-		// Prevent this outright if its within control.rainingSafeRounds of the next rainingRound
-		if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds) {
-			return;
-		}
-
-		//Count each slot in lane
-		for (var i = 0; i < 4; i++) {
-			var enemy = s().GetEnemy(currentLane, i);
-			if (enemy) {
-				enemyCount++;
-				if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds !== 0 && level % 10 === 0)) {
-					enemySpawnerExists = true;
-				}
-			}
-		}
-
-		//Burn them all if spawner and 2+ other monsters
-		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(ABILITIES.NAPALM);
-		}
 	}
 
 	// Use Moral Booster if doable
 	function useMoraleBoosterIfRelevant() {
-		// check if Good Luck Charms is purchased and cooled down
-		if (!canUseAbility(ABILITIES.MORALE_BOOSTER) || Math.random() > control.useAbilityChance) {
-			return;
-		}
-		var numberOfWorthwhileEnemies = 0;
-		for (var i = 0; i < s().m_rgGameData.lanes[s().m_nExpectedLane].enemies.length; i++) {
-			//Worthwhile enemy is when an enamy has a current hp value of at least 1,000,000
-			if (s().m_rgGameData.lanes[s().m_nExpectedLane].enemies[i].hp > 1000000) {
-				numberOfWorthwhileEnemies++;
-			}
-		}
-		if (numberOfWorthwhileEnemies >= 2) {
-			// Moral Booster is purchased, cooled down, and needed. Trigger it.
-			advLog('Moral Booster is purchased, cooled down, and needed. Trigger it.', 2);
-			triggerAbility(ABILITIES.MORALE_BOOSTER);
-		}
+		// Moral Booster is purchased, cooled down, and needed. Trigger it.
+		advLog('Moral Booster is purchased, cooled down, and needed. Trigger it.', 2);
+		triggerAbility(ABILITIES.MORALE_BOOSTER);
 	}
 
 	function useTacticalNukeIfRelevant() {
@@ -1266,7 +1222,7 @@
 		for (var i = 0; i < 4; i++) {
 			var enemy = s().GetEnemy(currentLane, i);
 			if (enemy) {
-				if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds !== 0 && level % 10 === 0)) {
+				if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds !== 0)) {
 					enemySpawnerExists = true;
 					enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 				}
@@ -1313,60 +1269,21 @@
 	}
 
 	function useGoldRainIfRelevant() {
-		// Check if gold rain is purchased
-		if (!canUseItem(ABILITIES.RAINING_GOLD)) {
-			return;
-		}
-
-		var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
-		// check if current target is a boss, otherwise its not worth using the gold rain
-		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
-			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
-
-			if (enemyBossHealthPercent >= 0.6) { // We want sufficient time for the gold rain to be applicable
-				// Gold Rain is purchased, cooled down, and needed. Trigger it.
-				advLog('Gold rain is purchased and cooled down, Triggering it on boss', 2);
-				triggerItem(ABILITIES.RAINING_GOLD);
-			}
+		if (triggerItem(ABILITIES.RAINING_GOLD)) {
+			// Max Elemental Damage is purchased, cooled down, and needed. Trigger it.
+			advLog('Max Elemental Damage is purchased and cooled down, triggering it.', 2);
 		}
 	}
 
 	function useMetalDetectorIfRelevant() {
-		// Early game treasures
-		if ((getGameLevel() <= 30 || getGameLevel() >= 100000) && canUseItem(ABILITIES.TREASURE)) {
-			triggerItem(ABILITIES.TREASURE);
-		}
-		// Check if metal detector or treasure is purchased
-		if (canUseAbility(ABILITIES.METAL_DETECTOR) || canUseItem(ABILITIES.TREASURE)) {
-			if (isAbilityActive(ABILITIES.METAL_DETECTOR)) {
-				return;
-			}
-
-			var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
-			// check if current target is a boss, otherwise we won't use metal detector
-			if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
-				var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
-
-				if (enemyBossHealthPercent <= 0.25) { // We want sufficient time for the metal detector to be applicable
-					// Metal Detector is purchased, cooled down, and needed. Trigger it.
-					if (canUseAbility(ABILITIES.METAL_DETECTOR)) {
-						advLog('Metal Detector is purchased and cooled down, Triggering it on boss', 2);
-						triggerAbility(ABILITIES.METAL_DETECTOR);
-					} else if (canUseItem(ABILITIES.TREASURE)) {
-						advLog('Treasure is available and cooled down, Triggering it on boss', 2);
-						triggerItem(ABILITIES.TREASURE);
-					}
-				}
-			}
+		if (triggerAbility(ABILITIES.METAL_DETECTOR,)) {
+			// Max Elemental Damage is purchased, cooled down, and needed. Trigger it.
+			advLog('Max Elemental Damage is purchased and cooled down, triggering it.', 2);
 		}
 	}
 
 
 	function useMaxElementalDmgIfRelevant() {
-		// Check if Max Elemental Damage is purchased
-		if (isAbilityActive(ABILITIES.MAX_ELEMENTAL_DAMAGE) || Math.random() > control.useAbilityChance) {
-			return;
-		}
 		if (tryUsingItem(ABILITIES.MAX_ELEMENTAL_DAMAGE, true)) {
 			// Max Elemental Damage is purchased, cooled down, and needed. Trigger it.
 			advLog('Max Elemental Damage is purchased and cooled down, triggering it.', 2);
