@@ -1838,8 +1838,8 @@
 			}
 			else if(w.g_Minigame && w.g_Minigame.CurrentScene() && w.g_Minigame.CurrentScene().m_rgPlayerTechTree
 				&& !w.g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points) { // techtree but no points
-				clearInterval(waitForWelcomePanelInterval);
-			}
+					clearInterval(waitForWelcomePanelInterval);
+				}
 			else if(--checkTicks <= 0) { // give up
 				clearInterval(waitForWelcomePanelInterval);
 			}
