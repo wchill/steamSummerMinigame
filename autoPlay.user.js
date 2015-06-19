@@ -1100,7 +1100,7 @@
 
 			// Prevent attack abilities and items if up against a boss or treasure minion
 			var level = getGameLevel();
-			if (targetIsTreasure)) {
+			if (targetIsTreasure) {
 				BOSS_DISABLED_ABILITIES.forEach(disableAbility);
 			} else if (targetIsBoss && (isGoldRainRound() || level % control.wormholeRounds === 0)) {
 				BOSS_DISABLED_ABILITIES.forEach(disableAbility);
