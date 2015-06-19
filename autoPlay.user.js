@@ -1276,7 +1276,7 @@
 	}
 
 	function useMetalDetectorIfRelevant() {
-		if (triggerAbility(ABILITIES.METAL_DETECTOR,)) {
+		if (triggerAbility(ABILITIES.METAL_DETECTOR)) {
 			// Max Elemental Damage is purchased, cooled down, and needed. Trigger it.
 			advLog('Max Elemental Damage is purchased and cooled down, triggering it.', 2);
 		}
