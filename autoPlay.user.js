@@ -21,6 +21,7 @@
 	// OPTIONS
 	var clickRate = 20;
 	var logLevel = 1; // 5 is the most verbose, 0 disables all log
+	var msTickRateWormhole = 300;
 
 	var enableAutoClicker = getPreferenceBoolean("enableAutoClicker", true);
 
@@ -441,7 +442,11 @@
 			currentClickRate = getWantedClicksPerSecond();
 			s().m_nClicks = currentClickRate;
 			s().m_nLastTick = false;
-			w.g_msTickRate = 1000;
+			if (level % control.rainingRounds === 0 && hasItem(ABILITIES.WORMHOLE)) {
+				w.g_msTickRate = msTickRateWormhole;
+			} else {
+				w.g_msTickRate = 1000;
+			}
 
 			var damagePerClick = s().CalculateDamage(
 				s().m_rgPlayerTechTree.damage_per_click,
@@ -1354,8 +1359,21 @@
 		if (hasItem(ABILITIES.WORMHOLE)) {
 			// Force usage of it regardless of cooldown. Will work if at least one NL was used suring the last second.
 			triggerAbility(ABILITIES.WORMHOLE);
+			for (var i = 1; i < 10; i++) {
+				wormholeTimeout(100 * i);
+			}
 			advLog('Less than ' + control.minsLeft + ' minutes for game to end. Triggering wormholes...', 2);
 		}
+	}
+
+	function wormholeTimeout(timeout) {
+		setTimeout(function(){
+			var level = getGameLevel();
+			if (level % control.rainingRounds !== 0) {
+				return;
+			}
+			triggerAbility(ABILITIES.WORMHOLE);
+		}, timeout);
 	}
 
 	function useLikeNewIfRelevant() {
