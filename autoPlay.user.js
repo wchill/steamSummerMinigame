@@ -62,11 +62,12 @@
 		speedThreshold: 2000,
 		// Stop using offensive abilities shortly before rain/wormhole rounds.
 		rainingSafeRounds: 5,
-		rainingRounds: 100,
+		rainingRounds: 10,
 		timePerUpdate: 60000,
 		useSlowMode: false,
 		minsLeft: 60,
 		allowWormholeLevel: 180000,
+		wormholeRounds: 100,
 		githubVersion: SCRIPT_VERSION,
 		useAbilityChance: 0.03,
 		useLikeNewMinChance: 0.02,
@@ -385,6 +386,29 @@
 		}
 	}
 
+	function isGoldRainRound() {
+		var level = getGameLevel();
+		// Don't use gold rain below gold threshold
+		if (level < control.useGoldThreshold) {
+			return false;
+		}
+
+		// Don't use gold rain past the speedThreshold
+		if (level > control.speedThreshold) {
+			// ...and if level is not a raining round
+			if (level % control.rainingRounds !== 0) {
+				return false;
+			}
+		}
+
+		// Don't use gold rain on wormhole rounds
+		if (level % control.wormholeRounds === 0) {
+			return false;
+		}
+
+		return true;
+	}
+
 	function isNearEndGame() {
 		var cTime = new Date();
 		var cHours = cTime.getUTCHours();
@@ -421,9 +445,7 @@
 			useTacticalNukeIfRelevant();
 			useCrippleMonsterIfRelevant();
 			useCrippleSpawnerIfRelevant();
-			if ((level < control.speedThreshold || level % control.rainingRounds === 0) && level > control.useGoldThreshold) {
-				useGoldRainIfRelevant();
-			}
+			useGoldRainIfRelevant();
 			useCrippleMonsterIfRelevant(level);
 			useReviveIfRelevant(level);
 			useMaxElementalDmgIfRelevant();
@@ -434,7 +456,7 @@
 				lastLevel = level;
 				refreshPlayerData();
 			}
-			
+
 			// This belongs here so we can update the header during boss fights
 			updateLevelInfoTitle(level);
 
@@ -539,9 +561,9 @@
 									w.$J('.name', ele).text( rgEntry.actor_name );
 									w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
 									w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
-	
+
 									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
-	
+
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 									advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
 									w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
@@ -551,9 +573,9 @@
 									w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
 									w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
 									w.$J('.name', ele).attr( "style", "color: yellow" );
-	
+
 									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
-	
+
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 								}
 							} else {
@@ -847,6 +869,7 @@
 		return clickRate;
 	}
 
+	/* not being referenced at the moment
 	function getLevelsSkipped() {
 		var total = 0;
 		for (var i = 3; i >= 0; i--) {
@@ -856,6 +879,7 @@
 		total += levelsSkipped[0];
 		return total;
 	}
+	*/
 
 	function updateLogLevel(event) {
 		if (event !== undefined) {
@@ -1063,7 +1087,6 @@
 			}
 		}
 
-
 		// go to the chosen lane
 		if (targetFound) {
 			if (s().m_nExpectedLane != lowLane) {
@@ -1079,7 +1102,9 @@
 
 			// Prevent attack abilities and items if up against a boss or treasure minion
 			var level = getGameLevel();
-			if (targetIsTreasure || (targetIsBoss && (level < control.speedThreshold || level % control.rainingRounds === 0))) {
+			if (targetIsTreasure) {
+				BOSS_DISABLED_ABILITIES.forEach(disableAbility);
+			} else if (targetIsBoss && (isGoldRainRound() || level % control.wormholeRounds === 0)) {
 				BOSS_DISABLED_ABILITIES.forEach(disableAbility);
 			} else {
 				BOSS_DISABLED_ABILITIES.forEach(enableAbility);
@@ -1157,7 +1182,7 @@
 			var enemy = s().GetEnemy(currentLane, i);
 			if (enemy) {
 				enemyCount++;
-				if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds !== 0 && level % 10 === 0)) {
+				if (enemy.m_data.type === 0 || (!isGoldRainRound() && level % 10 === 0)) {
 					enemySpawnerExists = true;
 				}
 			}
@@ -1190,7 +1215,7 @@
 			var enemy = s().GetEnemy(currentLane, i);
 			if (enemy) {
 				enemyCount++;
-				if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds !== 0 && level % 10 === 0)) {
+				if (enemy.m_data.type === 0 || (!isGoldRainRound() && level % 10 === 0)) {
 					enemySpawnerExists = true;
 				}
 			}
@@ -1237,7 +1262,7 @@
 		for (var i = 0; i < 4; i++) {
 			var enemy = s().GetEnemy(currentLane, i);
 			if (enemy) {
-				if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds !== 0 && level % 10 === 0)) {
+				if (enemy.m_data.type === 0 || (!isGoldRainRound() && level % 10 === 0)) {
 					enemySpawnerExists = true;
 					enemySpawnerHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 				}
@@ -1289,6 +1314,10 @@
 			return;
 		}
 
+		if (!isGoldRainRound()) {
+			return;
+		}
+
 		var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
 		// check if current target is a boss, otherwise its not worth using the gold rain
 		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
@@ -1332,7 +1361,6 @@
 		}
 	}
 
-
 	function useMaxElementalDmgIfRelevant() {
 		// Check if Max Elemental Damage is purchased
 		if (isAbilityActive(ABILITIES.MAX_ELEMENTAL_DAMAGE) || Math.random() > control.useAbilityChance) {
@@ -1347,7 +1375,7 @@
 	function useWormholeIfRelevant() {
 		// Check the time before using wormhole.
 		var level = getGameLevel();
-		if (level % control.rainingRounds !== 0) {
+		if (level % control.wormholeRounds !== 0) {
 			return;
 		}
 		// Check if Wormhole is purchased
@@ -1387,7 +1415,7 @@
 	function useLikeNew() {
 		// Make sure that we're still in the boss round when we actually use it.
 		var level = getGameLevel();
-		if (level % control.rainingRounds === 0) {
+		if (level % control.wormholeRounds === 0) {
 			if (tryUsingItem(ABILITIES.LIKE_NEW)) {
 				advLog('We can actually use Like New semi-reliably! Cooldowns-b-gone.', 2);
 				//canUseLikeNew = true;
@@ -1820,36 +1848,36 @@
 	function getGameLevel() {
 		return s().m_rgGameData.level + 1;
 	}
-	
+
 	//I'm sorry of the way I name things. This function predicts jumps on a warp boss level, returns the value.
 	function estimateJumps() {
-	    var level = getGameLevel();
-	    var wormholesNow = 0;
-	 
-	    //Gather total wormholes active.
-	    for (var i = 0; i <= 2; i++) {
-	                //advLog('L' + i + ':' + g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26], 1);
-	                if (typeof g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26] !== 'undefined') {
-	                        wormholesNow += g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26];
-	                }
-	        }
-	 
-	        //During baws round fc
-	    if (level % control.rainingRounds == 0) {
-	        if (predictLastWormholesUpdate !== wormholesNow) {
-	                predictTicks++;
-	                predictJumps += wormholesNow;
-	                predictLastWormholesUpdate = wormholesNow;
-	        }
-	    } else {
-	        predictTicks = 0;
-	        predictJumps = 0;
-	        predictLastWormholesUpdate = 0;
-	        return 0;
-	    }
-	 
-	    return predictJumps / predictTicks * (s().m_rgGameData.timestamp - s().m_rgGameData.timestamp_level_start);
-	    //advLog('PT:' + predictTicks + ' PJ:' + predictJumps + ' PLWU:' + predictLastWormholesUpdate, 1);
+		var level = getGameLevel();
+		var wormholesNow = 0;
+
+		//Gather total wormholes active.
+		for (var i = 0; i <= 2; i++) {
+			//advLog('L' + i + ':' + g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26], 1);
+			if (typeof w.g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26] !== 'undefined') {
+				wormholesNow += w.g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26];
+			}
+		}
+
+		//During baws round fc
+		if (level % control.wormholeRounds == 0) {
+			if (predictLastWormholesUpdate !== wormholesNow) {
+				predictTicks++;
+				predictJumps += wormholesNow;
+				predictLastWormholesUpdate = wormholesNow;
+			}
+		} else {
+			predictTicks = 0;
+			predictJumps = 0;
+			predictLastWormholesUpdate = 0;
+			return 0;
+		}
+
+		return predictJumps / predictTicks * (s().m_rgGameData.timestamp - s().m_rgGameData.timestamp_level_start);
+		//advLog('PT:' + predictTicks + ' PJ:' + predictJumps + ' PLWU:' + predictLastWormholesUpdate, 1);
 	}
 
 	/** Check periodicaly if the welcome panel is visible
@@ -1913,6 +1941,5 @@
 			});
 		};
 	}, false);
-
 
 }(window));
