@@ -1170,29 +1170,19 @@
 	}
 
 	function useClusterBombIfRelevant() {
-		//Check if Cluster Bomb is purchased and cooled down
-		if (!canUseAbility(ABILITIES.CLUSTER_BOMB) || !canUseOffensiveAbility()) {
+		if (!canUseOffensiveAbility()) {
 			return;
 		}
 
-		//Check lane has monsters to explode
-		var currentLane = s().m_nExpectedLane;
-		var enemyCount = 0;
-		var enemySpawnerExists = false;
+		// Check the time before using like new.
 		var level = getGameLevel();
-		//Count each slot in lane
-		for (var i = 0; i < 4; i++) {
-			var enemy = s().GetEnemy(currentLane, i);
-			if (enemy) {
-				enemyCount++;
-				if (enemy.m_data.type === 0 || (level > control.speedThreshold && level % control.rainingRounds !== 0 && level % 10 === 0)) {
-					enemySpawnerExists = true;
-				}
-			}
+		if (level % control.rainingRounds === 0) {
+			return;
 		}
-		//Bombs away if spawner and 2+ other monsters
-		if (enemySpawnerExists && enemyCount >= 3) {
-			triggerAbility(ABILITIES.CLUSTER_BOMB);
+
+		if (triggerAbility(ABILITIES.CLUSTER_BOMB)) {
+			// Max Elemental Damage is purchased, cooled down, and needed. Trigger it.
+			advLog('Cluster Bomb is purchased and cooled down, triggering it.', 2);
 		}
 	}
 
