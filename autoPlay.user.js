@@ -860,6 +860,9 @@
 		if (level % control.rainingRounds === 0) {
 			if (hasItem(ABILITIES.WORMHOLE)) {
 				return 0;
+			}
+			if (getActiveAbilityLaneCount(ABILITIES.WORMHOLE) > 1000) {
+				return 0;
 			} else {
 				return Math.floor(clickRate/2);
 			}
