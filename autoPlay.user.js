@@ -73,7 +73,6 @@
 		minsLeft: 60,
 		allowWormholeLevel: 180000,
 		githubVersion: SCRIPT_VERSION,
-		useAbilityChance: 0.03,
 		useLikeNewMinChance: 0.02,
 		useLikeNewMaxChance: 1.0,
 		useGoldThreshold: 200
@@ -1122,7 +1121,7 @@
 	}
 
 	function useCooldownIfRelevant() {
-		if (getActiveAbilityLaneCount(ABILITIES.DECREASE_COOLDOWNS) > 0 || Math.random() > control.useAbilityChance) {
+		if (getActiveAbilityLaneCount(ABILITIES.DECREASE_COOLDOWNS) > 0) {
 			disableAbility(ABILITIES.DECREASE_COOLDOWNS);
 			return;
 		}
@@ -1172,7 +1171,7 @@
 
 	function useClusterBombIfRelevant() {
 		//Check if Cluster Bomb is purchased and cooled down
-		if (!canUseAbility(ABILITIES.CLUSTER_BOMB) || !canUseOffensiveAbility() || Math.random() > control.useAbilityChance) {
+		if (!canUseAbility(ABILITIES.CLUSTER_BOMB) || !canUseOffensiveAbility()) {
 			return;
 		}
 
@@ -1209,7 +1208,7 @@
 
 	function useTacticalNukeIfRelevant() {
 		// Check if Tactical Nuke is purchased
-		if (!canUseAbility(ABILITIES.TACTICAL_NUKE) || !canUseOffensiveAbility() || Math.random() > control.useAbilityChance) {
+		if (!canUseAbility(ABILITIES.TACTICAL_NUKE) || !canUseOffensiveAbility()) {
 			return;
 		}
 
@@ -1242,7 +1241,7 @@
 
 	function useCrippleSpawnerIfRelevant() {
 		// Check if Cripple Spawner is available
-		if (!canUseItem(ABILITIES.CRIPPLE_SPAWNER) || Math.random() > control.useAbilityChance) {
+		if (!canUseItem(ABILITIES.CRIPPLE_SPAWNER)) {
 			return;
 		}
 
@@ -1333,7 +1332,7 @@
 	}
 
 	function useReviveIfRelevant(level) {
-		if (level % 10 === 9 && Math.random() <= control.useAbilityChance && tryUsingItem(ABILITIES.RESURRECTION)) {
+		if (level % 10 === 9 && tryUsingItem(ABILITIES.RESURRECTION)) {
 			// Resurrect is purchased and we are using it.
 			advLog('Triggered Resurrect.');
 		}
