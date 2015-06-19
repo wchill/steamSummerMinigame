@@ -42,7 +42,7 @@
 
 	// DO NOT MODIFY
 	var wormHoleConstantUse = false;
-	var wormHoleConstantUseOverride = false;
+	var wormHoleConstantUseOverride = true;
 	var isAlreadyRunning = false;
 	var refreshTimer = null;
 	var currentClickRate = enableAutoClicker ? clickRate : 0;
