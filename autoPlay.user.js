@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 6.1.2
+// @version 6.1.3
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '6.1.2 Anti-Troll Branch';
+	var SCRIPT_VERSION = '6.1.3 Better Anti-Troll Branch';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -435,15 +435,15 @@
 				useMedicsIfRelevant();
 				useMoraleBoosterIfRelevant();
 				useMetalDetectorIfRelevant();
-				useClusterBombIfRelevant();
-				useNapalmIfRelevant();
-				useTacticalNukeIfRelevant();
-				useCrippleMonsterIfRelevant();
+			//	useClusterBombIfRelevant();
+			//	useNapalmIfRelevant();
+			//	useTacticalNukeIfRelevant();
+			//	useCrippleMonsterIfRelevant();
 				useCrippleSpawnerIfRelevant();
 				if ((level < control.speedThreshold || level % control.rainingRounds === 0) && level > control.useGoldThreshold) {
 					useGoldRainIfRelevant();
 				}
-				useCrippleMonsterIfRelevant(level);
+			//	useCrippleMonsterIfRelevant(level);
 				useMaxElementalDmgIfRelevant();
 			}
 			else {
