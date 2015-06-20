@@ -147,6 +147,19 @@
 		WORMHOLE: 26,
 		LIKE_NEW: 27
 	};
+	
+	var NUISANCE_ABILITIES = [
+		ABILITIES.TACTICAL_NUKE,
+		ABILITIES.CLUSTER_BOMB,
+		ABILITIES.NAPALM,
+		ABILITIES.CRIPPLE_MONSTER,
+		ABILITIES.MAX_ELEMENTAL_DAMAGE,
+		ABILITIES.THROW_MONEY_AT_SCREEN,
+		ABILITIES.TREASURE,
+		ABILITIES.STEAL_HEALTH,
+		ABILITIES.REFLECT_DAMAGE,
+		ABILITIES.FEELING_LUCKY
+	];
 
 	var BOSS_DISABLED_ABILITIES = [
 		ABILITIES.MORALE_BOOSTER,
@@ -433,6 +446,8 @@
 			if (level < 10 && control.useSlowMode) {
 				return;
 			}
+			
+			NUISANCE_ABILITIES.forEach(disableAbility);
 
 			wormHoleConstantUse = ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds)) || wormHoleConstantUseOverride;
 
@@ -553,6 +568,8 @@
 					}
 				}
 			}
+			
+			NUISANCE_ABILITIES.forEach(disableAbility);
 		}
 
 		if(w.CUI && !replacedCUI) {
@@ -1358,9 +1375,11 @@
 
 	function toggleAbilityVisibility(abilityId, show) {
 		if (show) {
+			w.$J("#ability_" + abilityId).show();
 			w.$J("#abilityitem_" + abilityId).show();
 		}
 		else {
+			w.$J("#ability_" + abilityId).hide();
 			w.$J("#abilityitem_" + abilityId).hide();
 		}
 	}
