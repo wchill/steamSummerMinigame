@@ -3,13 +3,8 @@
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @version 6.0.8
-// @match *://steamcommunity.com/minigame/*
-// @match *://steamcommunity.com//minigame//*
-// @match *://steamcommunity.com/minigame/towerattack*
-// @match *://steamcommunity.com//minigame//towerattack*
+// @match *://steamcommunity.com/minigame*
 // @grant GM_xmlhttpRequest
-// @grant GM_addStyle
-// @grant unsafeWindow
 // @updateURL https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js
 // @downloadURL https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js
 // @require		https://raw.github.com/dcodeIO/Long.js/master/dist/Long.min.js
