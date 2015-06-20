@@ -1338,6 +1338,14 @@
 		if ((getGameLevel() <= 30 || getGameLevel() >= 100000) && canUseItem(ABILITIES.TREASURE)) {
 			triggerItem(ABILITIES.TREASURE);
 		}
+        
+        // If Like New is being spammed, spam Metal Detector (because why not?)
+        if (isAbilityActive(ABILITIES.LIKE_NEW) && canUseAbility(ABILITIES.METAL_DETECTOR)) {
+            advLog('Metal Detector has been reset by Like New, using the free cooldown.', 2);
+            triggerAbility(ABILITIES.METAL_DETECTOR);
+            return;
+        }
+
 		// Check if metal detector or treasure is purchased
 		if (canUseAbility(ABILITIES.METAL_DETECTOR) || canUseItem(ABILITIES.TREASURE)) {
 			if (isAbilityActive(ABILITIES.METAL_DETECTOR)) {
