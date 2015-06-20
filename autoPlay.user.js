@@ -147,7 +147,7 @@
 		WORMHOLE: 26,
 		LIKE_NEW: 27
 	};
-	
+
 	var NUISANCE_ABILITIES = [
 		ABILITIES.TACTICAL_NUKE,
 		ABILITIES.CLUSTER_BOMB,
@@ -351,33 +351,29 @@
 		leave_game_box.parentElement.removeChild(leave_game_box);
 
 		enhanceTooltips();
-		enableMultibuy();
 		waitForWelcomePanelLoad();
 
 		// Determine number of badge points
 		var badgePoints = w.g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points;
-		
+
 		// Determine how many other things to buy
 		var buy_count = (w.g_steamID % 10) + 1;
-		
+
 		// Buy some
 		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='25' data-cost='200'></a>"), buy_count );
 		badgePoints -= buy_count*200;
-		
+
 		// How many WH/LN do we buy too?
-		var purchaseCount = Math.floor(badgePoints / 100);
-		
+		var purchaseCount = Math.floor(badgePoints / 600);
+
 		// Buy mostly WH
-		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='26' data-cost='100'></a>"), 5 * purchaseCount / 6 );
-		purchaseCount -= 5 * purchaseCount / 6;
-		
+		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='26' data-cost='100'></a>"), purchaseCount * 5 );
+
 		// Buy a few LN
 		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='27' data-cost='100'></a>"), purchaseCount);
-		
-		badgePoints %= 100;
-		
+
 		//Rest is Pumped Up
-		w.g_Minigame.CurrentScene().TrySpendBadgePoints(w.$J("<a data-type='19' data-cost='1'></a>"), badgePoints);
+		w.g_Minigame.CurrentScene().TrySpendBadgePoints(w.$J("<a data-type='19' data-cost='1'></a>"), badgePoints % 100 );
 	}
 
 	function updateLaneData() {
@@ -446,7 +442,7 @@
 			if (level < 10 && control.useSlowMode) {
 				return;
 			}
-			
+
 			NUISANCE_ABILITIES.forEach(disableAbility);
 
 			wormHoleConstantUse = ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds)) || wormHoleConstantUseOverride;
@@ -465,15 +461,15 @@
 				useMedicsIfRelevant();
 				useMoraleBoosterIfRelevant();
 				useMetalDetectorIfRelevant();
-			//	useClusterBombIfRelevant();
-			//	useNapalmIfRelevant();
-			//	useTacticalNukeIfRelevant();
-			//	useCrippleMonsterIfRelevant();
+				//	useClusterBombIfRelevant();
+				//	useNapalmIfRelevant();
+				//	useTacticalNukeIfRelevant();
+				//	useCrippleMonsterIfRelevant();
 				useCrippleSpawnerIfRelevant();
 				if ((level < control.speedThreshold || level % control.rainingRounds === 0) && level > control.useGoldThreshold) {
 					useGoldRainIfRelevant();
 				}
-			//	useCrippleMonsterIfRelevant(level);
+				//	useCrippleMonsterIfRelevant(level);
 				useMaxElementalDmgIfRelevant();
 			}
 			else {
@@ -568,7 +564,7 @@
 					}
 				}
 			}
-			
+
 			NUISANCE_ABILITIES.forEach(disableAbility);
 		}
 
@@ -1723,49 +1719,6 @@
 			}
 
 			return strOut;
-		};
-	}
-
-	function enableMultibuy(){
-
-		// We have to add this to the scene so that we can access the "this" identifier.
-		s().trt_oldbuy = w.g_Minigame.m_CurrentScene.TrySpendBadgePoints;
-		w.g_Minigame.m_CurrentScene.TrySpendBadgePoints = function(ele, count){
-
-			if (count != 1){
-				s().trt_oldbuy(ele, count);
-				return;
-			}
-
-			var instance = this;
-			var $ele = w.$J(ele);
-
-			var name = w.$J('.name', ele).text();
-			var type = $ele.data('type');
-			var cost = $ele.data('cost');
-
-			var badge_points = instance.m_rgPlayerTechTree.badge_points;
-			var maxBuy = Math.floor(badge_points / cost);
-			var resp = prompt("How many "+ name + " do you want to buy? (max " + maxBuy + ")", 0);
-
-			if (!resp){
-				return;
-			}
-
-			var newCount = parseInt(resp);
-
-			if (isNaN(newCount) || newCount < 0) {
-				alert("Please enter a positive number.");
-				return;
-			}
-
-			if ( instance.m_rgPlayerTechTree.badge_points < (cost * newCount))
-			{
-				alert("Not enough badge points.");
-				return;
-			}
-
-			s().trt_oldbuy(ele, newCount);
 		};
 	}
 
