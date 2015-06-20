@@ -1114,15 +1114,17 @@
 				BOSS_DISABLED_ABILITIES.forEach(disableAbility);
 			} else {
 				BOSS_DISABLED_ABILITIES.forEach(enableAbility);
+				
+				//keep offence abilities disabled to avoid trigger happy players
+				disableAbility(ABILITIES.TACTICAL_NUKE);
+				disableAbility(ABILITIES.NAPALM);
+				disableAbility(ABILITIES.CLUSTER_BOMB);
+				disableAbility(ABILITIES.CRIPPLE_MONSTER);
+				disableAbility(ABILITIES.CLUSTER_BOMB);
 			}
 
 		}
-		//keep offence abilities disabled to avoid trigger happy players
-		disableAbility(ABILITIES.TACTICAL_NUKE);
-		disableAbility(ABILITIES.NAPALM);
-		disableAbility(ABILITIES.CLUSTER_BOMB);
-		disableAbility(ABILITIES.CRIPPLE_MONSTER);
-		disableAbility(ABILITIES.CLUSTER_BOMB);
+		
 	}
 
 	function useCooldownIfRelevant() {
