@@ -364,13 +364,13 @@
 		badgePoints -= buy_count*200;
 
 		// How many WH/LN do we buy too?
-		var purchaseCount = Math.floor(badgePoints / 600);
+		var purchaseCount = Math.floor(badgePoints / 200);
 
 		// Buy mostly WH
-		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='26' data-cost='100'></a>"), purchaseCount * 5 );
+		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='26' data-cost='100'></a>"), purchaseCount );
 
 		// Buy a few LN
-		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='27' data-cost='100'></a>"), purchaseCount);
+		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='27' data-cost='100'></a>"), purchaseCount );
 
 		//Rest is Pumped Up
 		w.g_Minigame.CurrentScene().TrySpendBadgePoints(w.$J("<a data-type='19' data-cost='1'></a>"), badgePoints % 100 );
@@ -433,6 +433,16 @@
 			return false;
 		}
 	}
+	
+	function getRemainingTime() {
+		var time = Math.floor(s().m_nTime) % 86400;
+		time = time - 16*3600;
+		if (time < 0) {
+			time = time + 86400;
+		}
+
+		return 86400 - time;
+	}
 
 	function MainLoop() {
 		if (!isAlreadyRunning) {
@@ -445,6 +455,7 @@
 
 			NUISANCE_ABILITIES.forEach(disableAbility);
 
+			wormHoleConstantUseOverride = (getRemainingTime()*5 < getItemCount(ABILITIES.WORMHOLE));
 			wormHoleConstantUse = ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds)) || wormHoleConstantUseOverride;
 
 			updateLaneData();
@@ -455,7 +466,7 @@
 				wormholeInterval = false;
 			}
 
-			if ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds)) {
+			if ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds) && !wormHooleConstantUseOverride) {
 				if (level % control.rainingRounds === 0) {
 					goToRainingLane();
 				} else {
@@ -478,7 +489,7 @@
 				useMaxElementalDmgIfRelevant();
 			}
 			else {
-				if (level % control.rainingRounds === 0) {
+				if (level % control.rainingRounds === 0 || wormHooleConstantUseOverride) {
 					goToRainingLane();
 				} else {
 					goToLaneWithBestTarget();
@@ -1318,9 +1329,10 @@
 	function useWormholeIfRelevant() {
 		// Check the time before using wormhole.
 		var level = getGameLevel();
-		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse) {
+		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse && !wormHoleConstantUseOverride) {
 			return;
 		}
+		
 		if (!wormholeInterval) {
 			wormholeInterval = w.setInterval(function(){
 				w.g_Minigame.m_CurrentScene.m_rgAbilityQueue.push({'ability': 26}); //wormhole
@@ -1458,6 +1470,16 @@
 			}
 		}
 		return false;
+	}
+	
+	function getItemCount(itemId) {
+		for (var i = 0; i < s().m_rgPlayerTechTree.ability_items.length; ++i) {
+			var abilityItem = s().m_rgPlayerTechTree.ability_items[i];
+			if (abilityItem.ability == itemId) {
+				return abilityItem.quantity;
+			}
+		}
+		return 0;
 	}
 
 	function tryUsingItem(itemId, checkInLane) {
