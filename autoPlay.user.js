@@ -1340,17 +1340,11 @@
 	}
 
 	function toggleAbilityVisibility(abilityId, show) {
-		var vis = show === true ? "visible" : "hidden";
-
-		var elem = document.getElementById('ability_' + abilityId);
-
-		// temporary
-		if(!elem) {
-			elem = document.getElementById('abilityitem_' + abilityId);
+		if (show) {
+			w.$J("#abilityitem_" + abilityId).show();
 		}
-
-		if (elem && elem.childElements() && elem.childElements().length >= 1) {
-			elem.childElements()[0].style.visibility = vis;
+		else {
+			w.$J("#abilityitem_" + abilityId).hide();
 		}
 	}
 
