@@ -1384,8 +1384,8 @@
 			if(wormholeInterval) {
 				w.clearInterval(wormholeInterval);
 				wormholeInterval = false;
-				disableAbility(ABILITIES.WORMHOLE);
 			}
+			disableAbility(ABILITIES.WORMHOLE);
 			return;
 		}
 		if (!wormholeInterval) {
