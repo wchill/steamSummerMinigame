@@ -465,8 +465,13 @@
 				w.clearInterval(wormholeInterval);
 				wormholeInterval = false;
 			}
+			
+			if (likenewInterval) {
+				w.clearInterval(likenewInterval);
+				likenewInterval = false;
+			}
 
-			if ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds) && !wormHooleConstantUseOverride) {
+			if ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds) && !wormHoleConstantUseOverride) {
 				if (level % control.rainingRounds === 0) {
 					goToRainingLane();
 				} else {
@@ -489,7 +494,7 @@
 				useMaxElementalDmgIfRelevant();
 			}
 			else {
-				if (level % control.rainingRounds === 0 || wormHooleConstantUseOverride) {
+				if (level % control.rainingRounds === 0 || wormHoleConstantUseOverride) {
 					goToRainingLane();
 				} else {
 					goToLaneWithBestTarget();
@@ -1344,11 +1349,7 @@
 
 	function useLikeNew() {
 		var level = getGameLevel();
-		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse) {
-			if (likenewInterval) {
-				w.clearInterval(likenewInterval);
-				likenewInterval = false;
-			}
+		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse && !wormHoleConstantUseOverride) {
 			return;
 		}
 		if (!likenewInterval) {
