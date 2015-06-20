@@ -7,10 +7,14 @@
 // @match *://steamcommunity.com//minigame//*
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame//towerattack*
-// @grant none
+// @grant GM_xmlhttpRequest
+// @grant GM_addStyle
+// @grant unsafeWindow
 // @updateURL https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js
 // @downloadURL https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js
-// @require     https://cdn.rawgit.com/dcodeIO/ProtoBuf.js/master/dist/ProtoBuf.js
+// @require		https://raw.github.com/dcodeIO/Long.js/master/dist/Long.min.js
+// @require		https://raw.github.com/dcodeIO/ByteBuffer.js/master/dist/ByteBufferAB.min.js
+// @require     https://raw.github.com/dcodeIO/ProtoBuf.js/master/dist/ProtoBuf.min.js
 // ==/UserScript==
 
 // IMPORTANT: Update the @version property above to a higher number such as 1.1 and 1.2 when you update the script! Otherwise, Tamper / Greasemonkey users will not update automatically.
@@ -180,17 +184,28 @@
 	}
 	
 	function doXHR(url, cb, async){
-		var xhr = new XmlHttpRequest();
+		GM_xmlhttpRequest({
+			method: "GET",
+			url: url,
+			onload: function (response) {
+				cb(response);
+			}
+		});
+	}
+	
+	function doXHRBUF(url, cb, async){
+		var xhr = new XMLHttpRequest();
 		xhr.onreadystatechange=function()
 		{
 			if (xhr.readyState==4 && xhr.status==200)
 			{
-				cb(xhr.response);
+				cb(xhr);
 			}
 		};
 		  
 		xhr.open("GET",url,async);
-		xmlhttp.send();
+		xhr.responseType = "arraybuffer";
+		xhr.send();
 	}
 	
 	function firstRun() {
@@ -1627,24 +1642,28 @@
 	//check room list if on game load page
 	if(window.location.href.indexOf("towerattack") == -1){
 		var builder = dcodeIO.ProtoBuf.loadProtoFile("http://cdn.akamai.steamstatic.com/steamcommunity/public/assets/minigame/towerattack/messages.proto");
-		var RoomData = builder.build("CTowerAttack_GetGameData_Response");
-		
-		setInterval(function () {
-			console.log("Checking for rooms...");
-			doXHR("http://docker.harkin.me/roomlist.json", function(data) {
-				var data = JSON.Parse(xhr.response);
-				if(data.list != undefined){
-					//check room status
-					for(var x in data.list){
-						var room = data.list[x];
-						doXHR("http://steamapi-a.akamaihd.net/ITowerAttackMiniGameService/GetGameData/v0001/?gameid="+room.id+"&include_stats=0&format=protobuf_raw", function(data) {
-							var rd = RoomData.decode(data);
-							console.log(rd);
-						}, true);
-					}
+		var RoomData = builder.build("CTowerAttack_GetPlayerNames_Response");
+
+		console.log("Checking for rooms...");
+		doXHR("http://docker.harkin.me/rooms.json", function(rsp) {
+			console.log(rsp);
+			var data = JSON.parse(rsp.response);
+			if(data.list != undefined){
+				//check room status
+				for(var x = 0; x < data.list.length; x++){
+					var room = data.list[x];
+					console.log("Checking room: "+room.id);
+					doXHRBUF("http://steamapi-a.akamaihd.net/ITowerAttackMiniGameService/GetPlayerNames/v0001/?input_json="+JSON.stringify({"gameid":room.id,"accountids":null})+"&format=protobuf_raw", function(rsp) {
+						console.log(rsp);
+						var rd = RoomData.decode(rsp.response);
+						console.log(rd);
+                        if(rd.names != null && rd.names.length < 1500){
+                            JoinGame(room.id);
+                        }
+					}, true);
 				}
-			}, true);
-		},1000);
+			}
+		}, true);
 		
 		return; //Do not run script, if on loading page
 	}else{
