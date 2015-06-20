@@ -1115,12 +1115,14 @@
 			} else {
 				BOSS_DISABLED_ABILITIES.forEach(enableAbility);
 			}
-			if (level < control.allowWormholeLevel && !isNearEndGame()) {
-				//disableAbility(ABILITIES.WORMHOLE);
-			} else {
-				enableAbility(ABILITIES.WORMHOLE);
-			}
+
 		}
+		//keep offence abilities disabled to avoid trigger happy players
+		disableAbility(ABILITIES.TACTICAL_NUKE);
+		disableAbility(ABILITIES.NAPALM);
+		disableAbility(ABILITIES.CLUSTER_BOMB);
+		disableAbility(ABILITIES.CRIPPLE_MONSTER);
+		disableAbility(ABILITIES.CLUSTER_BOMB);
 	}
 
 	function useCooldownIfRelevant() {
@@ -1382,10 +1384,12 @@
 			if(wormholeInterval) {
 				w.clearInterval(wormholeInterval);
 				wormholeInterval = false;
+				disableAbility(ABILITIES.WORMHOLE);
 			}
 			return;
 		}
 		if (!wormholeInterval) {
+			enableAbility(ABILITIES.WORMHOLE);
 			wormholeInterval = w.setInterval(function(){
 				w.g_Minigame.m_CurrentScene.m_rgAbilityQueue.push({'ability': 26}); //wormhole
 				w.g_Minigame.m_CurrentScene.m_nLastTick = 0;
