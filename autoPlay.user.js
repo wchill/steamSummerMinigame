@@ -1122,9 +1122,7 @@
 				disableAbility(ABILITIES.CRIPPLE_MONSTER);
 				disableAbility(ABILITIES.CLUSTER_BOMB);
 			}
-
 		}
-		
 	}
 
 	function useCooldownIfRelevant() {
