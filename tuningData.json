@@ -1,0 +1,544 @@
+{
+    "version": 1434297503,
+    "player": {
+        "respawn_time": 60,
+        "min_dead_time": 5,
+        "hp": 1000,
+        "dps": 0,
+        "gold_multiplier_while_dead": "0.75",
+        "damage_per_click": 10,
+        "damage_multiplier_fire": 1,
+        "damage_multiplier_water": 1,
+        "damage_multiplier_air": 1,
+        "damage_multiplier_earth": 1,
+        "damage_multiplier_crit": 2,
+        "crit_percentage": "0.1",
+        "loot_chance": "0.25",
+        "start_condition_minigame_badge": {
+            "badge_points_per_level_factor": "0.1"
+        },
+        "start_condition_summersale_badge": {
+            "badge_points_per_level_factor": 1
+        },
+        "start_condition_summersale_foil_badge": {
+            "badge_points_per_level_factor": 10
+        }
+    },
+    "tower": {
+        "respawn_time": 30,
+        "hp": 60000,
+        "dps": "1.25",
+        "gold": 100,
+        "hp_multiplier": "1.2",
+        "hp_exponent": "1.5",
+        "dps_multiplier": 1,
+        "dps_exponent": 1,
+        "gold_multiplier": "1.6",
+        "gold_exponent": "1.1"
+    },
+    "mob": {
+        "hp": 5000,
+        "dps": 1,
+        "gold": 30,
+        "hp_multiplier": "1.2",
+        "hp_multiplier_variance": "0.2",
+        "hp_exponent": "1.5",
+        "dps_multiplier": 1,
+        "dps_exponent": 1,
+        "gold_multiplier": "1.2",
+        "gold_exponent": "1.02"
+    },
+    "miniboss": {
+        "respawn_time": 900,
+        "hp": 60000,
+        "dps": "1.25",
+        "gold": 100,
+        "hp_multiplier": "1.2",
+        "hp_exponent": "1.5",
+        "dps_multiplier": 1,
+        "dps_exponent": 1,
+        "gold_multiplier": "1.7",
+        "gold_exponent": "1.1"
+    },
+    "boss": {
+        "hp": 260000,
+        "dps": 3,
+        "gold": 500,
+        "hp_multiplier": "1.5",
+        "hp_exponent": 3,
+        "dps_multiplier": 1,
+        "dps_exponent": 1,
+        "gold_multiplier": "1.9",
+        "gold_exponent": "1.25"
+    },
+    "treasure_mob": {
+        "hp": 60000,
+        "dps": 1,
+        "gold": 200,
+        "hp_multiplier": "1.2",
+        "hp_exponent": "1.5",
+        "dps_exponent": 1,
+        "lifetime": 10,
+        "chance": "0.01",
+        "gold_multiplier": "1.7",
+        "gold_exponent": "1.1"
+    },
+    "abilities": {
+        "1": {
+            "name": "Fire Weapon",
+            "max_num_clicks": 20
+        },
+        "2": {
+            "name": "Change Lane",
+            "cost": 0
+        },
+        "3": {
+            "name": "Respawn",
+            "cost": 0
+        },
+        "4": {
+            "name": "Change Target",
+            "cost": 0
+        },
+        "5": {
+            "name": "Morale Booster",
+            "multiplier": "0.2",
+            "cost": 0,
+            "duration": 10,
+            "cooldown": 1800,
+            "desc": "Increases all damage done by players in the current lane"
+        },
+        "6": {
+            "name": "Good Luck Charms",
+            "multiplier": "0.1",
+            "cost": 0,
+            "duration": 15,
+            "cooldown": 1800,
+            "desc": "Increases chance to do critical click damage for players in the current lane"
+        },
+        "7": {
+            "name": "Medics",
+            "multiplier": "0.1",
+            "cost": 0,
+            "duration": 5,
+            "cooldown": 300,
+            "desc": "Slowly heals everyone in the current lane that is still alive"
+        },
+        "8": {
+            "name": "Metal Detector",
+            "multiplier": "0.1",
+            "cost": 0,
+            "duration": 20,
+            "cooldown": 3600,
+            "desc": "Increases gold dropped by enemies in the current lane"
+        },
+        "9": {
+            "name": "Decrease Cooldowns",
+            "multiplier": "0.25",
+            "cost": 0,
+            "duration": 15,
+            "cooldown": 3600,
+            "desc": "While active, decreases cooldowns for any newly activated ability in the current lane (does not stack)."
+        },
+        "10": {
+            "name": "Tactical Nuke",
+            "multiplier": "0.5",
+            "multiplier_boss": "0.2",
+            "cost": 0,
+            "instant": 1,
+            "duration": 5,
+            "cooldown": 3600,
+            "desc": "Launches a tactical nuclear missile that does high damage to your current target."
+        },
+        "11": {
+            "name": "Cluster Bomb",
+            "multiplier": "0.20",
+            "cost": 0,
+            "instant": 1,
+            "duration": 5,
+            "cooldown": 3600,
+            "desc": "Drops a cluster bomb, damaging all enemies in your lane."
+        },
+        "12": {
+            "name": "Napalm",
+            "multiplier": "0.05",
+            "cost": 0,
+            "duration": 10,
+            "cooldown": 3600,
+            "desc": "Drops napalm, inflicting damage on all enemies in your lane over time."
+        },
+        "13": {
+            "name": "Resurrection",
+            "multiplier": 1,
+            "badge_points_cost": 10,
+            "instant": 1,
+            "duration": 5,
+            "cooldown": 30,
+            "desc": "Resurrects dead players in your lane and restores them to 100% health."
+        },
+        "14": {
+            "name": "Cripple Spawner",
+            "multiplier": 1,
+            "badge_points_cost": 10,
+            "instant": 1,
+            "duration": 5,
+            "cooldown": 60,
+            "desc": "Damages a spawner down to 1 HP."
+        },
+        "15": {
+            "name": "Cripple Monster",
+            "multiplier": "0.05",
+            "badge_points_cost": 5,
+            "instant": 1,
+            "duration": 5,
+            "cooldown": 60,
+            "desc": "Reduces player's current target to 1 HP for normal monsters or up to 5% max health for a boss monster."
+        },
+        "16": {
+            "name": "Max Elemental Damage",
+            "multiplier": 1,
+            "badge_points_cost": 10,
+            "duration": 5,
+            "cooldown": 60,
+            "desc": "All players in your lane apply their highest elemental damage multiplier, regardless of the monster's elemental weakness."
+        },
+        "17": {
+            "name": "Raining Gold",
+            "multiplier": "0.01",
+            "badge_points_cost": 10,
+            "duration": 10,
+            "cooldown": 30,
+            "desc": "All players in your lane will receive 1% of their target's gold per click while this is active."
+        },
+        "18": {
+            "name": "Crit",
+            "multiplier": "0.01",
+            "badge_points_cost": 10,
+            "instant": 1,
+            "duration": 5,
+            "cooldown": 60,
+            "desc": "Permanently increases your chance to do critical click damage by 1% and automatically deploys Good Luck Charms for free."
+        },
+        "19": {
+            "name": "Pumped Up",
+            "multiplier": "0.1",
+            "badge_points_cost": 1,
+            "instant": 1,
+            "duration": 5,
+            "cooldown": 10,
+            "desc": "Permanently increases your max health and automatically deploys Medics in your lane for free."
+        },
+        "20": {
+            "name": "Throw Money At Screen",
+            "multiplier": "0.1",
+            "badge_points_cost": 10,
+            "duration": 5,
+            "cooldown": 10,
+            "desc": "Spend 10% of your gold and damage your current target by up to 10% of their max health."
+        },
+        "21": {
+            "name": "GOD MODE",
+            "multiplier": 1,
+            "badge_points_cost": 1,
+            "duration": 5,
+            "cooldown": 5,
+            "desc": "Temporarily take no damage."
+        },
+        "22": {
+            "name": "Treasure!",
+            "multiplier": 100000,
+            "badge_points_cost": 2,
+            "instant": 1,
+            "duration": 0,
+            "cooldown": 5,
+            "desc": "Gives you 100k of gold and automatically deploys Metal Detector in your lane for free."
+        },
+        "23": {
+            "name": "Steal Health",
+            "multiplier": "0.1",
+            "badge_points_cost": 5,
+            "duration": 10,
+            "cooldown": 10,
+            "desc": "Replenishes the health of all players in your lane based on the click damage they do to their target."
+        },
+        "24": {
+            "name": "Reflect Damage",
+            "multiplier": "0.5",
+            "badge_points_cost": 5,
+            "duration": 10,
+            "cooldown": 30,
+            "desc": "Monsters take damage based on how much damage they deal out."
+        },
+        "25": {
+            "name": "Feeling Lucky",
+            "multiplier": 1,
+            "badge_points_cost": 200,
+            "instant": 1,
+            "duration": 10,
+            "cooldown": 1800,
+            "desc": "Grant every alive player in your lane one random special item.<br><br>This item can only be purchased with badge points."
+        },
+        "26": {
+            "name": "Wormhole",
+            "multiplier": 1,
+            "gold_multiplier": 50000,
+            "badge_points_cost": 100,
+            "instant": 1,
+            "duration": 10,
+            "cooldown": 60,
+            "desc": "Skips a level with each use (stackable) and grants 50k of gold to every player. However, enemies will not drop gold or loot for any skipped levels.<br><br>This item can only be purchased with badge points."
+        },
+        "27": {
+            "name": "Like New",
+            "multiplier": 1,
+            "badge_points_cost": 100,
+            "duration": 5,
+            "cooldown": 1,
+            "desc": "While active, clears the cooldown on every ability for all players in your lane.<br><br>This item can only be purchased with badge points."
+        }
+    },
+    "upgrades": {
+        "0": {
+            "name": "Light Armor",
+            "multiplier": "1.3",
+            "type": 0,
+            "cost": 100,
+            "cost_exponential_base": "2.5",
+            "desc": "Increases your health (HP)"
+        },
+        "1": {
+            "name": "Auto-fire Cannon",
+            "initial_value": 10,
+            "multiplier": 1,
+            "type": 1,
+            "cost": 150,
+            "cost_exponential_base": "1.3",
+            "desc": "Inflicts damage on your target every second"
+        },
+        "2": {
+            "name": "Armor Piercing Round",
+            "multiplier": 1,
+            "type": 2,
+            "cost": 200,
+            "cost_exponential_base": "1.2",
+            "desc": "Increases your click damage"
+        },
+        "3": {
+            "name": "+Damage to Fire Monsters",
+            "multiplier": "1.5",
+            "type": 3,
+            "cost": 50,
+            "cost_exponential_base": "2.2",
+            "desc": "Do additional damage to Fire Monsters"
+        },
+        "4": {
+            "name": "+Damage to Water Monsters",
+            "multiplier": "1.5",
+            "type": 4,
+            "cost": 50,
+            "cost_exponential_base": "2.2",
+            "desc": "Do additional damage to Water Monsters"
+        },
+        "5": {
+            "name": "+Damage to Air Monsters",
+            "multiplier": "1.5",
+            "type": 5,
+            "cost": 50,
+            "cost_exponential_base": "2.2",
+            "desc": "Do additional damage to Air Monsters"
+        },
+        "6": {
+            "name": "+Damage to Earth Monsters",
+            "multiplier": "1.5",
+            "type": 6,
+            "cost": 50,
+            "cost_exponential_base": "2.2",
+            "desc": "Do additional damage to Earth Monsters"
+        },
+        "7": {
+            "name": "Lucky Shot",
+            "multiplier": "1.5",
+            "type": 7,
+            "cost": 50,
+            "cost_exponential_base": "2.5",
+            "required_upgrade": 2,
+            "required_upgrade_level": 5,
+            "desc": "Increase your critical hit click damage"
+        },
+        "8": {
+            "name": "Heavy Armor",
+            "multiplier": 10,
+            "type": 0,
+            "cost": 10000,
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 0,
+            "required_upgrade_level": 10,
+            "desc": "Increases your health (HP)"
+        },
+        "9": {
+            "name": "Advanced Targeting",
+            "multiplier": 10,
+            "type": 1,
+            "cost": 10000,
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 1,
+            "required_upgrade_level": 10,
+            "desc": "Increases the damage inflicted by your Auto-fire Cannon"
+        },
+        "10": {
+            "name": "Explosive Rounds",
+            "multiplier": 10,
+            "type": 2,
+            "cost": 10000,
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 2,
+            "required_upgrade_level": 10,
+            "desc": "Increases your click damage"
+        },
+        "11": {
+            "name": "Medics",
+            "type": 8,
+            "cost": 5000,
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 0,
+            "ability": 7,
+            "desc": "Slowly heals everyone in the current lane that is still alive"
+        },
+        "12": {
+            "name": "Morale Booster",
+            "type": 8,
+            "cost": 10000000,
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 1,
+            "required_upgrade_level": 20,
+            "ability": 5,
+            "desc": "Increases all damage done by players in the current lane"
+        },
+        "13": {
+            "name": "Good Luck Charms",
+            "type": 8,
+            "cost": 1000000,
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 2,
+            "required_upgrade_level": 5,
+            "ability": 6,
+            "desc": "Increases chance to do critical click damage for players in the current lane"
+        },
+        "14": {
+            "name": "Metal Detector",
+            "type": 8,
+            "cost": 10000000,
+            "cost_exponential_base": "2.2",
+            "ability": 8,
+            "desc": "Increases gold dropped by enemies in the current lane"
+        },
+        "15": {
+            "name": "Decrease Cooldowns",
+            "type": 8,
+            "cost": 10000000,
+            "cost_exponential_base": "2.2",
+            "ability": 9,
+            "desc": "While active, decreases cooldowns for any newly activated ability in the current lane (does not stack)."
+        },
+        "16": {
+            "name": "Tactical Nuke",
+            "type": 8,
+            "cost": 100000,
+            "cost_exponential_base": 5,
+            "required_upgrade": 2,
+            "required_upgrade_level": 10,
+            "ability": 10,
+            "desc": "Launches a tactical nuclear missile that does high damage to your current target."
+        },
+        "17": {
+            "name": "Cluster Bomb",
+            "type": 8,
+            "cost": 1000000,
+            "cost_exponential_base": "2.2",
+            "ability": 11,
+            "required_upgrade": 1,
+            "required_upgrade_level": 10,
+            "desc": "Drops a cluster bomb, damaging all enemies in your lane."
+        },
+        "18": {
+            "name": "Napalm",
+            "type": 8,
+            "cost": 2000000,
+            "cost_exponential_base": "2.2",
+            "ability": 12,
+            "required_upgrade": 1,
+            "required_upgrade_level": 10,
+            "desc": "Drops napalm, inflicting damage on all enemies in your lane over time."
+        },
+        "19": {
+            "name": "Boss Loot",
+            "multiplier": "0.01",
+            "type": 9,
+            "cost": 100000,
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 1,
+            "required_upgrade_level": 10,
+            "desc": "Increase your chance to get loot after defeating a boss"
+        },
+        "20": {
+            "name": "Energy Shields",
+            "multiplier": 100,
+            "type": 0,
+            "cost": 100000,
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 8,
+            "required_upgrade_level": 10,
+            "desc": "Increases your health (HP)"
+        },
+        "21": {
+            "name": "Farming Equipment",
+            "multiplier": 100,
+            "type": 1,
+            "cost": 100000,
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 9,
+            "required_upgrade_level": 10,
+            "desc": "Increases the damage inflicted by your Auto-fire Cannon"
+        },
+        "22": {
+            "name": "Railgun",
+            "multiplier": 100,
+            "type": 2,
+            "cost": 100000,
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 10,
+            "required_upgrade_level": 10,
+            "desc": "Increases your click damage"
+        },
+        "23": {
+            "name": "Personal Training",
+            "multiplier": 1000,
+            "type": 0,
+            "cost": 1000000,
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 20,
+            "required_upgrade_level": 10,
+            "desc": "Increases your health (HP)"
+        },
+        "24": {
+            "name": "AFK Equipment",
+            "multiplier": 1000,
+            "type": 1,
+            "cost": 1000000,
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 21,
+            "required_upgrade_level": 10,
+            "desc": "Increases the damage inflicted by your Auto-fire Cannon"
+        },
+        "25": {
+            "name": "New Mouse Button",
+            "multiplier": 1000,
+            "type": 2,
+            "cost": 1000000,
+            "cost_exponential_base": "2.2",
+            "required_upgrade": 22,
+            "required_upgrade_level": 10,
+            "desc": "Increases your click damage"
+        }
+    }
+}

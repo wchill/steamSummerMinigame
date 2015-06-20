@@ -2,12 +2,12 @@
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 6.1.5
+// @version 7.0.0
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
-// @updateURL https://raw.githubusercontent.com/wchill/steamSummerMinigame/anti-troll/autoPlay.user.js
-// @downloadURL https://raw.githubusercontent.com/wchill/steamSummerMinigame/anti-troll/autoPlay.user.js
+// @updateURL https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js
+// @downloadURL https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js
 // ==/UserScript==
 
 // IMPORTANT: Update the @version property above to a higher number such as 1.1 and 1.2 when you update the script! Otherwise, Tamper / Greasemonkey users will not update automatically.
@@ -16,13 +16,11 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '6.1.5 Even Better Anti-Troll Branch';
+	var SCRIPT_VERSION = '7.0.0';
 
 	// OPTIONS
 	var clickRate = 20;
 	var logLevel = 1; // 5 is the most verbose, 0 disables all log
-
-	var enableAutoClicker = getPreferenceBoolean("enableAutoClicker", true);
 
 	var removeInterface = getPreferenceBoolean("removeInterface", true); // get rid of a bunch of pointless DOM var removeParticles = getPreferenceBoolean("removeParticles", true);
 	var removeParticles = getPreferenceBoolean("removeParticles", true);
@@ -30,7 +28,7 @@
 	var removeCritText = getPreferenceBoolean("removeCritText", false);
 	var removeGoldText = getPreferenceBoolean("removeGoldText", false);
 	var removeAllText = getPreferenceBoolean("removeAllText", false);
-	var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined");
+	var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined" || w.usingMsgScript);
 	var enableFingering = getPreferenceBoolean("enableFingering", true);
 	var disableRenderer = getPreferenceBoolean("disableRenderer", false);
 	var useTrollTracker = getPreferenceBoolean("useTrollTracker", false);
@@ -45,7 +43,7 @@
 	var wormHoleConstantUseOverride = false;
 	var isAlreadyRunning = false;
 	var refreshTimer = null;
-	var currentClickRate = enableAutoClicker ? clickRate : 0;
+	var currentClickRate = clickRate;
 	var lastLevel = 0;
 	var goldHelmURLs = {
 		"Original Gold Helm": "https://i.imgur.com/1zRXQgm.png",
@@ -311,7 +309,6 @@
 		options1.style["column-count"] = 3;
 		options1.style.width = "100%";
 
-		options1.appendChild(makeCheckBox("enableAutoClicker", "Enable autoclicker", enableAutoClicker, toggleAutoClicker, false));
 		options1.appendChild(makeCheckBox("removeInterface", "Remove interface", removeInterface, handleEvent, true));
 		options1.appendChild(makeCheckBox("removeParticles", "Remove particle effects", removeParticles, handleEvent, true));
 		options1.appendChild(makeCheckBox("removeFlinching", "Remove flinching effects", removeFlinching, handleEvent, true));
@@ -320,7 +317,7 @@
 		options1.appendChild(makeCheckBox("removeAllText", "Remove all text", removeAllText, toggleAllText, false));
 		options1.appendChild(makeCheckBox("disableRenderer", "Throttle game renderer", disableRenderer, toggleRenderer, true));
 
-		if (typeof GM_info !== "undefined") {
+		if (typeof GM_info !== "undefined" || w.usingMsgScript) {
 			options1.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh", enableAutoRefresh, toggleAutoRefresh, false));
 		}
 
@@ -364,13 +361,13 @@
 		badgePoints -= buy_count*200;
 
 		// How many WH/LN do we buy too?
-		var purchaseCount = Math.floor(badgePoints / 600);
+		var purchaseCount = Math.floor(badgePoints / 200);
 
 		// Buy mostly WH
-		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='26' data-cost='100'></a>"), purchaseCount * 5 );
+		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='26' data-cost='100'></a>"), purchaseCount );
 
 		// Buy a few LN
-		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='27' data-cost='100'></a>"), purchaseCount);
+		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='27' data-cost='100'></a>"), purchaseCount );
 
 		//Rest is Pumped Up
 		w.g_Minigame.CurrentScene().TrySpendBadgePoints(w.$J("<a data-type='19' data-cost='1'></a>"), badgePoints % 100 );
@@ -434,6 +431,16 @@
 		}
 	}
 
+	function getRemainingTime() {
+		var time = Math.floor(s().m_nTime) % 86400;
+		time = time - 16*3600;
+		if (time < 0) {
+			time = time + 86400;
+		}
+
+		return 86400 - time;
+	}
+
 	function MainLoop() {
 		if (!isAlreadyRunning) {
 			isAlreadyRunning = true;
@@ -445,12 +452,23 @@
 
 			NUISANCE_ABILITIES.forEach(disableAbility);
 
+			wormHoleConstantUseOverride = (getRemainingTime()*3 < getItemCount(ABILITIES.WORMHOLE)) || (getRemainingTime()*3 < getItemCount(ABILITIES.LIKE_NEW));
 			wormHoleConstantUse = ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds)) || wormHoleConstantUseOverride;
 
 			updateLaneData();
 			attemptRespawn();
 
-			if ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds)) {
+			if (wormholeInterval) {
+				w.clearInterval(wormholeInterval);
+				wormholeInterval = false;
+			}
+
+			if (likenewInterval) {
+				w.clearInterval(likenewInterval);
+				likenewInterval = false;
+			}
+
+			if ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds) && !wormHoleConstantUseOverride) {
 				if (level % control.rainingRounds === 0) {
 					goToRainingLane();
 				} else {
@@ -473,7 +491,7 @@
 				useMaxElementalDmgIfRelevant();
 			}
 			else {
-				if (level % control.rainingRounds === 0) {
+				if (level % control.rainingRounds === 0 || wormHoleConstantUseOverride) {
 					goToRainingLane();
 				} else {
 					goToLaneWithBestTarget();
@@ -820,15 +838,6 @@
 		fixActiveCapacityUI();
 	}
 
-	function toggleAutoClicker(event) {
-		var value = enableAutoClicker;
-		if (event !== undefined) {
-			value = handleCheckBox(event);
-		}
-		enableAutoClicker = value;
-		advLog('Autoclicker is ' + enableAutoClicker, 1);
-	}
-
 	function toggleAutoRefresh(event) {
 		var value = enableAutoRefresh;
 		if (event !== undefined) {
@@ -894,16 +903,8 @@
 
 	function getWantedClicksPerSecond() {
 		var level = getGameLevel();
-		if (!enableAutoClicker) {
-			return 0;
-		}
 		if (level % control.rainingRounds === 0) {
 			return 0;
-		}
-		if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds) {
-			return Math.floor(clickRate/10);
-		} else if (level % control.rainingRounds > control.rainingRounds - control.rainingSafeRounds*2) {
-			return Math.floor(clickRate/5);
 		}
 		return clickRate;
 	}
@@ -1313,13 +1314,10 @@
 	function useWormholeIfRelevant() {
 		// Check the time before using wormhole.
 		var level = getGameLevel();
-		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse) {
-			if (wormholeInterval) {
-				w.clearInterval(wormholeInterval);
-				wormholeInterval = false;
-			}
+		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse && !wormHoleConstantUseOverride) {
 			return;
 		}
+
 		if (!wormholeInterval) {
 			wormholeInterval = w.setInterval(function(){
 				w.g_Minigame.m_CurrentScene.m_rgAbilityQueue.push({'ability': 26}); //wormhole
@@ -1331,11 +1329,7 @@
 
 	function useLikeNew() {
 		var level = getGameLevel();
-		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse) {
-			if (likenewInterval) {
-				w.clearInterval(likenewInterval);
-				likenewInterval = false;
-			}
+		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse && !wormHoleConstantUseOverride) {
 			return;
 		}
 		if (!likenewInterval) {
@@ -1457,6 +1451,16 @@
 			}
 		}
 		return false;
+	}
+
+	function getItemCount(itemId) {
+		for (var i = 0; i < s().m_rgPlayerTechTree.ability_items.length; ++i) {
+			var abilityItem = s().m_rgPlayerTechTree.ability_items[i];
+			if (abilityItem.ability == itemId) {
+				return abilityItem.quantity;
+			}
+		}
+		return 0;
 	}
 
 	function tryUsingItem(itemId, checkInLane) {
