@@ -1319,16 +1319,18 @@
 		if (!canUseItem(ABILITIES.RAINING_GOLD)) {
 			return;
 		}
+		// don't use gold rain on WH levels, we don't want to encourage dumb people
+		if (getGameLevel() % control.rainingRounds !== 0) {
+			var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
+			// check if current target is a boss, otherwise its not worth using the gold rain
+			if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
+				var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
 
-		var enemy = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target);
-		// check if current target is a boss, otherwise its not worth using the gold rain
-		if (enemy && enemy.m_data.type == ENEMY_TYPE.BOSS) {
-			var enemyBossHealthPercent = enemy.m_flDisplayedHP / enemy.m_data.max_hp;
-
-			if (enemyBossHealthPercent >= 0.6) { // We want sufficient time for the gold rain to be applicable
-				// Gold Rain is purchased, cooled down, and needed. Trigger it.
-				advLog('Gold rain is purchased and cooled down, Triggering it on boss', 2);
-				triggerItem(ABILITIES.RAINING_GOLD);
+				if (enemyBossHealthPercent >= 0.6) { // We want sufficient time for the gold rain to be applicable
+					// Gold Rain is purchased, cooled down, and needed. Trigger it.
+					advLog('Gold rain is purchased and cooled down, Triggering it on boss', 2);
+					triggerItem(ABILITIES.RAINING_GOLD);
+				}
 			}
 		}
 	}
