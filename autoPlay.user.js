@@ -1878,7 +1878,7 @@
 	}
 
 	/** Check periodicaly if the welcome panel is visible
-	 * then trigger an event 'event:welcomePanelVisible' */
+	* then trigger an event 'event:welcomePanelVisible' */
 	function waitForWelcomePanelLoad() {
 		var checkTicks = 20; // not very elegant but effective
 		var waitForWelcomePanelInterval = setInterval(function() {
