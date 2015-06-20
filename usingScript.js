@@ -1,1 +1,1 @@
-w.usingMsgScript = true;
+window.usingMsgScript = true;
