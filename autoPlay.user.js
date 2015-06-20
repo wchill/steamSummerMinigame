@@ -1114,7 +1114,7 @@
 				BOSS_DISABLED_ABILITIES.forEach(disableAbility);
 			} else {
 				BOSS_DISABLED_ABILITIES.forEach(enableAbility);
-				
+
 				//keep offence abilities disabled to avoid trigger happy players
 				disableAbility(ABILITIES.TACTICAL_NUKE);
 				disableAbility(ABILITIES.NAPALM);
