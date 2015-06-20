@@ -1,0 +1,18 @@
+{
+	"name": "Monster Summer Game 2015",
+	"description": "Cheats for you in the Steam Monster Summer Game.",
+	"icons": {
+		"16": "icon.png"
+	},
+	"content_scripts": [ {
+		"js": [ "js/jQuery.min.js", "js/mainloop.js" ],
+		"matches": [ "*://steamcommunity.com/minigame/towerattack", "*://steamcommunity.com/minigame/towerattack/", "*://steamcommunity.com//minigame//towerattack/", "*://steamcommunity.com//minigame//towerattack//" ],
+		"run_at": "document_end"
+	}],
+	"version": "1.0",
+	"permissions": [ "https://github.com/wchill/steamSummerMinigame/*", "https://raw.githubusercontent.com/wchill/steamSummerMinigame/*" ],
+	"web_accessible_resources": [ "js/joinGame.js" ],
+	"content_security_policy": "script-src 'self' https://raw.githubusercontent.com; object-src 'self'",
+	"minimum_chrome_version": "9",
+	"manifest_version": 2
+}
