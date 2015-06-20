@@ -178,7 +178,6 @@
 
 	function firstRun() {
 		advLog("Starting /u/wchill's script (version " + SCRIPT_VERSION + ")", 1);
-		w.usingMsgScript = SCRIPT_VERSION;
 
 		trt_oldCrit = s().DoCritEffect;
 		trt_oldPush = s().m_rgClickNumbers.push;
