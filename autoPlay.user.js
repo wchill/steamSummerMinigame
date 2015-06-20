@@ -449,6 +449,11 @@
 
 			updateLaneData();
 			attemptRespawn();
+			
+			if (wormholeInterval) {
+				w.clearInterval(wormholeInterval);
+				wormholeInterval = false;
+			}
 
 			if ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds)) {
 				if (level % control.rainingRounds === 0) {
@@ -1314,10 +1319,6 @@
 		// Check the time before using wormhole.
 		var level = getGameLevel();
 		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse) {
-			if (wormholeInterval) {
-				w.clearInterval(wormholeInterval);
-				wormholeInterval = false;
-			}
 			return;
 		}
 		if (!wormholeInterval) {
