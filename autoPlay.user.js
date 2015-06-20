@@ -3,11 +3,13 @@
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
 // @version 6.0.8
-// @match *://steamcommunity.com/minigame/towerattack*
-// @match *://steamcommunity.com//minigame/towerattack*
-// @grant none
+// @match *://steamcommunity.com/minigame*
+// @grant GM_xmlhttpRequest
 // @updateURL https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js
 // @downloadURL https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js
+// @require		https://raw.github.com/dcodeIO/Long.js/master/dist/Long.min.js
+// @require		https://raw.github.com/dcodeIO/ByteBuffer.js/master/dist/ByteBufferAB.min.js
+// @require     https://raw.github.com/dcodeIO/ProtoBuf.js/master/dist/ProtoBuf.min.js
 // ==/UserScript==
 
 // IMPORTANT: Update the @version property above to a higher number such as 1.1 and 1.2 when you update the script! Otherwise, Tamper / Greasemonkey users will not update automatically.
@@ -175,10 +177,35 @@
 	function s() {
 		return w.g_Minigame.m_CurrentScene;
 	}
-
+	
+	function doXHR(url, cb, async){
+		GM_xmlhttpRequest({
+			method: "GET",
+			url: url,
+			onload: function (response) {
+				cb(response);
+			}
+		});
+	}
+	
+	function doXHRBUF(url, cb, async){
+		var xhr = new XMLHttpRequest();
+		xhr.onreadystatechange=function()
+		{
+			if (xhr.readyState==4 && xhr.status==200)
+			{
+				cb(xhr);
+			}
+		};
+		  
+		xhr.open("GET",url,async);
+		xhr.responseType = "arraybuffer";
+		xhr.send();
+	}
+	
 	function firstRun() {
 		advLog("Starting /u/wchill's script (version " + SCRIPT_VERSION + ")", 1);
-
+		
 		trt_oldCrit = s().DoCritEffect;
 		trt_oldPush = s().m_rgClickNumbers.push;
 		trt_oldRender = w.g_Minigame.Render;
@@ -1580,7 +1607,7 @@
 
 	function getCurrentTime() {
 		return s().m_rgGameData.timestamp;
-	}
+	} 
 
 	function getActiveAbilityLaneCount(ability) {
 		var now = getCurrentTime();
@@ -1608,27 +1635,55 @@
 			console.log(msg);
 		}
 	}
+	
+	//check room list if on game load page
+	if(window.location.href.indexOf("towerattack") == -1){
+		var builder = dcodeIO.ProtoBuf.loadProtoFile("http://cdn.akamai.steamstatic.com/steamcommunity/public/assets/minigame/towerattack/messages.proto");
+		var RoomData = builder.build("CTowerAttack_GetPlayerNames_Response");
 
-	if (w.SteamDB_Minigame_Timer) {
-		w.clearInterval(w.SteamDB_Minigame_Timer);
-	}
-
-	w.SteamDB_Minigame_Timer = w.setInterval(function() {
-		if (w.g_Minigame && s().m_bRunning && s().m_rgPlayerTechTree && s().m_rgGameData) {
+		console.log("Checking for rooms...");
+		doXHR("http://docker.harkin.me/rooms.json", function(rsp) {
+			console.log(rsp);
+			var data = JSON.parse(rsp.response);
+			if(data.list != undefined){
+				//check room status
+				for(var x = 0; x < data.list.length; x++){
+					var room = data.list[x];
+					console.log("Checking room: "+room.id);
+					doXHRBUF("http://steamapi-a.akamaihd.net/ITowerAttackMiniGameService/GetPlayerNames/v0001/?input_json="+JSON.stringify({"gameid":room.id,"accountids":null})+"&format=protobuf_raw", function(rsp) {
+						console.log(rsp);
+						var rd = RoomData.decode(rsp.response);
+						console.log(rd);
+                        if(rd.names != null && rd.names.length < 1500){
+                            JoinGame(room.id);
+                        }
+					}, true);
+				}
+			}
+		}, true);
+		
+		return; //Do not run script, if on loading page
+	}else{
+		if (w.SteamDB_Minigame_Timer) {
 			w.clearInterval(w.SteamDB_Minigame_Timer);
-			firstRun();
-			w.SteamDB_Minigame_Timer = w.setInterval(MainLoop, 1000);
 		}
-	}, 1000);
 
-	// reload page if game isn't fully loaded, regardless of autoRefresh setting
-	w.setTimeout(function() {
-		// m_rgGameData is 'undefined' if stuck at 97/97 or below
-		if (!w.g_Minigame || !w.g_Minigame.m_CurrentScene || !w.g_Minigame.m_CurrentScene.m_rgGameData) {
-			w.location.reload(true);
-		}
-	}, autoRefreshSecondsCheckLoadedDelay * 1000);
+		w.SteamDB_Minigame_Timer = w.setInterval(function() {
+			if (w.g_Minigame && s().m_bRunning && s().m_rgPlayerTechTree && s().m_rgGameData) {
+				w.clearInterval(w.SteamDB_Minigame_Timer);
+				firstRun();
+				w.SteamDB_Minigame_Timer = w.setInterval(MainLoop, 1000);
+			}
+		}, 1000);
 
+		// reload page if game isn't fully loaded, regardless of autoRefresh setting
+		w.setTimeout(function() {
+			// m_rgGameData is 'undefined' if stuck at 97/97 or below
+			if (!w.g_Minigame || !w.g_Minigame.m_CurrentScene || !w.g_Minigame.m_CurrentScene.m_rgGameData) {
+				w.location.reload(true);
+			}
+		}, autoRefreshSecondsCheckLoadedDelay * 1000);
+	}
 	// Append gameid to breadcrumbs
 	var breadcrumbs = document.querySelector('.breadcrumbs');
 
