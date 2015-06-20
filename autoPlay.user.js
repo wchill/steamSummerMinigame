@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 7.0.1
+// @version 7.0.2
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '7.0.1';
+	var SCRIPT_VERSION = '7.0.2';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -613,11 +613,17 @@
 
 					switch( rgEntry.type ) {
 						case 'ability':
+						  console.log(rgEntry);
 							var ele = this.m_eleUpdateLogTemplate.clone();
 							if(useTrollTracker) {
-								if(getGameLevel() % 100 === 0 && [10, 11, 12, 15, 20].indexOf(rgEntry.ability) > -1) {
+								if((getGameLevel() % 100 === 0 && [10, 11, 12, 15, 20].indexOf(rgEntry.ability) > -1)) {
 									w.$J(ele).data('abilityid', rgEntry.ability );
-									w.$J('.name', ele).text( rgEntry.actor_name );
+									if(w.BigNumber !== "undefined") {
+										var num = new w.BigNumber(rgEntry.actor);
+										w.$J('.name', ele).append( "<a href=\"http://steamcommunity.com/profiles/" + num.plus(new w.BigNumber("76561197960265728")) + "\" target=\"_blank\" style=\"color: red; font-weight: bold;\">" + rgEntry.actor_name + "</a>" );
+									} else {
+										w.$J('.name', ele).text( rgEntry.actor_name );
+									}
 									w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());
 									w.$J('img', ele).attr( 'src', w.g_rgIconMap['ability_' + rgEntry.ability].icon );
 
@@ -626,7 +632,23 @@
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 									advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
 									w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
-								} else if(getGameLevel() % 100 !== 0 && getGameLevel() % 10 > 3 && rgEntry.ability === 26) {
+									/*
+									w.$J.ajax({
+										type: 'POST',
+										url: 'https://to.com/postHere.php',
+										crossDomain: true,
+										data: '{"name":rgEntry.actor_name, "steamid":rgEntry.actor, "round":getGameLevel(), "ability":rgEntry.ability, "time":rgEntry.time}',
+										dataType: 'json',
+										success: function(responseData, textStatus, jqXHR) {
+											var value = responseData.someKey;
+											advLog("Reported " + rgEntry.actor_name + " at time " + rgEntry.time, 2);
+										},
+										error: function (responseData, textStatus, errorThrown) {
+											console.log('POST failed.', 2);
+										}
+									});
+									*/
+								} else if(getGameLevel() % 100 !== 0 && getGameLevel() % 10 === 9 && rgEntry.ability === 26) {
 									w.$J(ele).data('abilityid', rgEntry.ability );
 									w.$J('.name', ele).text( rgEntry.actor_name );
 									w.$J('.ability', ele).text( this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel());

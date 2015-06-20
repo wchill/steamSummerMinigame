@@ -18,6 +18,7 @@ function injectScript(file, node) {
 
 }
 injectScript( 'https://wchill.github.io/steamSummerMinigame/usingScript.js', 'body');
+injectScript( chrome.extension.getURL('/js/bignumber.js'), 'body');
 injectScript( 'https://wchill.github.io/steamSummerMinigame/autoPlay.user.js', 'body');
 injectScript( 'https://wchill.github.io/steamSummerMinigame/upgrademanager.user.js', 'body');
 
@@ -84,4 +85,3 @@ var loop = setInterval(function() {
 }, 1000);
 
 */
-
