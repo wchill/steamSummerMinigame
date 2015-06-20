@@ -455,7 +455,7 @@
 
 			NUISANCE_ABILITIES.forEach(disableAbility);
 
-			wormHoleConstantUseOverride = (getRemainingTime()*5 < getItemCount(ABILITIES.WORMHOLE));
+			wormHoleConstantUseOverride = (getRemainingTime()*5 < getItemCount(ABILITIES.WORMHOLE)) || (getRemainingTime()*5 < getItemCount(ABILITIES.LIKE_NEW));
 			wormHoleConstantUse = ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds)) || wormHoleConstantUseOverride;
 
 			updateLaneData();
