@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 6.1.7
+// @version 6.1.8
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '6.1.7 EPIC Anti-Troll Branch';
+	var SCRIPT_VERSION = '6.1.8 EPIC Anti-Troll Branch';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -455,7 +455,7 @@
 
 			NUISANCE_ABILITIES.forEach(disableAbility);
 
-			wormHoleConstantUseOverride = (getRemainingTime()*5 < getItemCount(ABILITIES.WORMHOLE)) || (getRemainingTime()*5 < getItemCount(ABILITIES.LIKE_NEW));
+			wormHoleConstantUseOverride = (getRemainingTime()*3 < getItemCount(ABILITIES.WORMHOLE)) || (getRemainingTime()*3 < getItemCount(ABILITIES.LIKE_NEW));
 			wormHoleConstantUse = ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds)) || wormHoleConstantUseOverride;
 
 			updateLaneData();
