@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 7.0.2
+// @version 7.0.3
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '7.0.2';
+	var SCRIPT_VERSION = '7.0.3';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -613,7 +613,6 @@
 
 					switch( rgEntry.type ) {
 						case 'ability':
-						  console.log(rgEntry);
 							var ele = this.m_eleUpdateLogTemplate.clone();
 							if(useTrollTracker) {
 								if((getGameLevel() % 100 === 0 && [10, 11, 12, 15, 20].indexOf(rgEntry.ability) > -1)) {
