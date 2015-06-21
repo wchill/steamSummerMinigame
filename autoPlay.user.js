@@ -638,7 +638,8 @@
 				}
 
 				var nHighestTime = 0;
-
+				
+				/*jshint loopfunc: true */
 				for( var i=rgLaneLog.length-1; i >= 0; i--) {
 					var rgEntry = rgLaneLog[i];
 
