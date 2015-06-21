@@ -638,7 +638,6 @@
 				}
 
 				var nHighestTime = 0;
-				
 				for( var i=rgLaneLog.length-1; i >= 0; i--) {
 					var rgEntry = rgLaneLog[i];
 
@@ -1856,7 +1855,7 @@
 	{
 		console.log("Reported " + this.rgEntry.actor_name + " at time " + this.rgEntry.time);
 	}
-	function reportFailure(dataFromServer,textStatus,jqXHR)
+	function reportFailure(dataFromServer, textStatus, jqXHR)
 	{
 		console.log('POST failed.');
 	}
