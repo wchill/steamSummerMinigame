@@ -36,13 +36,10 @@
 
 	var autoRefreshMinutes = 30; // refresh page after x minutes
 	var autoRefreshMinutesRandomDelay = 10;
-	var autoRefreshSecondsCheckLoadedDelay = 30;
 
 	// DO NOT MODIFY
 	var wormHoleConstantUse = false;
 	var wormHoleConstantUseOverride = false;
-	var isAlreadyRunning = false;
-	var refreshTimer = null;
 	var currentClickRate = clickRate;
 	var lastLevel = 0;
 	var goldHelmURLs = {
@@ -60,6 +57,8 @@
 	var trt_oldCrit = function() {};
 	var trt_oldPush = function() {};
 	var trt_oldRender = function() {};
+	var runOnUpdateWhileTrue = [];
+	var autoRefreshTime = 0;
 
 	var control = {
 		speedThreshold: 2000,
@@ -187,190 +186,195 @@
 		return w.g_Minigame.m_CurrentScene;
 	}
 
-	function firstRun() {
-		advLog("Starting /u/wchill's script (version " + SCRIPT_VERSION + ")", 1);
-
-		trt_oldCrit = s().DoCritEffect;
-		trt_oldPush = s().m_rgClickNumbers.push;
-		trt_oldRender = w.g_Minigame.Render;
-		lockElements();
-
-		// disable particle effects - this drastically reduces the game's memory leak
-		if (removeParticles) {
-			disableParticles();
-		}
-
-		// disable enemy flinching animation when they get hit
-		if (removeFlinching && w.CEnemy) {
-			w.CEnemy.prototype.TakeDamage = function() {};
-			w.CEnemySpawner.prototype.TakeDamage = function() {};
-			w.CEnemyBoss.prototype.TakeDamage = function() {};
-		}
-
-		if (removeCritText) {
-			toggleCritText();
-		}
-
-		if (removeAllText) {
-			toggleAllText();
-		}
-
-		var node = document.getElementById("abilities");
-
-		if (node) {
-			node.style.textAlign = 'left';
-		}
-
-		if (removeInterface) {
-			node = document.getElementById("global_header");
-			if (node && node.parentNode) {
-				node.parentNode.removeChild(node);
+	// Adding our hook function to the actual object rather than the prototype means we don't have to worry about
+	// cleaning up before reloading code with a new hook function.
+	function hookPrototype(proto, target, method, before, after) {
+		target[method] = function() {
+			try {
+				var args = [].slice.call(arguments);
+				if (before) {
+					before.apply(target, args);
+				}
+				proto[method].apply(target, args);
+				if (after) {
+					after.apply(target, args);
+				}
+			} catch (e) {
+				console.error(e);
 			}
-			node = document.getElementById("footer");
-			if (node && node.parentNode) {
-				node.parentNode.removeChild(node);
-			}
-			node = document.getElementById("footer_spacer");
-			if (node && node.parentNode) {
-				node.parentNode.removeChild(node);
-			}
-			node = document.querySelector(".pagecontent");
-			if (node) {
-				node.style["padding-bottom"] = 0;
-			}
-
-			document.body.style.backgroundPosition = "0 0";
-		}
-
-		if (enableAutoRefresh) {
-			autoRefreshPage(autoRefreshMinutes);
-		}
-
-		if (enableFingering) {
-			startFingering();
-		}
-
-		if (disableRenderer) {
-			toggleRenderer();
-		}
-
-		if (w.CSceneGame !== undefined) {
-			w.CSceneGame.prototype.DoScreenShake = function() {};
-		}
-
-		fixActiveCapacityUI();
-
-		// Easter egg button
-		var egg = document.createElement("span");
-		egg.className = "toggle_music_btn";
-		egg.textContent = "Easter Egg";
-		egg.onclick = function() {
-			w.SmackTV();
 		};
-		document.querySelector(".game_options").insertBefore(egg, document.querySelector(".leave_game_btn"));
+	}
 
-		// Add "players in game" label
-		var titleActivity = document.querySelector('.title_activity');
-		var playersInGame = document.createElement('span');
-		playersInGame.innerHTML = '<span id=\"players_in_game\">0/1500</span>&nbsp;Players in room<br>';
-		titleActivity.insertBefore(playersInGame, titleActivity.firstChild);
+	function firstRun(scene) {
+		try {
+			advLog("Starting /u/wchill's script (version " + SCRIPT_VERSION + ")", 1);
 
-		// Fix alignment
-		var activity = document.getElementById("activitylog");
-		activity.style.marginTop = "33px";
+			hookPrototype(w.CSceneGame.prototype, scene, 'OnReceiveUpdate', false, afterOnReceiveUpdate);
+			hookPrototype(w.CSceneGame.prototype, scene, 'OnSimulatedServerTick', false, afterOnSimulatedServerTick);
+			hookPrototype(w.CSceneGame.prototype, scene, 'TryAbility', beforeTryAbility);
+			hookPrototype(w.CUI.prototype, scene.m_UI, 'UpdateSpendBadgePointsDialog', false, afterUpdateSpendBadgePointsDialog);
 
-		var newDiv = document.createElement("div");
-		document.getElementsByClassName('pagecontent')[0].insertBefore(newDiv, document.getElementsByClassName('footer_spacer')[0]);
-		newDiv.className = "options_box";
+			trt_oldCrit = s().DoCritEffect;
+			trt_oldPush = s().m_rgClickNumbers.push;
+			trt_oldRender = w.g_Minigame.Render;
+			lockElements();
 
-		var options_box = document.querySelector(".options_box");
+			// disable particle effects - this drastically reduces the game's memory leak
+			if (removeParticles) {
+				disableParticles();
+			}
 
-		if(!options_box) {
-			options_box = document.querySelector(".options_box");
+			// disable enemy flinching animation when they get hit
+			if (removeFlinching && w.CEnemy) {
+				w.CEnemy.prototype.TakeDamage = function() {};
+				w.CEnemySpawner.prototype.TakeDamage = function() {};
+				w.CEnemyBoss.prototype.TakeDamage = function() {};
+			}
+
+			if (removeCritText) {
+				toggleCritText();
+			}
+
+			if (removeAllText) {
+				toggleAllText();
+			}
+
+			var node = document.getElementById("abilities");
+
+			if (node) {
+				node.style.textAlign = 'left';
+			}
+
+			if (removeInterface) {
+				node = document.getElementById("global_header");
+				if (node && node.parentNode) {
+					node.parentNode.removeChild(node);
+				}
+				node = document.getElementById("footer");
+				if (node && node.parentNode) {
+					node.parentNode.removeChild(node);
+				}
+				node = document.getElementById("footer_spacer");
+				if (node && node.parentNode) {
+					node.parentNode.removeChild(node);
+				}
+				node = document.querySelector(".pagecontent");
+				if (node) {
+					node.style["padding-bottom"] = 0;
+				}
+
+				document.body.style.backgroundPosition = "0 0";
+			}
+
+			if (enableAutoRefresh) {
+				toggleAutoRefresh();
+			}
+
+			if (enableFingering) {
+				startFingering();
+			}
+
+			if (disableRenderer) {
+				runOnUpdateWhileTrue.push(toggleRenderer);
+			}
+
+			if (w.CSceneGame !== undefined) {
+				w.CSceneGame.prototype.DoScreenShake = function() {};
+			}
+
+			fixActiveCapacityUI();
+
+			// Easter egg button
+			var egg = document.createElement("span");
+			egg.className = "toggle_music_btn";
+			egg.textContent = "Easter Egg";
+			egg.onclick = function() {
+				w.SmackTV();
+			};
+			document.querySelector(".game_options").insertBefore(egg, document.querySelector(".leave_game_btn"));
+
+			// Add "players in game" label
+			var titleActivity = document.querySelector('.title_activity');
+			var playersInGame = document.createElement('span');
+			playersInGame.innerHTML = '<span id=\"players_in_game\">0/1500</span>&nbsp;Players in room<br>';
+			titleActivity.insertBefore(playersInGame, titleActivity.firstChild);
+
+			// Fix alignment
+			var activity = document.getElementById("activitylog");
+			activity.style.marginTop = "33px";
+
+			var newDiv = document.createElement("div");
+			document.getElementsByClassName('pagecontent')[0].insertBefore(newDiv, document.getElementsByClassName('footer_spacer')[0]);
+			newDiv.className = "options_box";
+
+			var options_box = document.querySelector(".options_box");
+
+			if(!options_box) {
+				options_box = document.querySelector(".options_box");
+			}
+			options_box.innerHTML = '<b>OPTIONS</b> (v' + SCRIPT_VERSION + ')<br>Settings marked with a <span style="color:#FF5252;font-size:22px;line-height:4px;vertical-align:bottom;">*</span> requires a refresh to take effect.<hr>';
+
+			// reset the CSS for the info box for aesthetics
+			options_box.className = "options_box";
+			options_box.style.backgroundColor = "#000000";
+			options_box.style.width = "600px";
+			options_box.style.marginTop = "12px";
+			options_box.style.padding = "12px";
+			options_box.style.boxShadow = "2px 2px 0 rgba( 0, 0, 0, 0.6 )";
+			options_box.style.color = "#ededed";
+			options_box.style.marginLeft = "auto";
+			options_box.style.marginRight = "auto";
+
+			var info_box = options_box.cloneNode(true);
+
+			var options1 = document.createElement("div");
+			options1.style["-moz-column-count"] = 3;
+			options1.style["-webkit-column-count"] = 3;
+			options1.style["column-count"] = 3;
+			options1.style.width = "100%";
+
+			options1.appendChild(makeCheckBox("removeInterface", "Remove interface", removeInterface, handleEvent, true));
+			options1.appendChild(makeCheckBox("removeParticles", "Remove particle effects", removeParticles, handleEvent, true));
+			options1.appendChild(makeCheckBox("removeFlinching", "Remove flinching effects", removeFlinching, handleEvent, true));
+			options1.appendChild(makeCheckBox("removeCritText", "Remove crit text", removeCritText, toggleCritText, false));
+			options1.appendChild(makeCheckBox("removeGoldText", "Remove gold text", removeGoldText, handleEvent, false));
+			options1.appendChild(makeCheckBox("removeAllText", "Remove all text", removeAllText, toggleAllText, false));
+			options1.appendChild(makeCheckBox("disableRenderer", "Throttle game renderer", disableRenderer, toggleRenderer, true));
+
+			if (typeof GM_info !== "undefined" || w.usingMsgScript !== "undefined") {
+				options1.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh", enableAutoRefresh, toggleAutoRefresh, false));
+			}
+
+			options1.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer", enableFingering, handleEvent, true));
+			options1.appendChild(makeCheckBox("useTrollTracker", "Track improper ability use", useTrollTracker, handleEvent, true));
+			options1.appendChild(makeCheckBox("praiseGoldHelm", "Praise Gold Helm!", praiseGoldHelm, togglePraise, false));
+			options1.appendChild(makeDropdown("praiseGoldHelmImage", "", goldHelmUI, goldHelmURLs, changePraiseImage));
+			options1.appendChild(makeNumber("setLogLevel", "Change the log level", "25px", logLevel, 0, 5, updateLogLevel));
+
+			options_box.appendChild(options1);
+
+			info_box.innerHTML = "<b>GAME INFO</b><br/>";
+			info_box.className = "info_box";
+			info_box.style.right = "0px";
+			lane_info = document.createElement("div");
+			lane_info.style["-moz-column-count"] = 3;
+			lane_info.style["-webkit-column-count"] = 3;
+			lane_info.style["column-count"] = 3;
+
+			lane_info.appendChild(document.createElement("div"));
+			lane_info.appendChild(document.createElement("div"));
+			lane_info.appendChild(document.createElement("div"));
+
+			info_box.appendChild(lane_info);
+			options_box.parentElement.appendChild(info_box);
+
+			var leave_game_box = document.querySelector(".leave_game_helper");
+			leave_game_box.parentElement.removeChild(leave_game_box);
+
+			enhanceTooltips();
+		} catch (e) {
+			console.error('firstRun', e);
 		}
-		options_box.innerHTML = '<b>OPTIONS</b> (v' + SCRIPT_VERSION + ')<br>Settings marked with a <span style="color:#FF5252;font-size:22px;line-height:4px;vertical-align:bottom;">*</span> requires a refresh to take effect.<hr>';
-
-		// reset the CSS for the info box for aesthetics
-		options_box.className = "options_box";
-		options_box.style.backgroundColor = "#000000";
-		options_box.style.width = "600px";
-		options_box.style.marginTop = "12px";
-		options_box.style.padding = "12px";
-		options_box.style.boxShadow = "2px 2px 0 rgba( 0, 0, 0, 0.6 )";
-		options_box.style.color = "#ededed";
-		options_box.style.marginLeft = "auto";
-		options_box.style.marginRight = "auto";
-
-		var info_box = options_box.cloneNode(true);
-
-		var options1 = document.createElement("div");
-		options1.style["-moz-column-count"] = 3;
-		options1.style["-webkit-column-count"] = 3;
-		options1.style["column-count"] = 3;
-		options1.style.width = "100%";
-
-		options1.appendChild(makeCheckBox("removeInterface", "Remove interface", removeInterface, handleEvent, true));
-		options1.appendChild(makeCheckBox("removeParticles", "Remove particle effects", removeParticles, handleEvent, true));
-		options1.appendChild(makeCheckBox("removeFlinching", "Remove flinching effects", removeFlinching, handleEvent, true));
-		options1.appendChild(makeCheckBox("removeCritText", "Remove crit text", removeCritText, toggleCritText, false));
-		options1.appendChild(makeCheckBox("removeGoldText", "Remove gold text", removeGoldText, handleEvent, false));
-		options1.appendChild(makeCheckBox("removeAllText", "Remove all text", removeAllText, toggleAllText, false));
-		options1.appendChild(makeCheckBox("disableRenderer", "Throttle game renderer", disableRenderer, toggleRenderer, true));
-
-		if (typeof GM_info !== "undefined" || w.usingMsgScript !== "undefined") {
-			options1.appendChild(makeCheckBox("enableAutoRefresh", "Enable auto-refresh", enableAutoRefresh, toggleAutoRefresh, false));
-		}
-
-		options1.appendChild(makeCheckBox("enableFingering", "Enable targeting pointer", enableFingering, handleEvent, true));
-		options1.appendChild(makeCheckBox("useTrollTracker", "Track improper ability use", useTrollTracker, handleEvent, true));
-		options1.appendChild(makeCheckBox("praiseGoldHelm", "Praise Gold Helm!", praiseGoldHelm, togglePraise, false));
-		options1.appendChild(makeDropdown("praiseGoldHelmImage", "", goldHelmUI, goldHelmURLs, changePraiseImage));
-		options1.appendChild(makeNumber("setLogLevel", "Change the log level", "25px", logLevel, 0, 5, updateLogLevel));
-
-		options_box.appendChild(options1);
-
-		info_box.innerHTML = "<b>GAME INFO</b><br/>";
-		info_box.className = "info_box";
-		info_box.style.right = "0px";
-		lane_info = document.createElement("div");
-		lane_info.style["-moz-column-count"] = 3;
-		lane_info.style["-webkit-column-count"] = 3;
-		lane_info.style["column-count"] = 3;
-
-		lane_info.appendChild(document.createElement("div"));
-		lane_info.appendChild(document.createElement("div"));
-		lane_info.appendChild(document.createElement("div"));
-
-		info_box.appendChild(lane_info);
-		options_box.parentElement.appendChild(info_box);
-
-		var leave_game_box = document.querySelector(".leave_game_helper");
-		leave_game_box.parentElement.removeChild(leave_game_box);
-
-		enhanceTooltips();
-		waitForWelcomePanelLoad();
-
-		// Determine number of badge points
-		var badgePoints = w.g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points;
-
-		// Determine how many other things to buy
-		var buy_count = (w.g_steamID % 10) + 1;
-
-		// Buy some
-		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='25' data-cost='200'></a>"), buy_count );
-		badgePoints -= buy_count*200;
-
-		// How many WH/LN do we buy too?
-		var purchaseCount = Math.floor(badgePoints / 200);
-
-		// Buy mostly WH
-		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='26' data-cost='100'></a>"), purchaseCount );
-
-		// Buy a few LN
-		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='27' data-cost='100'></a>"), purchaseCount );
-
-		//Rest is Pumped Up
-		w.g_Minigame.CurrentScene().TrySpendBadgePoints(w.$J("<a data-type='19' data-cost='1'></a>"), badgePoints % 100 );
 	}
 
 	function updateLaneData() {
@@ -441,150 +445,142 @@
 		return 86400 - time;
 	}
 
-	function MainLoop() {
-		if (!isAlreadyRunning) {
-			isAlreadyRunning = true;
+	function afterOnReceiveUpdate() {
+		var s = this;
+		if ( !s.m_rgPlayerData || !s.m_rgGameData || s.m_rgGameData.status != 2 ) {
+			return;
+		}
+		if(runOnUpdateWhileTrue.length) {
+			runOnUpdateWhileTrue = runOnUpdateWhileTrue.filter(function(func) {
+				return func();
+			});
+		}
 
-			var level = getGameLevel();
-			if (level < 10 && control.useSlowMode) {
-				return;
+		var level = getGameLevel();
+		if (level < 10 && control.useSlowMode) {
+			return;
+		}
+
+		NUISANCE_ABILITIES.forEach(disableAbility);
+
+		wormHoleConstantUseOverride = (getRemainingTime()*3 < getItemCount(ABILITIES.WORMHOLE)) || (getRemainingTime()*3 < getItemCount(ABILITIES.LIKE_NEW));
+		wormHoleConstantUse = ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds)) || wormHoleConstantUseOverride;
+
+		updateLaneData();
+		attemptRespawn();
+
+		if (wormholeInterval) {
+			w.clearInterval(wormholeInterval);
+			wormholeInterval = false;
+		}
+
+		if (likenewInterval) {
+			w.clearInterval(likenewInterval);
+			likenewInterval = false;
+		}
+
+		if ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds) && !wormHoleConstantUseOverride) {
+			if (level % control.rainingRounds === 0) {
+				goToRainingLane();
+			} else {
+				goToLaneWithBestTarget();
 			}
-
-			NUISANCE_ABILITIES.forEach(disableAbility);
-
-			wormHoleConstantUseOverride = (getRemainingTime()*3 < getItemCount(ABILITIES.WORMHOLE)) || (getRemainingTime()*3 < getItemCount(ABILITIES.LIKE_NEW));
-			wormHoleConstantUse = ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds)) || wormHoleConstantUseOverride;
-
-			updateLaneData();
-			attemptRespawn();
-
-			if (wormholeInterval) {
-				w.clearInterval(wormholeInterval);
-				wormholeInterval = false;
+			useCooldownIfRelevant();
+			useGoodLuckCharmIfRelevant();
+			useMedicsIfRelevant();
+			useMoraleBoosterIfRelevant();
+			useMetalDetectorIfRelevant();
+			//	useClusterBombIfRelevant();
+			//	useNapalmIfRelevant();
+			//	useTacticalNukeIfRelevant();
+			//	useCrippleMonsterIfRelevant();
+			useCrippleSpawnerIfRelevant();
+			if ((level < control.speedThreshold || level % control.rainingRounds === 0) && level > control.useGoldThreshold) {
+				useGoldRainIfRelevant();
 			}
-
-			if (likenewInterval) {
-				w.clearInterval(likenewInterval);
-				likenewInterval = false;
+			//	useCrippleMonsterIfRelevant(level);
+			useMaxElementalDmgIfRelevant();
+		}
+		else {
+			if (level % control.rainingRounds === 0 || wormHoleConstantUseOverride) {
+				goToRainingLane();
+			} else {
+				goToLaneWithBestTarget();
 			}
+			useCooldownIfRelevant();
+			useMedicsIfRelevant();
+			useMoraleBoosterIfRelevant();
+			useMetalDetectorIfRelevant();
+			useMaxElementalDmgIfRelevant();
 
-			if ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds) && !wormHoleConstantUseOverride) {
-				if (level % control.rainingRounds === 0) {
-					goToRainingLane();
-				} else {
-					goToLaneWithBestTarget();
-				}
-				useCooldownIfRelevant();
-				useGoodLuckCharmIfRelevant();
-				useMedicsIfRelevant();
-				useMoraleBoosterIfRelevant();
-				useMetalDetectorIfRelevant();
-				//	useClusterBombIfRelevant();
-				//	useNapalmIfRelevant();
-				//	useTacticalNukeIfRelevant();
-				//	useCrippleMonsterIfRelevant();
-				useCrippleSpawnerIfRelevant();
-				if ((level < control.speedThreshold || level % control.rainingRounds === 0) && level > control.useGoldThreshold) {
-					useGoldRainIfRelevant();
-				}
-				//	useCrippleMonsterIfRelevant(level);
-				useMaxElementalDmgIfRelevant();
-			}
-			else {
-				if (level % control.rainingRounds === 0 || wormHoleConstantUseOverride) {
-					goToRainingLane();
-				} else {
-					goToLaneWithBestTarget();
-				}
-				useCooldownIfRelevant();
-				useMedicsIfRelevant();
-				useMoraleBoosterIfRelevant();
-				useMetalDetectorIfRelevant();
-				useMaxElementalDmgIfRelevant();
+			useLikeNew();
+			useWormholeIfRelevant();
+			useReviveIfRelevant(level);
+		}
 
-				useLikeNew();
-				useWormholeIfRelevant();
-				useReviveIfRelevant(level);
-			}
+		updatePlayersInGame();
 
-			updatePlayersInGame();
+		if (level !== lastLevel) {
+			lastLevel = level;
+		}
 
-			if (level !== lastLevel) {
-				lastLevel = level;
-				refreshPlayerData();
-			}
+		// This belongs here so we can update the header during boss fights
+		updateLevelInfoTitle(level);
 
-			// This belongs here so we can update the header during boss fights
-			updateLevelInfoTitle(level);
+		currentClickRate = getWantedClicksPerSecond();
 
-			currentClickRate = getWantedClicksPerSecond();
-			s().m_nClicks = currentClickRate;
-			s().m_nLastTick = false;
-			w.g_msTickRate = 1000;
+		var damagePerClick = s.CalculateDamage(
+			s.m_rgPlayerTechTree.damage_per_click,
+			s.m_rgGameData.lanes[s.m_rgPlayerData.current_lane].element
+		);
 
-			var damagePerClick = s().CalculateDamage(
-				s().m_rgPlayerTechTree.damage_per_click,
-				s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].element
+		advLog("Ticked. Current clicks per second: " + currentClickRate + ". Current damage per second: " + (damagePerClick * currentClickRate), 4);
+
+		if (currentClickRate > 0) {
+			var enemy = s.GetEnemy(
+				s.m_rgPlayerData.current_lane,
+				s.m_rgPlayerData.target
 			);
 
-			advLog("Ticked. Current clicks per second: " + currentClickRate + ". Current damage per second: " + (damagePerClick * currentClickRate), 4);
+			if (enemy) {
+				displayText(
+					enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
+					enemy.m_Sprite.position.y - 52,
+					"-" + w.FormatNumberForDisplay((damagePerClick * currentClickRate), 5),
+					"#aaf"
+				);
 
-			if(disableRenderer) {
-				s().Tick();
+				if (s.m_rgStoredCrits.length > 0) {
+					var rgDamage = s.m_rgStoredCrits.reduce(function(a, b) {
+						return a + b;
+					});
+					s.m_rgStoredCrits.length = 0;
 
-				requestAnimationFrame(function() {
-					w.g_Minigame.Renderer.render(s().m_Container);
-				});
-			}
+					s.DoCritEffect(rgDamage, enemy.m_Sprite.position.x - (enemy.m_nLane * 440), enemy.m_Sprite.position.y + 17, 'Crit!');
+				}
 
-			isAlreadyRunning = false;
-
-			var enemy = s().GetEnemy(
-				s().m_rgPlayerData.current_lane,
-				s().m_rgPlayerData.target);
-
-			if (currentClickRate > 0) {
-
-				if (enemy) {
-					displayText(
-						enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
-						enemy.m_Sprite.position.y - 52,
-						"-" + w.FormatNumberForDisplay((damagePerClick * currentClickRate), 5),
-						"#aaf"
+				var goldPerClickPercentage = s.m_rgGameData.lanes[s.m_rgPlayerData.current_lane].active_player_ability_gold_per_click;
+				if (goldPerClickPercentage > 0 && enemy.m_data.hp > 0) {
+					var goldPerSecond = enemy.m_data.gold * goldPerClickPercentage * currentClickRate;
+					s.ClientOverride('player_data', 'gold', s.m_rgPlayerData.gold + goldPerSecond);
+					s.ApplyClientOverrides('player_data', true);
+					advLog(
+						"Raining gold ability is active in current lane. Percentage per click: " + goldPerClickPercentage + "%. Approximately gold per second: " + goldPerSecond,
+						4
 					);
-
-					if (s().m_rgStoredCrits.length > 0) {
-						var rgDamage = s().m_rgStoredCrits.reduce(function(a, b) {
-							return a + b;
-						});
-						s().m_rgStoredCrits.length = 0;
-
-						s().DoCritEffect(rgDamage, enemy.m_Sprite.position.x - (enemy.m_nLane * 440), enemy.m_Sprite.position.y + 17, 'Crit!');
-					}
-
-					var goldPerClickPercentage = s().m_rgGameData.lanes[s().m_rgPlayerData.current_lane].active_player_ability_gold_per_click;
-					if (goldPerClickPercentage > 0 && enemy.m_data.hp > 0) {
-						var goldPerSecond = enemy.m_data.gold * goldPerClickPercentage * currentClickRate;
-						s().ClientOverride('player_data', 'gold', s().m_rgPlayerData.gold + goldPerSecond);
-						s().ApplyClientOverrides('player_data', true);
-						advLog(
-							"Raining gold ability is active in current lane. Percentage per click: " + goldPerClickPercentage + "%. Approximately gold per second: " + goldPerSecond,
-							4
+					if (!removeGoldText) {
+						displayText(
+							enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
+							enemy.m_Sprite.position.y - 17,
+							"+" + w.FormatNumberForDisplay(goldPerSecond, 5),
+							"#e1b21e"
 						);
-						if (!removeGoldText) {
-							displayText(
-								enemy.m_Sprite.position.x - (enemy.m_nLane * 440),
-								enemy.m_Sprite.position.y - 17,
-								"+" + w.FormatNumberForDisplay(goldPerSecond, 5),
-								"#e1b21e"
-							);
-						}
 					}
 				}
 			}
-
-			NUISANCE_ABILITIES.forEach(disableAbility);
 		}
+
+		NUISANCE_ABILITIES.forEach(disableAbility);
 
 		if(w.CUI && !replacedCUI) {
 			replacedCUI = true;
@@ -697,35 +693,29 @@
 		}
 	}
 
-	function refreshPlayerData() {
-		advLog("Refreshing player data", 2);
+	function afterOnSimulatedServerTick() {
+		var s = this;
+		if ( !s.m_rgPlayerData || !s.m_rgGameData || s.m_rgGameData.status != 2 ) {
+			return;
+		}
+		if (enableAutoRefresh) {
+			autoRefreshPage();
+		}
+		s.m_nClicks = currentClickRate;
+		s.m_nLastTick = false;
+		w.g_msTickRate = 1000;
 
-		disableAbility('25');
+		if(disableRenderer) {
+			s.Tick();
 
-		w.g_Server.GetPlayerData(
-			function(rgResult) {
-				var instance = s();
+			requestAnimationFrame(function() {
+				w.g_Minigame.Renderer.render(s.m_Container);
+			});
+		}
+	}
 
-				if (rgResult.response.player_data) {
-					instance.m_rgPlayerData = rgResult.response.player_data;
-					instance.ApplyClientOverrides('player_data');
-					instance.ApplyClientOverrides('ability');
-				}
-
-				if (rgResult.response.tech_tree) {
-					instance.m_rgPlayerTechTree = rgResult.response.tech_tree;
-					if (rgResult.response.tech_tree.upgrades) {
-						instance.m_rgPlayerUpgrades = w.V_ToArray(rgResult.response.tech_tree.upgrades);
-					} else {
-						instance.m_rgPlayerUpgrades = [];
-					}
-				}
-
-				instance.OnReceiveUpdate();
-			},
-			function() {},
-			true
-		);
+	function beforeTryAbility() {
+		this.m_bNeedTechTree = true;
 	}
 
 	function makeDropdown(name, desc, value, values, listener) {
@@ -805,27 +795,15 @@
 		handleCheckBox(event);
 	}
 
-	function autoRefreshPage(autoRefreshMinutes) {
-		var timerValue = (autoRefreshMinutes + autoRefreshMinutesRandomDelay * Math.random()) * 60 * 1000;
-		refreshTimer = setTimeout(function() {
-			autoRefreshHandler();
-		}, timerValue);
-	}
-
-	function autoRefreshHandler() {
-		var enemyData = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target).m_data;
-		if (typeof enemyData !== "undefined") {
-			var enemyType = enemyData.type;
-			if (enemyType != ENEMY_TYPE.BOSS) {
-				advLog('Refreshing, not boss', 5);
-				w.location.reload(true);
-			} else {
-				advLog('Not refreshing, A boss!', 5);
-				setTimeout(autoRefreshHandler, 3000);
+	function autoRefreshPage() {
+		if (autoRefreshTime && s().m_nLocalTime > autoRefreshTime) {
+			var enemyData = s().GetEnemy(s().m_rgPlayerData.current_lane, s().m_rgPlayerData.target).m_data;
+			if (typeof enemyData !== "undefined") {
+				var enemyType = enemyData.type;
+				if (enemyType != ENEMY_TYPE.BOSS) {
+					w.location.reload(true);
+				}
 			}
-		} else {
-			//Wait until it is defined
-			setTimeout(autoRefreshHandler, 1000);
 		}
 	}
 
@@ -865,9 +843,9 @@
 			value = handleCheckBox(event);
 		}
 		if (value) {
-			autoRefreshPage(autoRefreshMinutes);
+			autoRefreshTime = s().m_nLocalTime + (autoRefreshMinutes + autoRefreshMinutesRandomDelay * Math.random()) * 60 * 1000;
 		} else {
-			clearTimeout(refreshTimer);
+			autoRefreshTime = 0;
 		}
 	}
 
@@ -1562,25 +1540,6 @@
 		w.clearInterval(w.SteamDB_Minigame_Timer);
 	}
 
-	w.SteamDB_Minigame_Timer = w.setInterval(function() {
-		if (w.g_Minigame && s().m_bRunning && s().m_rgPlayerTechTree && s().m_rgGameData) {
-			w.clearInterval(w.SteamDB_Minigame_Timer);
-			firstRun();
-			w.SteamDB_Minigame_Timer = w.setInterval(MainLoop, 1000);
-		}
-	}, 1000);
-
-	// reload page if game isn't fully loaded, regardless of autoRefresh setting
-	w.setTimeout(function() {
-		// m_rgGameData is 'undefined' if stuck at 97/97 or below
-		if (!w.g_Minigame || !w.g_Minigame.m_CurrentScene || !w.g_Minigame.m_CurrentScene.m_rgGameData) {
-			w.location.reload(true);
-		}
-	}, autoRefreshSecondsCheckLoadedDelay * 1000);
-
-	// Append gameid to breadcrumbs
-	var breadcrumbs = document.querySelector('.breadcrumbs');
-
 	function countdown(time) {
 		var hours = 0;
 		var minutes = 0;
@@ -1599,39 +1558,78 @@
 		return {hours : hours, minutes : minutes};
 	}
 
-	if (breadcrumbs) {
-		var element = document.createElement('span');
-		element.textContent = ' > ';
-		breadcrumbs.appendChild(element);
+	w.$J(function() {
+		// Append gameid to breadcrumbs
+		var breadcrumbs = document.querySelector('.breadcrumbs');
 
-		element = document.createElement('span');
-		element.style.color = '#D4E157';
-		element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
-		element.textContent = 'Room ' + w.g_GameID;
-		breadcrumbs.appendChild(element);
+		if (breadcrumbs) {
+			var element = document.createElement('span');
+			element.textContent = ' > ';
+			breadcrumbs.appendChild(element);
 
-		element = document.createElement('span');
-		element.textContent = ' > ';
-		breadcrumbs.appendChild(element);
+			element = document.createElement('span');
+			element.style.color = '#D4E157';
+			element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
+			element.textContent = 'Room ' + w.g_GameID;
+			breadcrumbs.appendChild(element);
 
-		element = document.createElement('span');
-		element.style.color = '#FFA07A';
-		element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
-		element.textContent = 'Level: 0, Expected Level: 0, Likely Level: 0';
-		breadcrumbs.appendChild(element);
-		document.ExpectedLevel = element;
+			element = document.createElement('span');
+			element.textContent = ' > ';
+			breadcrumbs.appendChild(element);
 
-		element = document.createElement('span');
-		element.textContent = ' > ';
-		breadcrumbs.appendChild(element);
+			element = document.createElement('span');
+			element.style.color = '#FFA07A';
+			element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
+			element.textContent = 'Level: 0, Expected Level: 0, Likely Level: 0';
+			breadcrumbs.appendChild(element);
+			document.ExpectedLevel = element;
 
-		element = document.createElement('span');
-		element.style.color = '#9AC0FF';
-		element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
-		element.textContent = 'Remaining Time: 0 hours, 0 minutes.';
-		breadcrumbs.appendChild(element);
-		document.RemainingTime = element;
-	}
+			element = document.createElement('span');
+			element.textContent = ' > ';
+			breadcrumbs.appendChild(element);
+
+			element = document.createElement('span');
+			element.style.color = '#9AC0FF';
+			element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
+			element.textContent = 'Remaining Time: 0 hours, 0 minutes.';
+			breadcrumbs.appendChild(element);
+			document.RemainingTime = element;
+		}
+
+		if (w.g_Minigame && s() && !(s() instanceof w.CScenePreload)) {
+			firstRun(s());
+		} else {
+			var oldEnterScene = w.CMinigameManager.prototype.EnterScene;
+			var oldAjax = w.$J.ajax;
+			w.CMinigameManager.prototype.EnterScene = function(s) {
+				oldEnterScene.call(this, s);
+				if (s instanceof w.CScenePreload) {
+					w.$J.ajax = function(url, settings) {
+						var $req = oldAjax.apply(w.$J, [].slice.call(arguments));
+						if (!settings) {
+							settings = url;
+							url = null;
+						}
+						if (settings && settings.url) {
+							url = settings.url;
+						}
+						if (url && s.m_rgScriptsToLoad.indexOf(url) > -1) { // monkey-patch Valve's preload race condition
+							w.g_cActiveRequests++;
+							$req.done(function() {
+								w.g_cCompletedRequests++;
+								w.g_cActiveRequests--;
+							});
+						}
+						return $req;
+					};
+				} else {
+					w.CMinigameManager.prototype.EnterScene = oldEnterScene;
+					w.$J.ajax = oldAjax;
+					firstRun(s);
+				}
+			};
+		}
+	});
 
 	function updateLevelInfoTitle(level)
 	{
@@ -1783,65 +1781,27 @@
 		return predictJumps / predictTicks * (s().m_rgGameData.timestamp - s().m_rgGameData.timestamp_level_start);
 	}
 
-	/** Check periodicaly if the welcome panel is visible
-	 * then trigger an event 'event:welcomePanelVisible' */
-	function waitForWelcomePanelLoad() {
-		var checkTicks = 20; // not very elegant but effective
-		var waitForWelcomePanelInterval = setInterval(function() {
-			var $welcomePanel = w.$J('.spend_badge_ponts_ctn');
-			var panelReady = !!($welcomePanel && $welcomePanel.length && $welcomePanel.is(':visible'));
+	function afterUpdateSpendBadgePointsDialog() {
+		// Determine number of badge points
+		var badgePoints = s().m_rgPlayerTechTree.badge_points;
 
-			if(panelReady) { // Got it! Tuning time!
-				window.document.dispatchEvent(new Event('event:welcomePanelVisible'));
-				clearInterval(waitForWelcomePanelInterval);
-			}
-			else if(w.g_Minigame && w.g_Minigame.CurrentScene() && w.g_Minigame.CurrentScene().m_rgPlayerTechTree
-				&& !w.g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points) { // techtree but no points
-				clearInterval(waitForWelcomePanelInterval);
-			}
-			else if(--checkTicks <= 0) { // give up
-				clearInterval(waitForWelcomePanelInterval);
-			}
-		}, 500);
+		// Determine how many other things to buy
+		var buy_count = (w.g_steamID % 10) + 1;
+
+		// Buy some
+		s().TrySpendBadgePoints( w.$J("<a data-type='25' data-cost='200'></a>"), buy_count );
+		badgePoints -= buy_count*200;
+
+		// How many WH/LN do we buy too?
+		var purchaseCount = Math.floor(badgePoints / 200);
+
+		// Buy mostly WH
+		s().TrySpendBadgePoints( w.$J("<a data-type='26' data-cost='100'></a>"), purchaseCount );
+
+		// Buy a few LN
+		s().TrySpendBadgePoints( w.$J("<a data-type='27' data-cost='100'></a>"), purchaseCount );
+
+		//Rest is Pumped Up
+		s().TrySpendBadgePoints(w.$J("<a data-type='19' data-cost='1'></a>"), badgePoints % 100 );
 	}
-
-	// Wait for welcome panel then add more buttons for batch purchase
-	w.document.addEventListener('event:welcomePanelVisible', function() {
-		// Select existings x10 buttons
-		w.$J('#badge_items > .purchase_ability_item > .sub_item').each(function() {
-			var x10Button = w.$J(this);
-
-			// New button
-			var x100Button = w.$J('<div class="sub_item x100">x100</div>');
-			x100Button.click(function(event) { // same from steam script but x100 (incredible!)
-				w.g_Minigame.CurrentScene().TrySpendBadgePoints(this, 100);
-				event.stopPropagation();
-			});
-			x100Button.data(x10Button.data());
-
-			x10Button.css('margin-right', '50px'); // Shift the x10 button a little
-			x10Button.after(x100Button);
-		});
-
-		// Wrap panel update to unable/disable x100 buttons
-		var oldUpdate = w.g_Minigame.CurrentScene().m_UI.UpdateSpendBadgePointsDialog;
-		w.g_Minigame.CurrentScene().m_UI.UpdateSpendBadgePointsDialog = function() {
-			oldUpdate.apply(w.g_Minigame.CurrentScene().m_UI, arguments); // super call
-
-			// remaining badgepoints
-			var badgePoints = w.g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points;
-
-			// each x100 button
-			w.$J('#badge_items > .purchase_ability_item > .sub_item.x100').each(function() {
-				var button = w.$J(this);
-				// disable if not enougth points
-				if(badgePoints < button.data().cost * 100) {
-					button.addClass('disabled');
-				}
-				else {
-					button.removeClass('disabled');
-				}
-			});
-		};
-	}, false);
 }(window));
