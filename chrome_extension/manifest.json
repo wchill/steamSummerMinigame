@@ -6,21 +6,21 @@
 	},
 	"content_scripts": [ {
 		"js": [ "js/jQuery.min.js", "js/mainloop.js", "js/bignumber.js" ],
-		"matches": [ "*://steamcommunity.com/minigame/towerattack", 
-									"*://steamcommunity.com/minigame/towerattack/", 
-									"*://steamcommunity.com//minigame//towerattack/", 
+		"matches": [ "*://steamcommunity.com/minigame/towerattack",
+									"*://steamcommunity.com/minigame/towerattack/",
+									"*://steamcommunity.com//minigame//towerattack/",
 									"*://steamcommunity.com//minigame//towerattack//",
-									"*://steamcommunity.com/minigame/", 
-									"*://steamcommunity.com//minigame/", 
+									"*://steamcommunity.com/minigame/",
+									"*://steamcommunity.com//minigame/",
 									"*://steamcommunity.com//minigame//"
 									],
 		"run_at": "document_end"
 	}],
-	"version": "1.5.0",
-	"permissions": [ 
-		"https://github.com/wchill/steamSummerMinigame/*", 
-		"https://raw.githubusercontent.com/wchill/steamSummerMinigame/*", 
-		"https://github.com/codetorex/SteamMonsterLobby/*", 
+	"version": "1.5.1",
+	"permissions": [
+		"https://github.com/wchill/steamSummerMinigame/*",
+		"https://raw.githubusercontent.com/wchill/steamSummerMinigame/*",
+		"https://github.com/codetorex/SteamMonsterLobby/*",
 		"https://raw.githubusercontent.com/codetorex/SteamMonsterLobby/*",
 		"http://steamcommunity.com/minigame/*",
 		"http://steamcommunity.com/minigame/towerattack/*",
@@ -33,7 +33,7 @@
 	"web_accessible_resources": [ "js/mainloop.js", "js/bignumber.js" ],
 	"content_security_policy": "script-src 'self' https://raw.githubusercontent.com; object-src 'self'",
 	"minimum_chrome_version": "9",
-	"manifest_version": 4,
+	"manifest_version": 5,
 	"background": {
 		"scripts": ["js/jQuery.min.js", "js/background.js"],
 		"persistent": true

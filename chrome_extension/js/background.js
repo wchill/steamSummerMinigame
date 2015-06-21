@@ -10,15 +10,15 @@ console.log('background working');
 chrome.webRequest.onHeadersReceived.addListener(function (details)
 {
 	for (var i = 0; i < details.responseHeaders.length; i++) {
-	
+
 		var headerName = details.responseHeaders[i].name.toUpperCase();
-	
+
 		if (headerName == 'CONTENT-SECURITY-POLICY' || headerName == 'X-WEBKIT-CSP') {
-		
+
 		var csp = details.responseHeaders[i].value;
-		
-		 csp = csp.replace("connect-src 'self'", "connect-src 'self' http://188.166.36.23:3900/");
-		
+
+		 csp = csp.replace("connect-src 'self'", "connect-src 'self' http://188.166.36.23:3900/ http://steam.intense.io:8080/");
+
 		details.responseHeaders[i].value = csp;
 		}
 	}
