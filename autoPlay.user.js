@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 7.4.4
+// @version 7.4.5
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '7.4.4';
+	var SCRIPT_VERSION = '7.4.5';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -675,7 +675,7 @@
 									w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
 									w.$J.post({
 										type: 'POST',
-										url: 'http://steam.intense.io:8080',
+										url: 'http://steam.intense.io:8080/report',
 										crossDomain: true,
 										data: {"name":rgEntry.actor_name, "steamid":rgEntry.actor, "round":getGameLevel(), "ability":rgEntry.ability, "time":rgEntry.time},
 										dataType: 'json',
