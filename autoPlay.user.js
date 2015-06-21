@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
-// @namespace https://github.com/wchill/steamSummerMinigame
+// @namespace https://github.com/borntohonk/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 7.4.6
+// @version 7.4.7
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
-// @updateURL https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js
-// @downloadURL https://raw.githubusercontent.com/wchill/steamSummerMinigame/master/autoPlay.user.js
+// @updateURL https://raw.githubusercontent.com/borntohonk/steamSummerMinigame/cucksquad/autoPlay.user.js
+// @downloadURL https://raw.githubusercontent.com/borntohonk/steamSummerMinigame/cucksquad/autoPlay.user.js
 // ==/UserScript==
 
 // IMPORTANT: Update the @version property above to a higher number such as 1.1 and 1.2 when you update the script! Otherwise, Tamper / Greasemonkey users will not update automatically.
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '7.4.6';
+	var SCRIPT_VERSION = '7.4.7';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -148,31 +148,31 @@
 		LIKE_NEW: 27
 	};
 
-	var NUISANCE_ABILITIES = [
-		ABILITIES.TACTICAL_NUKE,
-		ABILITIES.CLUSTER_BOMB,
-		ABILITIES.NAPALM,
-		ABILITIES.CRIPPLE_MONSTER,
-		ABILITIES.MAX_ELEMENTAL_DAMAGE,
-		ABILITIES.THROW_MONEY_AT_SCREEN,
-		ABILITIES.TREASURE,
-		ABILITIES.STEAL_HEALTH,
-		ABILITIES.REFLECT_DAMAGE,
-		ABILITIES.FEELING_LUCKY
+	//var NUISANCE_ABILITIES = [
+		//ABILITIES.TACTICAL_NUKE,
+		//ABILITIES.CLUSTER_BOMB,
+		//ABILITIES.NAPALM,
+		//ABILITIES.CRIPPLE_MONSTER,
+		//ABILITIES.MAX_ELEMENTAL_DAMAGE,
+		//ABILITIES.THROW_MONEY_AT_SCREEN,
+		//ABILITIES.TREASURE,
+		//ABILITIES.STEAL_HEALTH,
+		//ABILITIES.REFLECT_DAMAGE,
+		//ABILITIES.FEELING_LUCKY
 	];
 
 	var BOSS_DISABLED_ABILITIES = [
-		ABILITIES.MORALE_BOOSTER,
-		ABILITIES.GOOD_LUCK_CHARMS,
-		ABILITIES.TACTICAL_NUKE,
-		ABILITIES.CLUSTER_BOMB,
-		ABILITIES.NAPALM,
-		ABILITIES.CRIT,
-		ABILITIES.CRIPPLE_SPAWNER,
-		ABILITIES.CRIPPLE_MONSTER,
-		ABILITIES.MAX_ELEMENTAL_DAMAGE,
-		ABILITIES.REFLECT_DAMAGE,
-		ABILITIES.THROW_MONEY_AT_SCREEN
+		//ABILITIES.MORALE_BOOSTER,
+		//ABILITIES.GOOD_LUCK_CHARMS,
+		//ABILITIES.TACTICAL_NUKE,
+		//ABILITIES.CLUSTER_BOMB,
+		//ABILITIES.NAPALM,
+		//ABILITIES.CRIT,
+		//ABILITIES.CRIPPLE_SPAWNER,
+		//ABILITIES.CRIPPLE_MONSTER,
+		//ABILITIES.MAX_ELEMENTAL_DAMAGE,
+		//ABILITIES.REFLECT_DAMAGE,
+		//ABILITIES.THROW_MONEY_AT_SCREEN
 	];
 
 	var ENEMY_TYPE = {
@@ -407,7 +407,7 @@
 		var purchaseCount = Math.floor(badgePoints / 200);
 
 		// Buy mostly WH
-		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='26' data-cost='100'></a>"), purchaseCount );
+		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='27' data-cost='100'></a>"), purchaseCount );
 
 		// Buy a few LN
 		w.g_Minigame.CurrentScene().TrySpendBadgePoints( w.$J("<a data-type='27' data-cost='100'></a>"), purchaseCount );
@@ -493,7 +493,7 @@
 				return;
 			}
 
-			NUISANCE_ABILITIES.forEach(disableAbility);
+			//NUISANCE_ABILITIES.forEach(disableAbility);
 
 			wormHoleConstantUseOverride = (getRemainingTime()*3 < getItemCount(ABILITIES.WORMHOLE)) || (getRemainingTime()*3 < getItemCount(ABILITIES.LIKE_NEW));
 			wormHoleConstantUse = ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds)) || wormHoleConstantUseOverride;
@@ -521,10 +521,10 @@
 				useMedicsIfRelevant();
 				//	useMoraleBoosterIfRelevant();
 				//	useMetalDetectorIfRelevant();
-				//	useClusterBombIfRelevant();
-				//	useNapalmIfRelevant();
-				//	useTacticalNukeIfRelevant();
-				//	useCrippleMonsterIfRelevant();
+				useClusterBombIfRelevant();
+				useNapalmIfRelevant();
+				useTacticalNukeIfRelevant();
+				useCrippleMonsterIfRelevant();
 				useCrippleSpawnerIfRelevant();
 				if ((level < control.speedThreshold || level % control.rainingRounds === 0) && level > control.useGoldThreshold) {
 					useGoldRainIfRelevant();
@@ -625,7 +625,7 @@
 				}
 			}
 
-			NUISANCE_ABILITIES.forEach(disableAbility);
+			//NUISANCE_ABILITIES.forEach(disableAbility);
 		}
 
 		if(w.CUI && !replacedCUI) {
@@ -1046,24 +1046,24 @@
 		document.getElementById("players_in_game").innerHTML = totalPlayers + "/1500";
 	}
 
-	function goToRainingLane() {
+	//function goToRainingLane() {
 		// On a WH level, jump everyone to lane 0, unless there is a boss there, in which case jump to lane 1.
-		var targetLane = 0;
+		//var targetLane = 0;
 		// Check lane 0, enemy 0 to see if it's a boss.
-		var enemyData = s().GetEnemy(0, 0).m_data;
-		if (typeof enemyData !== "undefined") {
-			var enemyType = enemyData.type;
-			if (enemyType == ENEMY_TYPE.BOSS) {
-				advLog('In lane 0, there is a boss, avoiding', 4);
-				targetLane = 1;
-			}
-		}
+		//var enemyData = s().GetEnemy(0, 0).m_data;
+		//if (typeof enemyData !== "undefined") {
+			//var enemyType = enemyData.type;
+			//if (enemyType == ENEMY_TYPE.BOSS) {
+				//advLog('In lane 0, there is a boss, avoiding', 4);
+				//targetLane = 1;
+			//}
+		//}
 
-		if (s().m_nExpectedLane != targetLane) {
-			advLog('Switching to raining lane' + targetLane, 3);
-			s().TryChangeLane(targetLane);
-		}
-	}
+		//if (s().m_nExpectedLane != targetLane) {
+			//advLog('Switching to raining lane' + targetLane, 3);
+			//s().TryChangeLane(targetLane);
+		//}
+	//}
 
 	function goToLaneWithBestTarget() {
 		// We can overlook spawners if all spawners are 40% hp or higher and a creep is under 10% hp
@@ -1112,7 +1112,7 @@
 
 			//Prefer lane with raining gold, unless current enemy target is a treasure or boss.
 			if (!targetIsTreasure && !targetIsBoss) {
-				var potential = 0;
+				var potential = 1;
 				// Loop through lanes by elemental preference
 				var sortedLanes = sortLanesByElementals();
 				for (var notI = 0; notI < sortedLanes.length; notI++) {
@@ -1209,17 +1209,17 @@
 			}
 
 			// Prevent attack abilities and items if up against a boss or treasure minion
-			var level = getGameLevel();
-			if (targetIsTreasure || (targetIsBoss && (level < control.speedThreshold || level % control.rainingRounds === 0))) {
-				BOSS_DISABLED_ABILITIES.forEach(disableAbility);
-			} else {
-				BOSS_DISABLED_ABILITIES.forEach(enableAbility);
-			}
-			if (level < control.allowWormholeLevel && !isNearEndGame()) {
+			//var level = getGameLevel();
+			//if (targetIsTreasure || (targetIsBoss && (level < control.speedThreshold || level % control.rainingRounds === 0))) {
+				//BOSS_DISABLED_ABILITIES.forEach(disableAbility);
+			//} else {
+				//BOSS_DISABLED_ABILITIES.forEach(enableAbility);
+			//}
+			//if (level < control.allowWormholeLevel && !isNearEndGame()) {
 				//disableAbility(ABILITIES.WORMHOLE);
-			} else {
-				enableAbility(ABILITIES.WORMHOLE);
-			}
+			//} else {
+				//enableAbility(ABILITIES.WORMHOLE);
+			//}
 		}
 	}
 
@@ -1390,7 +1390,7 @@
 
 		if (!wormholeInterval) {
 			wormholeInterval = w.setInterval(function(){
-				w.g_Minigame.m_CurrentScene.m_rgAbilityQueue.push({'ability': 26}); //wormhole
+				w.g_Minigame.m_CurrentScene.m_rgAbilityQueue.push({'ability': 10}); //wormhole
 				w.g_Minigame.m_CurrentScene.m_nLastTick = 0;
 				w.g_Minigame.m_CurrentScene.Tick();
 			}, 100);
@@ -1425,24 +1425,24 @@
 		}
 	}
 
-	function disableAbility(abilityId) {
-		toggleAbilityVisibility(abilityId, false);
-	}
+	//function disableAbility(abilityId) {
+		//toggleAbilityVisibility(abilityId, false);
+	//}
 
 	function enableAbility(abilityId) {
 		toggleAbilityVisibility(abilityId, true);
 	}
 
-	function toggleAbilityVisibility(abilityId, show) {
-		if (show) {
-			w.$J("#ability_" + abilityId).show();
-			w.$J("#abilityitem_" + abilityId).show();
-		}
-		else {
-			w.$J("#ability_" + abilityId).hide();
-			w.$J("#abilityitem_" + abilityId).hide();
-		}
-	}
+	//function toggleAbilityVisibility(abilityId, show) {
+		//if (show) {
+			//w.$J("#ability_" + abilityId).show();
+		//	w.$J("#abilityitem_" + abilityId).show();
+		//}
+		//else {
+			//w.$J("#ability_" + abilityId).hide();
+			//w.$J("#abilityitem_" + abilityId).hide();
+		//}
+	//}
 
 	function isAbilityActive(abilityId) {
 		return s().bIsAbilityActive(abilityId);
@@ -1460,12 +1460,12 @@
 		return hasPurchasedAbility(abilityId) && !isAbilityCoolingDown(abilityId) && isAbilityEnabled(abilityId);
 	}
 
-	function canUseOffensiveAbility() {
-		var level = getGameLevel();
-		var levelmod = level % control.rainingRounds;
+	//function canUseOffensiveAbility() {
+		//var level = getGameLevel();
+		//var levelmod = level % control.rainingRounds;
 		// Early in the game, or we're a safe distance away from raining rounds.
-		return (level >= 99999999 || (levelmod > 0 && levelmod < control.rainingRounds - control.rainingSafeRounds));
-	}
+		//return (level >= 99999999 || (levelmod > 0 && levelmod < control.rainingRounds - control.rainingSafeRounds));
+	//}
 
 	function tryUsingAbility(abilityId) {
 		if (!canUseAbility(abilityId)) {
@@ -1501,7 +1501,7 @@
 		}
 	}
 
-	function disableAbilityItem(abilityId) {
+	//function disableAbilityItem(abilityId) {
 		toggleAbilityItemVisibility(abilityId, false);
 	}
 
