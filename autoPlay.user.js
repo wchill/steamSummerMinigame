@@ -616,7 +616,7 @@
 						case 'ability':
 							var ele = this.m_eleUpdateLogTemplate.clone();
 							if(useTrollTracker) {
-								if((getGameLevel() % 100 === 0 && [10, 11, 12, 15, 20].indexOf(rgEntry.ability) > -1)) {
+								if(true || (getGameLevel() % 100 === 0 && [10, 11, 12, 15, 20].indexOf(rgEntry.ability) > -1)) {
 									w.$J(ele).data('abilityid', rgEntry.ability );
 									if(!!w.BigNumber) {
 										var num = new w.BigNumber(rgEntry.actor);
