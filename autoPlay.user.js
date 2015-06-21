@@ -28,7 +28,7 @@
 	var removeCritText = getPreferenceBoolean("removeCritText", false);
 	var removeGoldText = getPreferenceBoolean("removeGoldText", false);
 	var removeAllText = getPreferenceBoolean("removeAllText", false);
-	var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined" || w.usingMsgScript !== "undefined");
+	var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined" || !!w.usingMsgScript);
 	var enableFingering = getPreferenceBoolean("enableFingering", true);
 	var disableRenderer = getPreferenceBoolean("disableRenderer", false);
 	var useTrollTracker = getPreferenceBoolean("useTrollTracker", false);
@@ -457,7 +457,7 @@
 
 			updateLaneData();
 			attemptRespawn();
-
+			/*
 			if (wormholeInterval) {
 				w.clearInterval(wormholeInterval);
 				wormholeInterval = false;
@@ -584,6 +584,7 @@
 			}
 
 			NUISANCE_ABILITIES.forEach(disableAbility);
+			*/
 		}
 
 		if(w.CUI && !replacedCUI) {
@@ -617,7 +618,7 @@
 							if(useTrollTracker) {
 								if((getGameLevel() % 100 === 0 && [10, 11, 12, 15, 20].indexOf(rgEntry.ability) > -1)) {
 									w.$J(ele).data('abilityid', rgEntry.ability );
-									if(w.BigNumber !== "undefined") {
+									if(!!w.BigNumber) {
 										var num = new w.BigNumber(rgEntry.actor);
 										w.$J('.name', ele).append( "<a href=\"http://steamcommunity.com/profiles/" + num.plus(new w.BigNumber("76561197960265728")) + "\" target=\"_blank\" style=\"color: red; font-weight: bold;\">" + rgEntry.actor_name + "</a>" );
 									} else {
@@ -631,22 +632,19 @@
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 									advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
 									w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
-									/*
 									w.$J.ajax({
 										type: 'POST',
-										url: 'https://to.com/postHere.php',
+										url: 'cerf.cs.ubc.ca:54321/report',
 										crossDomain: true,
 										data: '{"name":rgEntry.actor_name, "steamid":rgEntry.actor, "round":getGameLevel(), "ability":rgEntry.ability, "time":rgEntry.time}',
 										dataType: 'json',
 										success: function(responseData, textStatus, jqXHR) {
-											var value = responseData.someKey;
 											advLog("Reported " + rgEntry.actor_name + " at time " + rgEntry.time, 2);
 										},
 										error: function (responseData, textStatus, errorThrown) {
 											console.log('POST failed.', 2);
 										}
 									});
-									*/
 								} else if(getGameLevel() % 100 !== 0 && getGameLevel() % 10 === 9 && rgEntry.ability === 26) {
 									w.$J(ele).data('abilityid', rgEntry.ability );
 									w.$J('.name', ele).text( rgEntry.actor_name );
@@ -938,7 +936,7 @@
 
 	function setPreference(key, value) {
 		try {
-			if (localStorage !== 'undefined') {
+			if (localStorage !== undefined) {
 				localStorage.setItem('steamdb-minigame/' + key, value);
 			}
 		} catch (e) {
@@ -948,7 +946,7 @@
 
 	function getPreference(key, defaultValue) {
 		try {
-			if (localStorage !== 'undefined') {
+			if (localStorage !== undefined) {
 				var result = localStorage.getItem('steamdb-minigame/' + key);
 				return (result !== null ? result : defaultValue);
 			}
@@ -1012,7 +1010,7 @@
 		var targetLane = 0;
 		// Check lane 0, enemy 0 to see if it's a boss.
 		var enemyData = s().GetEnemy(0, 0).m_data;
-		if (typeof enemyData !== "undefined") {
+		if (typeof enemyData !== undefined) {
 			var enemyType = enemyData.type;
 			if (enemyType == ENEMY_TYPE.BOSS) {
 				advLog('In lane 0, there is a boss, avoiding', 4);
@@ -1084,7 +1082,7 @@
 						continue;
 					}
 					var stacks = 0;
-					if (typeof s().m_rgLaneData[i].abilities[17] != 'undefined') {
+					if (typeof s().m_rgLaneData[i].abilities[17] != undefined) {
 						stacks = s().m_rgLaneData[i].abilities[17];
 						advLog('stacks: ' + stacks, 3);
 					}
@@ -1758,7 +1756,7 @@
 
 		//Gather total wormholes active.
 		for (var i = 0; i <= 2; i++) {
-			if (typeof w.g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26] !== 'undefined') {
+			if (typeof w.g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26] !== undefined) {
 				wormholesNow += w.g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26];
 			}
 		}
