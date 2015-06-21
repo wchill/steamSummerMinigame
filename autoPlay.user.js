@@ -677,7 +677,7 @@
 										crossDomain: true,
 										data: JSON.stringify({"name":rgEntry.actor_name, "steamid":rgEntry.actor, "round":getGameLevel(), "ability":rgEntry.ability, "time":rgEntry.time}),
 										dataType: 'json',
-										success: reportSucess,
+										success: reportSuccess,
 										error: reportFailure
 										});
 								} else if(getGameLevel() % 100 !== 0 && getGameLevel() % 100 > 90 && rgEntry.ability === 26) {
@@ -1848,17 +1848,15 @@
 			else if(--checkTicks <= 0) { // give up
 				clearInterval(waitForWelcomePanelInterval);
 			}
-		}, 500);
+			}, 500);
 	}
-	
+
 	/**function called when the response data indicates a success for reporting the player**/
-	function reportSuccess(responseData, textStatus, jqXHR)
-	{
+	function reportSuccess(responseData, textStatus, jqXHR){
 		console.log("Reported " + this.rgEntry.actor_name + " at time " + this.rgEntry.time);
 	}
 	/**function called when the response data indicates a failure for reporting the player**/
-	function reportFailure(dataFromServer, textStatus, jqXHR)
-	{
+	function reportFailure(dataFromServer, textStatus, jqXHR){
 		console.log('POST failed.');
 	}
 }(window));
