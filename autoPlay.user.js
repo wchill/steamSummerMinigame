@@ -1848,7 +1848,7 @@
 			else if(--checkTicks <= 0) { // give up
 				clearInterval(waitForWelcomePanelInterval);
 			}
-			}, 500);
+		}, 500);
 	}
 
 	/**function called when the response data indicates a success for reporting the player**/
