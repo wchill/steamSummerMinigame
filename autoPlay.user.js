@@ -678,9 +678,9 @@
 										crossDomain: true,
 										data: JSON.stringify({"name":rgEntry.actor_name, "steamid":rgEntry.actor, "round":getGameLevel(), "ability":rgEntry.ability, "time":rgEntry.time}),
 										dataType: 'json',
-										success: reportSucess(responseData, textStatus, jqXHR),
-										error: reportFailure(dataFromServer,textStatus,jqXHR)
-									});
+										success: reportSucess,
+										error: reportFailure
+										});
 								} else if(getGameLevel() % 100 !== 0 && getGameLevel() % 100 > 90 && rgEntry.ability === 26) {
 									w.$J(ele).data('abilityid', rgEntry.ability );
 									w.$J('.name', ele).text( rgEntry.actor_name );
