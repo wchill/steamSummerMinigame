@@ -670,7 +670,6 @@
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 									advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
 									w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
-									/*jshint loopfunc: true */
 									w.$J.ajax({
 										type: 'POST',
 										url: 'http://steam.intense.io:8080/report',
