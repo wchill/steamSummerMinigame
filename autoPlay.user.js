@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 7.0.3
+// @version 7.4.1
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '7.0.3';
+	var SCRIPT_VERSION = '7.4.1';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -28,7 +28,7 @@
 	var removeCritText = getPreferenceBoolean("removeCritText", false);
 	var removeGoldText = getPreferenceBoolean("removeGoldText", false);
 	var removeAllText = getPreferenceBoolean("removeAllText", false);
-	var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined" || w.usingMsgScript !== "undefined");
+	var enableAutoRefresh = getPreferenceBoolean("enableAutoRefresh", typeof GM_info !== "undefined" || !!w.usingMsgScript);
 	var enableFingering = getPreferenceBoolean("enableFingering", true);
 	var disableRenderer = getPreferenceBoolean("disableRenderer", false);
 	var useTrollTracker = getPreferenceBoolean("useTrollTracker", false);
@@ -73,7 +73,9 @@
 		githubVersion: SCRIPT_VERSION,
 		useLikeNewMinChance: 0.02,
 		useLikeNewMaxChance: 1.0,
-		useGoldThreshold: 200
+		useGoldThreshold: 200,
+		goodLuckChance: 0.02,
+		medicChance: 0.02
 	};
 
 	var replacedCUI = false;
@@ -189,6 +191,47 @@
 
 	function firstRun() {
 		advLog("Starting /u/wchill's script (version " + SCRIPT_VERSION + ")", 1);
+
+
+			// Wait for welcome panel then add more buttons for batch purchase
+			w.document.addEventListener('event:welcomePanelVisible', function() {
+				// Select existings x10 buttons
+				w.$J('#badge_items > .purchase_ability_item > .sub_item').each(function() {
+					var x10Button = w.$J(this);
+
+					// New button
+					var x100Button = w.$J('<div class="sub_item x100">x100</div>');
+					x100Button.click(function(event) { // same from steam script but x100 (incredible!)
+						w.g_Minigame.CurrentScene().TrySpendBadgePoints(this, 100);
+						event.stopPropagation();
+					});
+					x100Button.data(x10Button.data());
+
+					x10Button.css('margin-right', '50px'); // Shift the x10 button a little
+					x10Button.after(x100Button);
+				});
+
+				// Wrap panel update to unable/disable x100 buttons
+				var oldUpdate = w.g_Minigame.CurrentScene().m_UI.UpdateSpendBadgePointsDialog;
+				w.g_Minigame.CurrentScene().m_UI.UpdateSpendBadgePointsDialog = function() {
+					oldUpdate.apply(w.g_Minigame.CurrentScene().m_UI, arguments); // super call
+
+					// remaining badgepoints
+					var badgePoints = w.g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points;
+
+					// each x100 button
+					w.$J('#badge_items > .purchase_ability_item > .sub_item.x100').each(function() {
+						var button = w.$J(this);
+						// disable if not enougth points
+						if(badgePoints < button.data().cost * 100) {
+							button.addClass('disabled');
+						}
+						else {
+							button.removeClass('disabled');
+						}
+					});
+				};
+			}, false);
 
 		trt_oldCrit = s().DoCritEffect;
 		trt_oldPush = s().m_rgClickNumbers.push;
@@ -457,7 +500,6 @@
 
 			updateLaneData();
 			attemptRespawn();
-
 			if (wormholeInterval) {
 				w.clearInterval(wormholeInterval);
 				wormholeInterval = false;
@@ -477,8 +519,8 @@
 				useCooldownIfRelevant();
 				useGoodLuckCharmIfRelevant();
 				useMedicsIfRelevant();
-				useMoraleBoosterIfRelevant();
-				useMetalDetectorIfRelevant();
+				//	useMoraleBoosterIfRelevant();
+				//	useMetalDetectorIfRelevant();
 				//	useClusterBombIfRelevant();
 				//	useNapalmIfRelevant();
 				//	useTacticalNukeIfRelevant();
@@ -617,7 +659,7 @@
 							if(useTrollTracker) {
 								if((getGameLevel() % 100 === 0 && [10, 11, 12, 15, 20].indexOf(rgEntry.ability) > -1)) {
 									w.$J(ele).data('abilityid', rgEntry.ability );
-									if(w.BigNumber !== "undefined") {
+									if(!!w.BigNumber) {
 										var num = new w.BigNumber(rgEntry.actor);
 										w.$J('.name', ele).append( "<a href=\"http://steamcommunity.com/profiles/" + num.plus(new w.BigNumber("76561197960265728")) + "\" target=\"_blank\" style=\"color: red; font-weight: bold;\">" + rgEntry.actor_name + "</a>" );
 									} else {
@@ -631,12 +673,11 @@
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 									advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
 									w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
-									/*
-									w.$J.ajax({
+									w.$J.post({
 										type: 'POST',
-										url: 'https://to.com/postHere.php',
+										url: 'http://cerf.cs.ubc.ca:54321/report',
 										crossDomain: true,
-										data: '{"name":rgEntry.actor_name, "steamid":rgEntry.actor, "round":getGameLevel(), "ability":rgEntry.ability, "time":rgEntry.time}',
+										data: {"name":rgEntry.actor_name, "steamid":rgEntry.actor, "round":getGameLevel(), "ability":rgEntry.ability, "time":rgEntry.time},
 										dataType: 'json',
 										success: function(responseData, textStatus, jqXHR) {
 											var value = responseData.someKey;
@@ -646,7 +687,6 @@
 											console.log('POST failed.', 2);
 										}
 									});
-									*/
 								} else if(getGameLevel() % 100 !== 0 && getGameLevel() % 10 === 9 && rgEntry.ability === 26) {
 									w.$J(ele).data('abilityid', rgEntry.ability );
 									w.$J('.name', ele).text( rgEntry.actor_name );
@@ -938,7 +978,7 @@
 
 	function setPreference(key, value) {
 		try {
-			if (localStorage !== 'undefined') {
+			if (localStorage !== undefined) {
 				localStorage.setItem('steamdb-minigame/' + key, value);
 			}
 		} catch (e) {
@@ -948,7 +988,7 @@
 
 	function getPreference(key, defaultValue) {
 		try {
-			if (localStorage !== 'undefined') {
+			if (localStorage !== undefined) {
 				var result = localStorage.getItem('steamdb-minigame/' + key);
 				return (result !== null ? result : defaultValue);
 			}
@@ -1012,7 +1052,7 @@
 		var targetLane = 0;
 		// Check lane 0, enemy 0 to see if it's a boss.
 		var enemyData = s().GetEnemy(0, 0).m_data;
-		if (typeof enemyData !== "undefined") {
+		if (typeof enemyData !== undefined) {
 			var enemyType = enemyData.type;
 			if (enemyType == ENEMY_TYPE.BOSS) {
 				advLog('In lane 0, there is a boss, avoiding', 4);
@@ -1084,7 +1124,7 @@
 						continue;
 					}
 					var stacks = 0;
-					if (typeof s().m_rgLaneData[i].abilities[17] != 'undefined') {
+					if (typeof s().m_rgLaneData[i].abilities[17] != undefined) {
 						stacks = s().m_rgLaneData[i].abilities[17];
 						advLog('stacks: ' + stacks, 3);
 					}
@@ -1204,8 +1244,13 @@
 			return;
 		}
 
+		// Don't use medics if it's too often
+		if (control.medicChance < Math.random()) {
+			return;
+		}
+
 		// check if Medics is purchased and cooled down
-		if (tryUsingAbility(ABILITIES.MEDICS)) {
+		if (tryUsingAbility(ABILITIES.MEDICS, false, true)) {
 			advLog('Medics is purchased, cooled down. Trigger it.', 2);
 		}
 
@@ -1225,6 +1270,11 @@
 		if (tryUsingItem(ABILITIES.CRIT)) {
 			// Crits is purchased, cooled down, and needed. Trigger it.
 			advLog('Crit chance is always good.', 3);
+		}
+
+		// Don't use good luck if it's too often
+		if (control.goodLuckChance < Math.random()) {
+			return;
 		}
 
 		// check if Good Luck Charms is purchased and cooled down
@@ -1571,12 +1621,15 @@
 	}, 1000);
 
 	// reload page if game isn't fully loaded, regardless of autoRefresh setting
+	// removed because it's causing issues
+	/*
 	w.setTimeout(function() {
 		// m_rgGameData is 'undefined' if stuck at 97/97 or below
 		if (!w.g_Minigame || !w.g_Minigame.m_CurrentScene || !w.g_Minigame.m_CurrentScene.m_rgGameData) {
 			w.location.reload(true);
 		}
 	}, autoRefreshSecondsCheckLoadedDelay * 1000);
+	*/
 
 	// Append gameid to breadcrumbs
 	var breadcrumbs = document.querySelector('.breadcrumbs');
@@ -1758,7 +1811,7 @@
 
 		//Gather total wormholes active.
 		for (var i = 0; i <= 2; i++) {
-			if (typeof w.g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26] !== 'undefined') {
+			if (typeof w.g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26] !== undefined) {
 				wormholesNow += w.g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26];
 			}
 		}
@@ -1805,43 +1858,4 @@
 		}, 500);
 	}
 
-	// Wait for welcome panel then add more buttons for batch purchase
-	w.document.addEventListener('event:welcomePanelVisible', function() {
-		// Select existings x10 buttons
-		w.$J('#badge_items > .purchase_ability_item > .sub_item').each(function() {
-			var x10Button = w.$J(this);
-
-			// New button
-			var x100Button = w.$J('<div class="sub_item x100">x100</div>');
-			x100Button.click(function(event) { // same from steam script but x100 (incredible!)
-				w.g_Minigame.CurrentScene().TrySpendBadgePoints(this, 100);
-				event.stopPropagation();
-			});
-			x100Button.data(x10Button.data());
-
-			x10Button.css('margin-right', '50px'); // Shift the x10 button a little
-			x10Button.after(x100Button);
-		});
-
-		// Wrap panel update to unable/disable x100 buttons
-		var oldUpdate = w.g_Minigame.CurrentScene().m_UI.UpdateSpendBadgePointsDialog;
-		w.g_Minigame.CurrentScene().m_UI.UpdateSpendBadgePointsDialog = function() {
-			oldUpdate.apply(w.g_Minigame.CurrentScene().m_UI, arguments); // super call
-
-			// remaining badgepoints
-			var badgePoints = w.g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points;
-
-			// each x100 button
-			w.$J('#badge_items > .purchase_ability_item > .sub_item.x100').each(function() {
-				var button = w.$J(this);
-				// disable if not enougth points
-				if(badgePoints < button.data().cost * 100) {
-					button.addClass('disabled');
-				}
-				else {
-					button.removeClass('disabled');
-				}
-			});
-		};
-	}, false);
 }(window));
