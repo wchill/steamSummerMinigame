@@ -191,10 +191,8 @@
 
 	function firstRun() {
 		advLog("Starting /u/wchill's script (version " + SCRIPT_VERSION + ")", 1);
-
-
 			// Wait for welcome panel then add more buttons for batch purchase
-			w.document.addEventListener('event:welcomePanelVisible', function() {
+		w.document.addEventListener('event:welcomePanelVisible', function() {
 				// Select existings x10 buttons
 				w.$J('#badge_items > .purchase_ability_item > .sub_item').each(function() {
 					var x10Button = w.$J(this);
@@ -639,7 +637,6 @@
 				}
 
 				var nHighestTime = 0;
-
 				for( var i=rgLaneLog.length-1; i >= 0; i--) {
 					var rgEntry = rgLaneLog[i];
 
@@ -658,7 +655,7 @@
 							if(useTrollTracker) {
 								if((getGameLevel() % 100 === 0 && [10, 11, 12, 15, 20].indexOf(rgEntry.ability) > -1)) {
 									w.$J(ele).data('abilityid', rgEntry.ability );
-									if(!!w.BigNumber) {
+									if(!w.BigNumber) {
 										var num = new w.BigNumber(rgEntry.actor);
 										w.$J('.name', ele).append( "<a href=\"http://steamcommunity.com/profiles/" + num.plus(new w.BigNumber("76561197960265728")) + "\" target=\"_blank\" style=\"color: red; font-weight: bold;\">" + rgEntry.actor_name + "</a>" );
 									} else {
@@ -678,13 +675,9 @@
 										crossDomain: true,
 										data: JSON.stringify({"name":rgEntry.actor_name, "steamid":rgEntry.actor, "round":getGameLevel(), "ability":rgEntry.ability, "time":rgEntry.time}),
 										dataType: 'json',
-										success: function(responseData, textStatus, jqXHR) {
-											console.log("Reported " + rgEntry.actor_name + " at time " + rgEntry.time);
-										},
-										error: function (responseData, textStatus, errorThrown) {
-											console.log('POST failed.');
-										}
-									});
+										success: reportSuccess,
+										error: reportFailure
+										});
 								} else if(getGameLevel() % 100 !== 0 && getGameLevel() % 100 > 90 && rgEntry.ability === 26) {
 									w.$J(ele).data('abilityid', rgEntry.ability );
 									w.$J('.name', ele).text( rgEntry.actor_name );
@@ -1360,15 +1353,15 @@
 
 	function useGoldRainIfRelevant() {
 		if (triggerItem(ABILITIES.RAINING_GOLD)) {
-			// Max Elemental Damage is purchased, cooled down, and needed. Trigger it.
+			// Gold rain is purchased, cooled down, and needed. Trigger it.
 			advLog('Gold Rain is purchased and cooled down, triggering it.', 2);
 		}
 	}
 
 	function useMetalDetectorIfRelevant() {
 		if (triggerAbility(ABILITIES.METAL_DETECTOR)) {
-			// Max Elemental Damage is purchased, cooled down, and needed. Trigger it.
-			advLog('Max Elemental Damage is purchased and cooled down, triggering it.', 2);
+			// Metal Detector is purchased, cooled down, and needed. Trigger it.
+			advLog('Metal Detector is purchased and cooled down, triggering it.', 2);
 		}
 	}
 
@@ -1856,4 +1849,12 @@
 		}, 500);
 	}
 
+	/**function called when the response data indicates a success for reporting the player**/
+	function reportSuccess(responseData, textStatus, jqXHR){
+		console.log("Reported " + this.rgEntry.actor_name + " at time " + this.rgEntry.time);
+	}
+	/**function called when the response data indicates a failure for reporting the player**/
+	function reportFailure(dataFromServer, textStatus, jqXHR){
+		console.log('POST failed.');
+	}
 }(window));
