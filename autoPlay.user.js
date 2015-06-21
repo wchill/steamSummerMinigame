@@ -639,8 +639,6 @@
 
 				var nHighestTime = 0;
 				
-				var pass = function reportSucess(responseData, textStatus, jqXHR);
-				var fail = function reportFailure(dataFromServer,textStatus,jqXHR );
 				for( var i=rgLaneLog.length-1; i >= 0; i--) {
 					var rgEntry = rgLaneLog[i];
 
@@ -680,8 +678,8 @@
 										crossDomain: true,
 										data: JSON.stringify({"name":rgEntry.actor_name, "steamid":rgEntry.actor, "round":getGameLevel(), "ability":rgEntry.ability, "time":rgEntry.time}),
 										dataType: 'json',
-										success: pass,
-										error: fail
+										success: reportSucess(responseData, textStatus, jqXHR),
+										error: reportFailure(dataFromServer,textStatus,jqXHR)
 									});
 								} else if(getGameLevel() % 100 !== 0 && getGameLevel() % 100 > 90 && rgEntry.ability === 26) {
 									w.$J(ele).data('abilityid', rgEntry.ability );
@@ -1858,7 +1856,7 @@
 	{
 		console.log("Reported " + this.rgEntry.actor_name + " at time " + this.rgEntry.time);
 	}
-	function reportFailure(dataFromServer,textStatus,jqXHR )
+	function reportFailure(dataFromServer,textStatus,jqXHR)
 	{
 		console.log('POST failed.');
 	}
