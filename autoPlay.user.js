@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 7.4.8
+// @version 7.4.9
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '7.4.8';
+	var SCRIPT_VERSION = '7.4.9';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -34,8 +34,8 @@
 	var useTrollTracker = getPreferenceBoolean("useTrollTracker", false);
 	var praiseGoldHelm = getPreferenceBoolean("praiseGoldHelm", true);
 
-	var autoRefreshMinutes = 30; // refresh page after x minutes
-	var autoRefreshMinutesRandomDelay = 10;
+	var autoRefreshMinutes = 15; // refresh page after x minutes
+	var autoRefreshMinutesRandomDelay = 5;
 	var autoRefreshSecondsCheckLoadedDelay = 30;
 
 	// DO NOT MODIFY
