@@ -474,7 +474,7 @@
 				if (level % control.rainingRounds === 0) {
 					goToRainingLane();
 				} else {
-					goToLaneWithBestTarget();
+					selectBestTarget();
 				}
 				useCooldownIfRelevant();
 				useGoodLuckCharmIfRelevant();
@@ -496,7 +496,7 @@
 				if (level % control.rainingRounds === 0 || wormHoleConstantUseOverride) {
 					goToRainingLane();
 				} else {
-					goToLaneWithBestTarget();
+					selectBestTarget();
 				}
 				useCooldownIfRelevant();
 				useMedicsIfRelevant();
@@ -1028,20 +1028,11 @@
 		}
 	}
 
-	function goToLaneWithBestTarget() {
+	function selectBestTarget() {
 		// We can overlook spawners if all spawners are 40% hp or higher and a creep is under 10% hp
 		var spawnerOKThreshold = 0.4;
 		var creepSnagThreshold = 0.1;
 
-		var targetFound = false;
-		var lowHP = 0;
-		var lowLane = 0;
-		var lowTarget = 0;
-		var lowPercentageHP = 0;
-		var preferredLane = -1;
-		var preferredTarget = -1;
-
-		// determine which lane and enemy is the optimal target
 		var enemyTypePriority = [
 			ENEMY_TYPE.TREASURE,
 			ENEMY_TYPE.BOSS,
@@ -1050,130 +1041,101 @@
 			ENEMY_TYPE.CREEP
 		];
 
-		var i;
-		var skippingSpawner = false;
-		var skippedSpawnerLane = 0;
-		var skippedSpawnerTarget = 0;
-		var targetIsTreasure = false;
-		var targetIsBoss = false;
-
-		for (var k = 0; !targetFound && k < enemyTypePriority.length; k++) {
-			targetIsTreasure = (enemyTypePriority[k] == ENEMY_TYPE.TREASURE);
-			targetIsBoss = (enemyTypePriority[k] == ENEMY_TYPE.BOSS);
-
-			var enemies = [];
-
-			// gather all the enemies of the specified type.
-			for (i = 0; i < 3; i++) {
-				for (var j = 0; j < 4; j++) {
-					var enemy = s().GetEnemy(i, j);
-					if (enemy && enemy.m_data.type == enemyTypePriority[k]) {
-						enemies[enemies.length] = enemy;
-					}
-				}
-			}
-
-			//Prefer lane with raining gold, unless current enemy target is a treasure or boss.
-			if (!targetIsTreasure && !targetIsBoss) {
-				var potential = 0;
-				// Loop through lanes by elemental preference
-				var sortedLanes = sortLanesByElementals();
-				for (var notI = 0; notI < sortedLanes.length; notI++) {
-					// Maximize compability with upstream
-					i = sortedLanes[notI];
-					// ignore if lane is empty
-					if (s().m_rgGameData.lanes[i].dps === 0) {
-						continue;
-					}
-					var stacks = 0;
-					if (typeof s().m_rgLaneData[i].abilities[17] != 'undefined') {
-						stacks = s().m_rgLaneData[i].abilities[17];
-						advLog('stacks: ' + stacks, 3);
-					}
-					for (var m = 0; m < s().m_rgEnemies.length; m++) {
-						var enemyGold = s().m_rgEnemies[m].m_data.gold;
-						if (stacks * enemyGold > potential) {
-							potential = stacks * enemyGold;
-							preferredTarget = s().m_rgEnemies[m].m_nID;
-							preferredLane = i;
-						}
-					}
-				}
-			}
-
-			// target the enemy of the specified type with the lowest hp
-			var mostHPDone = 0;
-			for (i = 0; i < enemies.length; i++) {
-				if (enemies[i] && !enemies[i].m_bIsDestroyed) {
-					// Only select enemy and lane if the preferedLane matches the potential enemy lane
-					if (lowHP < 1 || enemies[i].m_flDisplayedHP < lowHP) {
-						var element = s().m_rgGameData.lanes[enemies[i].m_nLane].element;
-
-						var dmg = s().CalculateDamage(
-							s().m_rgPlayerTechTree.dps,
-							element
-						);
-						if (mostHPDone <= dmg) {
-							mostHPDone = dmg;
-						} else {
-							continue;
-						}
-
-						targetFound = true;
-						lowHP = enemies[i].m_flDisplayedHP;
-						lowLane = enemies[i].m_nLane;
-						lowTarget = enemies[i].m_nID;
-					}
-					var percentageHP = enemies[i].m_flDisplayedHP / enemies[i].m_data.max_hp;
-					if (lowPercentageHP === 0 || percentageHP < lowPercentageHP) {
-						lowPercentageHP = percentageHP;
-					}
-				}
-			}
-
-			if (preferredLane != -1 && preferredTarget != -1) {
-				lowLane = preferredLane;
-				lowTarget = preferredTarget;
-				advLog('Switching to a lane with best raining gold benefit', 2);
-			}
-
-			// If we just finished looking at spawners,
-			// AND none of them were below our threshold,
-			// remember them and look for low creeps (so don't quit now)
-			// Don't skip spawner if lane has raining gold
-			if ((enemyTypePriority[k] == ENEMY_TYPE.SPAWNER && lowPercentageHP > spawnerOKThreshold) && preferredLane == -1) {
-				skippedSpawnerLane = lowLane;
-				skippedSpawnerTarget = lowTarget;
-				skippingSpawner = true;
-				targetFound = false;
-			}
-
-			// If we skipped a spawner and just finished looking at creeps,
-			// AND the lowest was above our snag threshold,
-			// just go back to the spawner!
-			if (skippingSpawner && enemyTypePriority[k] == ENEMY_TYPE.CREEP && lowPercentageHP > creepSnagThreshold) {
-				lowLane = skippedSpawnerLane;
-				lowTarget = skippedSpawnerTarget;
-			}
+		var enemies = s().m_rgEnemies;
+		if (!enemies.length) {
+			return;
 		}
 
+		var laneData = s().m_rgLaneData;
+		var gameDataLanes = s().m_rgGameData.lanes;
+		var currentLane = s().m_rgPlayerData.current_lane;
+		var currentTarget = s().m_nTarget;
+		var damageMultipliers = {};
+
+		function sortEnemiesByPriority(a, b) {
+			if (!a.m_data || !b.m_data) { // higher priority for enemies with data than those without
+				return (!a.m_data) + (!b.m_data) * -1;
+			}
+			if (a.m_data.m_bIsDestroyed || b.m_data.m_bIsDestroyed) { // higher priority for alive enemies than dead
+				return a.m_data.m_bIsDestroyed + b.m_data.m_bIsDestroyed * -1;
+			}
+			if (a.m_data.type === ENEMY_TYPE.TREASURE) { // higher priority for treasure and boss types than any other, assumes impossible for more than 1 of either to exist
+				return -1;
+			} else if (b.m_data.type === ENEMY_TYPE.TREASURE) {
+				return 1;
+			} else if (a.m_data.type === ENEMY_TYPE.BOSS) {
+				return -1;
+			} else if (b.m_data.type === ENEMY_TYPE.BOSS) {
+				return 1;
+			}
+			if (a.m_nLane != b.m_nLane) {
+				if (laneData && (!laneData[a.m_nLane] || !laneData[b.m_nLane])) { // higher priority for enemies in lanes with data than those without
+					return (!laneData[a.m_nLane]) + (!laneData[b.m_nLane]) * -1;
+				}
+				var rain_a = laneData && laneData[a.m_nLane].abilities[ABILITIES.RAINING_GOLD] || 0;
+				var rain_b = laneData && laneData[b.m_nLane].abilities[ABILITIES.RAINING_GOLD] || 0;
+				if (rain_a || rain_b) { // higher priority for enemies earning more gold per click
+					return b.m_data.gold * rain_b - a.m_data.gold * rain_a;
+				}
+			}
+			var percentHP_a = a.m_data.hp / a.m_data.max_hp;
+			var percentHP_b = b.m_data.hp / b.m_data.max_hp;
+			if (a.m_data.type === ENEMY_TYPE.CREEP && percentHP_a < creepSnagThreshold && (a.m_data.type != b.m_data.type || percentHP_a < percentHP_b)) { // higher priority for creeps below %hp threshold
+				return -1;
+			} else if (b.m_data.type === ENEMY_TYPE.CREEP && percentHP_b < creepSnagThreshold && (a.m_data.type != b.m_data.type || percentHP_a < percentHP_b)) {
+				return 1;
+			}
+			if (a.m_data.type === ENEMY_TYPE.SPAWNER && percentHP_a < spawnerOKThreshold && (a.m_data.type != b.m_data.type || percentHP_a < percentHP_b)) { // higher priority for spawners below %hp threshold
+				return -1;
+			} else if (b.m_data.type === ENEMY_TYPE.SPAWNER && percentHP_b < spawnerOKThreshold && (a.m_data.type != b.m_data.type || percentHP_a < percentHP_b)) {
+				return 1;
+			}
+			var typePriority_a = enemyTypePriority.indexOf(a.m_data.type);
+			var typePriority_b = enemyTypePriority.indexOf(b.m_data.type);
+			if (typePriority_a != typePriority_b) { // higher priority for enemies of more important type
+				return typePriority_a - typePriority_b;
+			}
+			if (a.m_nLane != b.m_nLane) {
+				if (gameDataLanes && (!gameDataLanes[a.m_nLane] || !gameDataLanes[b.m_nLane])) { // higher priority for enemies in lanes with game data than those without
+					return (!gameDataLanes[a.m_nLane]) + (!gameDataLanes[b.m_nLane]) * -1;
+				}
+				var element_a = gameDataLanes && gameDataLanes[a.m_nLane].element || false;
+				var element_b = gameDataLanes && gameDataLanes[b.m_nLane].element || false;
+				if (element_a != element_b) {
+					if (element_a && !damageMultipliers[element_a]) {
+						damageMultipliers[element_a] = s().CalculateDamage(1, element_a);
+					}
+					if (element_b && !damageMultipliers[element_b]) {
+						damageMultipliers[element_b] = s().CalculateDamage(1, element_b);
+					}
+					if (damageMultipliers[element_a] != damageMultipliers[element_b]) { // higher priority for enemies on a lane with larger damage multiplier
+						return damageMultipliers[element_b] - damageMultipliers[element_a];
+					}
+				}
+			}
+			return a.m_data.hp - b.m_data.hp; // higher priority for enemies with lower hp
+		}
+
+		var target = enemies.reduce(function(a, b) {
+			return sortEnemiesByPriority(a, b) > 0 ? b : a;
+		});
 
 		// go to the chosen lane
-		if (targetFound) {
-			if (s().m_nExpectedLane != lowLane) {
-				advLog('Switching to lane' + lowLane, 3);
-				s().TryChangeLane(lowLane);
+		if (target.m_nLane != currentLane || target.m_nID != currentTarget) {
+			if (target.m_nLane != currentLane) {
+				advLog('Switching to lane' + target.m_nLane, 3);
+				s().TryChangeLane(target.m_nLane);
 			}
 
 			// target the chosen enemy
-			if (s().m_nTarget != lowTarget) {
+			if (target.m_nID != currentTarget) {
 				advLog('Switching targets', 3);
-				s().TryChangeTarget(lowTarget);
+				s().TryChangeTarget(target.m_nID);
 			}
 
 			// Prevent attack abilities and items if up against a boss or treasure minion
 			var level = getGameLevel();
-			if (targetIsTreasure || (targetIsBoss && (level < control.speedThreshold || level % control.rainingRounds === 0))) {
+			if (target.m_data && (target.m_data.type === ENEMY_TYPE.TREASURE || (target.m_data.type === ENEMY_TYPE.BOSS && (level < control.speedThreshold || level % control.rainingRounds === 0)))) {
 				BOSS_DISABLED_ABILITIES.forEach(disableAbility);
 			} else {
 				BOSS_DISABLED_ABILITIES.forEach(enableAbility);
@@ -1512,31 +1474,6 @@
 		if (elem && elem.childElements() && elem.childElements().length >= 1) {
 			s().TryAbility(document.getElementById('abilityitem_' + itemId).childElements()[0]);
 		}
-	}
-
-	function sortLanesByElementals() {
-		var elementPriorities = [
-			s().m_rgPlayerTechTree.damage_multiplier_fire,
-			s().m_rgPlayerTechTree.damage_multiplier_water,
-			s().m_rgPlayerTechTree.damage_multiplier_air,
-			s().m_rgPlayerTechTree.damage_multiplier_earth
-		];
-
-		var lanes = s().m_rgGameData.lanes;
-		var lanePointers = [];
-
-		for (var i = 0; i < lanes.length; i++) {
-			lanePointers[i] = i;
-		}
-
-		lanePointers.sort(function(a, b) {
-			return elementPriorities[lanes[b].element - 1] - elementPriorities[lanes[a].element - 1];
-		});
-
-		advLog("Lane IDs  : " + lanePointers[0] + " " + lanePointers[1] + " " + lanePointers[2], 4);
-		advLog("Elements  : " + lanes[lanePointers[0]].element + " " + lanes[lanePointers[1]].element + " " + lanes[lanePointers[2]].element, 4);
-
-		return lanePointers;
 	}
 
 	function getCurrentTime() {
