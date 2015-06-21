@@ -2,7 +2,10 @@
 	"name": "Monster Summer Game 2015",
 	"description": "Cheats for you in the Steam Monster Summer Game.",
 	"icons": {
-		"16": "icon.png"
+		"16": "icon16.png",
+		"48": "icon48.png",
+		"128": "icon128.png",
+		"360": "icon360.png"
 	},
 	"content_scripts": [ {
 		"js": [ "js/jQuery.min.js", "js/mainloop.js", "js/bignumber.js" ],
