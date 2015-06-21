@@ -191,8 +191,6 @@
 
 	function firstRun() {
 		advLog("Starting /u/wchill's script (version " + SCRIPT_VERSION + ")", 1);
-
-
 			// Wait for welcome panel then add more buttons for batch purchase
 			w.document.addEventListener('event:welcomePanelVisible', function() {
 				// Select existings x10 buttons
@@ -659,7 +657,7 @@
 							if(useTrollTracker) {
 								if((getGameLevel() % 100 === 0 && [10, 11, 12, 15, 20].indexOf(rgEntry.ability) > -1)) {
 									w.$J(ele).data('abilityid', rgEntry.ability );
-									if(!!w.BigNumber) {
+									if(!w.BigNumber) {
 										var num = new w.BigNumber(rgEntry.actor);
 										w.$J('.name', ele).append( "<a href=\"http://steamcommunity.com/profiles/" + num.plus(new w.BigNumber("76561197960265728")) + "\" target=\"_blank\" style=\"color: red; font-weight: bold;\">" + rgEntry.actor_name + "</a>" );
 									} else {
@@ -673,6 +671,7 @@
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 									advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
 									w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
+									/*jshint loopfunc: true */
 									w.$J.ajax({
 										type: 'POST',
 										url: 'http://steam.intense.io:8080/report',
@@ -1856,5 +1855,6 @@
 			}
 		}, 500);
 	}
-
+	
+	}
 }(window));
