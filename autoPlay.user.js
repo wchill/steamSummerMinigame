@@ -1361,15 +1361,15 @@
 
 	function useGoldRainIfRelevant() {
 		if (triggerItem(ABILITIES.RAINING_GOLD)) {
-			// Max Elemental Damage is purchased, cooled down, and needed. Trigger it.
+			// Gold rain is purchased, cooled down, and needed. Trigger it.
 			advLog('Gold Rain is purchased and cooled down, triggering it.', 2);
 		}
 	}
 
 	function useMetalDetectorIfRelevant() {
 		if (triggerAbility(ABILITIES.METAL_DETECTOR)) {
-			// Max Elemental Damage is purchased, cooled down, and needed. Trigger it.
-			advLog('Max Elemental Damage is purchased and cooled down, triggering it.', 2);
+			// Metal Detector is purchased, cooled down, and needed. Trigger it.
+			advLog('Metal Detector is purchased and cooled down, triggering it.', 2);
 		}
 	}
 
