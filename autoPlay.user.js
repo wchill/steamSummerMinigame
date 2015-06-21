@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 7.4.3
+// @version 7.4.4
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '7.4.3';
+	var SCRIPT_VERSION = '7.4.4';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -680,7 +680,6 @@
 										data: {"name":rgEntry.actor_name, "steamid":rgEntry.actor, "round":getGameLevel(), "ability":rgEntry.ability, "time":rgEntry.time},
 										dataType: 'json',
 										success: function(responseData, textStatus, jqXHR) {
-											var value = responseData.someKey;
 											advLog("Reported " + rgEntry.actor_name + " at time " + rgEntry.time, 2);
 										},
 										error: function (responseData, textStatus, errorThrown) {
@@ -1052,7 +1051,7 @@
 		var targetLane = 0;
 		// Check lane 0, enemy 0 to see if it's a boss.
 		var enemyData = s().GetEnemy(0, 0).m_data;
-		if (typeof enemyData !== undefined) {
+		if (typeof enemyData !== "undefined") {
 			var enemyType = enemyData.type;
 			if (enemyType == ENEMY_TYPE.BOSS) {
 				advLog('In lane 0, there is a boss, avoiding', 4);
