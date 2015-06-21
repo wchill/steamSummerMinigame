@@ -192,7 +192,7 @@
 	function firstRun() {
 		advLog("Starting /u/wchill's script (version " + SCRIPT_VERSION + ")", 1);
 			// Wait for welcome panel then add more buttons for batch purchase
-			w.document.addEventListener('event:welcomePanelVisible', function() {
+		w.document.addEventListener('event:welcomePanelVisible', function() {
 				// Select existings x10 buttons
 				w.$J('#badge_items > .purchase_ability_item > .sub_item').each(function() {
 					var x10Button = w.$J(this);
@@ -1851,10 +1851,12 @@
 		}, 500);
 	}
 	
-	function reportSucess(responseData, textStatus, jqXHR)
+	/**function called when the response data indicates a success for reporting the player**/
+	function reportSuccess(responseData, textStatus, jqXHR)
 	{
 		console.log("Reported " + this.rgEntry.actor_name + " at time " + this.rgEntry.time);
 	}
+	/**function called when the response data indicates a failure for reporting the player**/
 	function reportFailure(dataFromServer, textStatus, jqXHR)
 	{
 		console.log('POST failed.');
