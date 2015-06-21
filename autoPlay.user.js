@@ -634,7 +634,7 @@
 									w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
 									w.$J.ajax({
 										type: 'POST',
-										url: 'cerf.cs.ubc.ca:54321/report',
+										url: 'http://cerf.cs.ubc.ca:54321/report',
 										crossDomain: true,
 										data: '{"name":rgEntry.actor_name, "steamid":rgEntry.actor, "round":getGameLevel(), "ability":rgEntry.ability, "time":rgEntry.time}',
 										dataType: 'json',
