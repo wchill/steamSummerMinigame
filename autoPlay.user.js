@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 7.4.6
+// @version 7.4.8
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '7.4.6';
+	var SCRIPT_VERSION = '7.4.8';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -495,8 +495,7 @@
 
 			NUISANCE_ABILITIES.forEach(disableAbility);
 
-			wormHoleConstantUseOverride = (getRemainingTime()*3 < getItemCount(ABILITIES.WORMHOLE)) || (getRemainingTime()*3 < getItemCount(ABILITIES.LIKE_NEW));
-			wormHoleConstantUse = ((level % control.rainingRounds > 0) && (level % control.rainingRounds < 100 - control.rainingSafeRounds)) || wormHoleConstantUseOverride;
+			wormHoleConstantUse = (level % control.rainingRounds === 0) || wormHoleConstantUseOverride;
 
 			updateLaneData();
 			attemptRespawn();
@@ -1810,7 +1809,7 @@
 
 		//Gather total wormholes active.
 		for (var i = 0; i <= 2; i++) {
-			if (typeof w.g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26] !== undefined) {
+			if (typeof w.g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26] !== 'undefined') {
 				wormholesNow += w.g_Minigame.m_CurrentScene.m_rgLaneData[i].abilities[26];
 			}
 		}
