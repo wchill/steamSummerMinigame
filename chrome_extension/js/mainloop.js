@@ -19,7 +19,7 @@ function injectScript(file, node) {
 }
 
  var url = window.location.href;
-			
+
 if (url.indexOf('towerattack') == -1)
 {
 	injectScript( 'https://codetorex.github.io/SteamMonsterLobby/MonsterLobby.user.js', 'body');
@@ -28,8 +28,9 @@ else
 {
 	injectScript( 'https://wchill.github.io/steamSummerMinigame/usingScript.js', 'body');
 	injectScript( chrome.extension.getURL('/js/bignumber.js'), 'body');
+	injectScript( chrome.extension.getURL('/js/autoPlay.user.js'), 'body');
 	injectScript( 'https://codetorex.github.io/SteamMonsterLobby/MonsterLobby.user.js', 'body');
-	injectScript( 'https://wchill.github.io/steamSummerMinigame/autoPlay.user.js', 'body');
+	//injectScript( 'https://wchill.github.io/steamSummerMinigame/autoPlay.user.js', 'body');
 	injectScript( 'https://wchill.github.io/steamSummerMinigame/upgrademanager.user.js', 'body');
 }
 

@@ -190,6 +190,47 @@
 	function firstRun() {
 		advLog("Starting /u/wchill's script (version " + SCRIPT_VERSION + ")", 1);
 
+
+			// Wait for welcome panel then add more buttons for batch purchase
+			w.document.addEventListener('event:welcomePanelVisible', function() {
+				// Select existings x10 buttons
+				w.$J('#badge_items > .purchase_ability_item > .sub_item').each(function() {
+					var x10Button = w.$J(this);
+
+					// New button
+					var x100Button = w.$J('<div class="sub_item x100">x100</div>');
+					x100Button.click(function(event) { // same from steam script but x100 (incredible!)
+						w.g_Minigame.CurrentScene().TrySpendBadgePoints(this, 100);
+						event.stopPropagation();
+					});
+					x100Button.data(x10Button.data());
+
+					x10Button.css('margin-right', '50px'); // Shift the x10 button a little
+					x10Button.after(x100Button);
+				});
+
+				// Wrap panel update to unable/disable x100 buttons
+				var oldUpdate = w.g_Minigame.CurrentScene().m_UI.UpdateSpendBadgePointsDialog;
+				w.g_Minigame.CurrentScene().m_UI.UpdateSpendBadgePointsDialog = function() {
+					oldUpdate.apply(w.g_Minigame.CurrentScene().m_UI, arguments); // super call
+
+					// remaining badgepoints
+					var badgePoints = w.g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points;
+
+					// each x100 button
+					w.$J('#badge_items > .purchase_ability_item > .sub_item.x100').each(function() {
+						var button = w.$J(this);
+						// disable if not enougth points
+						if(badgePoints < button.data().cost * 100) {
+							button.addClass('disabled');
+						}
+						else {
+							button.removeClass('disabled');
+						}
+					});
+				};
+			}, false);
+
 		trt_oldCrit = s().DoCritEffect;
 		trt_oldPush = s().m_rgClickNumbers.push;
 		trt_oldRender = w.g_Minigame.Render;
@@ -639,6 +680,7 @@
 										data: '{"name":rgEntry.actor_name, "steamid":rgEntry.actor, "round":getGameLevel(), "ability":rgEntry.ability, "time":rgEntry.time}',
 										dataType: 'json',
 										success: function(responseData, textStatus, jqXHR) {
+											var value = responseData.someKey;
 											advLog("Reported " + rgEntry.actor_name + " at time " + rgEntry.time, 2);
 										},
 										error: function (responseData, textStatus, errorThrown) {
@@ -1569,12 +1611,15 @@
 	}, 1000);
 
 	// reload page if game isn't fully loaded, regardless of autoRefresh setting
+	// removed because it's causing issues
+	/*
 	w.setTimeout(function() {
 		// m_rgGameData is 'undefined' if stuck at 97/97 or below
 		if (!w.g_Minigame || !w.g_Minigame.m_CurrentScene || !w.g_Minigame.m_CurrentScene.m_rgGameData) {
 			w.location.reload(true);
 		}
 	}, autoRefreshSecondsCheckLoadedDelay * 1000);
+	*/
 
 	// Append gameid to breadcrumbs
 	var breadcrumbs = document.querySelector('.breadcrumbs');
@@ -1803,43 +1848,4 @@
 		}, 500);
 	}
 
-	// Wait for welcome panel then add more buttons for batch purchase
-	w.document.addEventListener('event:welcomePanelVisible', function() {
-		// Select existings x10 buttons
-		w.$J('#badge_items > .purchase_ability_item > .sub_item').each(function() {
-			var x10Button = w.$J(this);
-
-			// New button
-			var x100Button = w.$J('<div class="sub_item x100">x100</div>');
-			x100Button.click(function(event) { // same from steam script but x100 (incredible!)
-				w.g_Minigame.CurrentScene().TrySpendBadgePoints(this, 100);
-				event.stopPropagation();
-			});
-			x100Button.data(x10Button.data());
-
-			x10Button.css('margin-right', '50px'); // Shift the x10 button a little
-			x10Button.after(x100Button);
-		});
-
-		// Wrap panel update to unable/disable x100 buttons
-		var oldUpdate = w.g_Minigame.CurrentScene().m_UI.UpdateSpendBadgePointsDialog;
-		w.g_Minigame.CurrentScene().m_UI.UpdateSpendBadgePointsDialog = function() {
-			oldUpdate.apply(w.g_Minigame.CurrentScene().m_UI, arguments); // super call
-
-			// remaining badgepoints
-			var badgePoints = w.g_Minigame.CurrentScene().m_rgPlayerTechTree.badge_points;
-
-			// each x100 button
-			w.$J('#badge_items > .purchase_ability_item > .sub_item.x100').each(function() {
-				var button = w.$J(this);
-				// disable if not enougth points
-				if(badgePoints < button.data().cost * 100) {
-					button.addClass('disabled');
-				}
-				else {
-					button.removeClass('disabled');
-				}
-			});
-		};
-	}, false);
 }(window));
