@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 8.1.1
+// @version 8.1.2
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '8.1.1';
+	var SCRIPT_VERSION = '8.1.2';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -534,7 +534,7 @@
 				//useMaxElementalDmgIfRelevant();
 			}
 			else {
-				if (level % control.rainingRounds === 0 || wormHoleConstantUseOverride) {
+				if (level % control.rainingRounds === 0) {
 					goToRainingLane();
 				} else {
 					goToLaneWithBestTarget();
