@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Monster Minigame AutoUpgrade 2.0
+// @name         Monster Minigame AutoUpgrade 2.1
 // @namespace    https://github.com/Pawsed/SteamMonsterAutoUpgradeManager/
-// @version      2.0
+// @version      2.1
 // @description  An automatic upgrade manager for the 2015 Summer Steam Monster Minigame
 // @match        *://steamcommunity.com/minigame/towerattack*
 // @match        *://steamcommunity.com//minigame/towerattack*
