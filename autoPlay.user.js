@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 8.1.4
+// @version 8.1.5
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '8.1.4';
+	var SCRIPT_VERSION = '8.1.5';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -238,7 +238,7 @@
 		trt_oldCrit = s().DoCritEffect;
 		trt_oldPush = s().m_rgClickNumbers.push;
 		trt_oldRender = w.g_Minigame.Render;
-		//lockElements();
+		lockElements();
 
 		// disable particle effects - this drastically reduces the game's memory leak
 		if (removeParticles) {
@@ -531,27 +531,26 @@
 					//useGoldRainIfRelevant();
 				}
 				useCrippleMonsterIfRelevant(level);
-				useMaxElementalDmgIfRelevant();
+				//useMaxElementalDmgIfRelevant();
 			}
 			else {
 				if (level % control.rainingRounds === 0) {
 					goToRainingLane();
 				} else {
 					goToLaneWithBestTarget();
-					//useMedicsIfRelevant();
+				}
+				useCooldownIfRelevant();
+				//useMedicsIfRelevant();
 				useMoraleBoosterIfRelevant();
 				//useMetalDetectorIfRelevant();
-				useMaxElementalDmgIfRelevant();
-				tryUsingItem(ABILITIES.REFLECT_DAMAGE);
-
+				//useMaxElementalDmgIfRelevant();
+				if (level % 100 < 90){
 					useClusterBombIfRelevant();
 					useNapalmIfRelevant();
 					useTacticalNukeIfRelevant();
 					useGoodLuckCharmIfRelevant();
 					useMoraleBoosterIfRelevant();
 				}
-				useCooldownIfRelevant();
-				
 				useLikeNew();
 				useWormholeIfRelevant();
 				useReviveIfRelevant(level);
@@ -1264,10 +1263,9 @@
 		}
 
 		// check if Medics is purchased and cooled down
-		//if (tryUsingAbility(ABILITIES.MEDICS, false, true)) {
-		//	advLog('Medics is purchased, cooled down. Trigger it.', 2);
-		//}
-		tryUsingItem(ABILITIES.REFLECT_DAMAGE);
+		if (tryUsingAbility(ABILITIES.MEDICS, false, true)) {
+			advLog('Medics is purchased, cooled down. Trigger it.', 2);
+		}
 
 		if (level > control.reflectDamageThreshold && tryUsingItem(ABILITIES.REFLECT_DAMAGE)) {
 			advLog('We have reflect damage, cooled down. Trigger it.', 2);
@@ -1300,12 +1298,12 @@
 
 	function useClusterBombIfRelevant() {
 		if (!canUseOffensiveAbility()) {
-			//return;
+			return;
 		}
 
 		// Check the time before using like new.
 		var level = getGameLevel();
-		if (level % control.rainingRounds === 0) {
+		if (level % control.rainingRounds === 0 || level % 100 >= 90) {
 			return;
 		}
 
@@ -1329,12 +1327,12 @@
 	function useTacticalNukeIfRelevant() {
 		// Check if Tactical Nuke is purchased
 		if (!canUseOffensiveAbility()) {
-	//		return;
+			return;
 		}
 
 		// Check the time before using like new.
 		var level = getGameLevel();
-		if (level % control.rainingRounds === 0) {
+		if (level % control.rainingRounds === 0 || level % 100 >= 90) {
 			return;
 		}
 
@@ -1403,6 +1401,10 @@
 		var level = getGameLevel();
 		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse && !wormHoleConstantUseOverride) {
 			return;
+		}
+
+		if (level % 100 <= 90 && level % 100 <= 99){
+			return; // Stop using stuff to try to land near something safe.
 		}
 
 		if (!wormholeInterval) {
