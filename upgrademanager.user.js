@@ -69,6 +69,17 @@ function startAutoUpgradeManager() {
 	};
 
 	var necessary = [
+		{ id: 1,
+		level 10
+		}
+		,
+		{ id: 16,
+		level: 1 }
+		{ id: 17,
+		level: 1 }
+		,
+		{ id: 18,
+		level: 1 }
 		{
 			id: 11,
 			level: 1
