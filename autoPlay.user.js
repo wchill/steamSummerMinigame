@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 8.0.0
+// @version 8.1.0
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '8.0.0';
+	var SCRIPT_VERSION = '8.1.0';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -519,18 +519,18 @@
 				}
 				useCooldownIfRelevant();
 				useGoodLuckCharmIfRelevant();
-				useMedicsIfRelevant();
-				//	useMoraleBoosterIfRelevant();
-				//	useMetalDetectorIfRelevant();
-				//	useClusterBombIfRelevant();
-				//	useNapalmIfRelevant();
-				//	useTacticalNukeIfRelevant();
-				//	useCrippleMonsterIfRelevant();
+				//useMedicsIfRelevant();
+				useMoraleBoosterIfRelevant();
+				useMetalDetectorIfRelevant();
+				useClusterBombIfRelevant();
+				useNapalmIfRelevant();
+				useTacticalNukeIfRelevant();
+				useCrippleMonsterIfRelevant();
 				useCrippleSpawnerIfRelevant();
 				if ((level < control.speedThreshold || level % control.rainingRounds === 0) && level > control.useGoldThreshold) {
 					useGoldRainIfRelevant();
 				}
-				//	useCrippleMonsterIfRelevant(level);
+				useCrippleMonsterIfRelevant(level);
 				useMaxElementalDmgIfRelevant();
 			}
 			else {
@@ -540,7 +540,7 @@
 					goToLaneWithBestTarget();
 				}
 				useCooldownIfRelevant();
-				useMedicsIfRelevant();
+				//useMedicsIfRelevant();
 				useMoraleBoosterIfRelevant();
 				useMetalDetectorIfRelevant();
 				useMaxElementalDmgIfRelevant();
