@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 7.5.1
+// @version 7.5.2
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '7.5.1';
+	var SCRIPT_VERSION = '7.5.2';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -655,6 +655,7 @@
 					switch( rgEntry.type ) {
 						case 'ability':
 							var ele = this.m_eleUpdateLogTemplate.clone();
+							var should_send = false;
 							if(useTrollTracker) {
 								if((getGameLevel() % 100 === 0 && [10, 11, 12, 15, 20].indexOf(rgEntry.ability) > -1)) {
 									w.$J(ele).data('abilityid', rgEntry.ability );
@@ -672,6 +673,7 @@
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 									advLog(rgEntry.actor_name + " used " + this.m_Game.m_rgTuningData.abilities[ rgEntry.ability ].name + " on level " + getGameLevel(), 1);
 									w.$J('.name', ele).attr( "style", "color: red; font-weight: bold;" );
+									should_send = true;
 								} else if(getGameLevel() % 100 !== 0 && getGameLevel() % 100 > 90 && rgEntry.ability === 26) {
 									w.$J(ele).data('abilityid', rgEntry.ability );
 									w.$J('.name', ele).text( rgEntry.actor_name );
@@ -682,20 +684,23 @@
 									w.$J(ele).v_tooltip({tooltipClass: 'ta_tooltip', location: 'top'});
 
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
+									should_send = true;
 								}
-								w.$J.ajax({
-									type: 'POST',
-									url: 'http://steam.intense.io:8080/report',
-									crossDomain: true,
-									data: JSON.stringify({"name":rgEntry.actor_name, "steamid":rgEntry.actor, "round":getGameLevel(), "ability":rgEntry.ability, "time":rgEntry.time}),
-									dataType: 'json',
-									success: function(responseData, textStatus, jqXHR) {
-										console.log("Reported " + rgEntry.actor_name + " at time " + rgEntry.time);
-									},
-									error: function (responseData, textStatus, errorThrown) {
-										console.log('POST failed.');
-									}
-								});
+								if(should_send) {
+									w.$J.ajax({
+										type: 'POST',
+										url: 'http://steam.intense.io:8080/report',
+										crossDomain: true,
+										data: JSON.stringify({"name":rgEntry.actor_name, "steamid":rgEntry.actor, "round":getGameLevel(), "ability":rgEntry.ability, "time":rgEntry.time}),
+										dataType: 'json',
+										success: function(responseData, textStatus, jqXHR) {
+											console.log("Reported " + rgEntry.actor_name + " at time " + rgEntry.time);
+										},
+										error: function (responseData, textStatus, errorThrown) {
+											console.log('POST failed.');
+										}
+									});
+								}
 							} else {
 								w.$J(ele).data('abilityid', rgEntry.ability );
 								w.$J('.name', ele).text( rgEntry.actor_name );
