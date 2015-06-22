@@ -542,6 +542,8 @@
 				useMoraleBoosterIfRelevant();
 				//useMetalDetectorIfRelevant();
 				useMaxElementalDmgIfRelevant();
+				tryUsingItem(ABIlITIES.REFLECT_DAMAGE);
+
 					useClusterBombIfRelevant();
 					useNapalmIfRelevant();
 					useTacticalNukeIfRelevant();
@@ -1265,7 +1267,7 @@
 		//if (tryUsingAbility(ABILITIES.MEDICS, false, true)) {
 		//	advLog('Medics is purchased, cooled down. Trigger it.', 2);
 		//}
-		tryUsingItem(ABIlITIES.REFLECT_)
+		tryUsingItem(ABIlITIES.REFLECT_DAMAGE);
 
 		if (level > control.reflectDamageThreshold && tryUsingItem(ABILITIES.REFLECT_DAMAGE)) {
 			advLog('We have reflect damage, cooled down. Trigger it.', 2);
@@ -1401,10 +1403,6 @@
 		var level = getGameLevel();
 		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse && !wormHoleConstantUseOverride) {
 			return;
-		}
-
-		if (level % 100 >= 90 && level % 100 <= 99){
-			return; // Stop using stuff to try to land near something safe.
 		}
 
 		if (!wormholeInterval) {
