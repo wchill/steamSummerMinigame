@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 8.1.0
+// @version 8.1.1
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '8.1.0';
+	var SCRIPT_VERSION = '8.1.1';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -521,17 +521,17 @@
 				useGoodLuckCharmIfRelevant();
 				//useMedicsIfRelevant();
 				useMoraleBoosterIfRelevant();
-				useMetalDetectorIfRelevant();
+				//useMetalDetectorIfRelevant();
 				useClusterBombIfRelevant();
 				useNapalmIfRelevant();
 				useTacticalNukeIfRelevant();
 				useCrippleMonsterIfRelevant();
 				useCrippleSpawnerIfRelevant();
 				if ((level < control.speedThreshold || level % control.rainingRounds === 0) && level > control.useGoldThreshold) {
-					useGoldRainIfRelevant();
+					//useGoldRainIfRelevant();
 				}
 				useCrippleMonsterIfRelevant(level);
-				useMaxElementalDmgIfRelevant();
+				//useMaxElementalDmgIfRelevant();
 			}
 			else {
 				if (level % control.rainingRounds === 0 || wormHoleConstantUseOverride) {
@@ -542,9 +542,15 @@
 				useCooldownIfRelevant();
 				//useMedicsIfRelevant();
 				useMoraleBoosterIfRelevant();
-				useMetalDetectorIfRelevant();
-				useMaxElementalDmgIfRelevant();
-
+				//useMetalDetectorIfRelevant();
+				//useMaxElementalDmgIfRelevant();
+				if (level % 100 < 90){
+					useClusterBombIfRelevant();
+					useNapalmIfRelevant();
+					useTacticalNukeIfRelevant();
+					useGoodLuckCharmIfRelevant();
+					useMoraleBoosterIfRelevant();
+				}
 				useLikeNew();
 				useWormholeIfRelevant();
 				useReviveIfRelevant(level);
@@ -656,6 +662,7 @@
 
 					switch( rgEntry.type ) {
 						case 'ability':
+							break;
 							var ele = this.m_eleUpdateLogTemplate.clone();
 							var should_send = false;
 							if(useTrollTracker) {
@@ -1296,7 +1303,7 @@
 
 		// Check the time before using like new.
 		var level = getGameLevel();
-		if (level % control.rainingRounds === 0) {
+		if (level % control.rainingRounds === 0 || level % 100 >= 90) {
 			return;
 		}
 
@@ -1307,6 +1314,7 @@
 	}
 
 	function useNapalmIfRelevant() {
+		triggerAbility(ABILITIES.NAPALM);
 	}
 
 	// Use Moral Booster if doable
@@ -1324,7 +1332,7 @@
 
 		// Check the time before using like new.
 		var level = getGameLevel();
-		if (level % control.rainingRounds === 0) {
+		if (level % control.rainingRounds === 0 || level % 100 >= 90) {
 			return;
 		}
 
@@ -1393,6 +1401,10 @@
 		var level = getGameLevel();
 		if (level % control.rainingRounds !== 0 && !wormHoleConstantUse && !wormHoleConstantUseOverride) {
 			return;
+		}
+
+		if (level % 100 <= 90 && level % 100 <= 99){
+			return; // Stop using stuff to try to land near something safe.
 		}
 
 		if (!wormholeInterval) {
