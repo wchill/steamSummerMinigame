@@ -1401,7 +1401,7 @@
 			return;
 		}
 
-		if (level % 100 <= 90 && level % 100 <= 99){
+		if (level % 100 >= 90 && level % 100 <= 99){
 			return; // Stop using stuff to try to land near something safe.
 		}
 
