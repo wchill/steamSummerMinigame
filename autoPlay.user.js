@@ -683,6 +683,19 @@
 
 									this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 								}
+								w.$J.ajax({
+									type: 'POST',
+									url: 'http://steam.intense.io:8080/report',
+									crossDomain: true,
+									data: JSON.stringify({"name":rgEntry.actor_name, "steamid":rgEntry.actor, "round":getGameLevel(), "ability":rgEntry.ability, "time":rgEntry.time}),
+									dataType: 'json',
+									success: function(responseData, textStatus, jqXHR) {
+										console.log("Reported " + rgEntry.actor_name + " at time " + rgEntry.time);
+									},
+									error: function (responseData, textStatus, errorThrown) {
+										console.log('POST failed.');
+									}
+								});
 							} else {
 								w.$J(ele).data('abilityid', rgEntry.ability );
 								w.$J('.name', ele).text( rgEntry.actor_name );
@@ -693,19 +706,6 @@
 
 								this.m_eleUpdateLogContainer[0].insertBefore(ele[0], this.m_eleUpdateLogContainer[0].firstChild);
 							}
-							w.$J.ajax({
-								type: 'POST',
-								url: 'http://steam.intense.io:8080/report',
-								crossDomain: true,
-								data: JSON.stringify({"name":rgEntry.actor_name, "steamid":rgEntry.actor, "round":getGameLevel(), "ability":rgEntry.ability, "time":rgEntry.time}),
-								dataType: 'json',
-								success: function(responseData, textStatus, jqXHR) {
-									console.log("Reported " + rgEntry.actor_name + " at time " + rgEntry.time);
-								},
-								error: function (responseData, textStatus, errorThrown) {
-									console.log('POST failed.');
-								}
-							});
 							break;
 
 						default:
