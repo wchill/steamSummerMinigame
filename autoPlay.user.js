@@ -2,7 +2,7 @@
 // @name /u/wchill Monster Minigame Auto-script w/ anti-troll
 // @namespace https://github.com/wchill/steamSummerMinigame
 // @description A script that runs the Steam Monster Minigame for you.
-// @version 8.1.2
+// @version 8.1.3
 // @match *://steamcommunity.com/minigame/towerattack*
 // @match *://steamcommunity.com//minigame/towerattack*
 // @grant none
@@ -16,7 +16,7 @@
 	"use strict";
 
 	//Version displayed to client, update along with the @version above
-	var SCRIPT_VERSION = '8.1.2';
+	var SCRIPT_VERSION = '8.1.3';
 
 	// OPTIONS
 	var clickRate = 20;
@@ -544,13 +544,11 @@
 				useMoraleBoosterIfRelevant();
 				//useMetalDetectorIfRelevant();
 				//useMaxElementalDmgIfRelevant();
-				if (level % 100 < 90){
 					useClusterBombIfRelevant();
 					useNapalmIfRelevant();
 					useTacticalNukeIfRelevant();
 					useGoodLuckCharmIfRelevant();
 					useMoraleBoosterIfRelevant();
-				}
 				useLikeNew();
 				useWormholeIfRelevant();
 				useReviveIfRelevant(level);
@@ -1303,7 +1301,7 @@
 
 		// Check the time before using like new.
 		var level = getGameLevel();
-		if (level % control.rainingRounds === 0 || level % 100 >= 90) {
+		if (level % control.rainingRounds === 0) {
 			return;
 		}
 
@@ -1332,7 +1330,7 @@
 
 		// Check the time before using like new.
 		var level = getGameLevel();
-		if (level % control.rainingRounds === 0 || level % 100 >= 90) {
+		if (level % control.rainingRounds === 0) {
 			return;
 		}
 
