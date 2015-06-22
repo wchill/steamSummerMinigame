@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Monster Minigame AutoUpgrade No Elemental No Auto-DPS Fork
+// @name         Monster Minigame AutoUpgrade 2.0
 // @namespace    https://github.com/Pawsed/SteamMonsterAutoUpgradeManager/
-// @version      1.1.0
+// @version      2.0
 // @description  An automatic upgrade manager for the 2015 Summer Steam Monster Minigame
 // @match        *://steamcommunity.com/minigame/towerattack*
 // @match        *://steamcommunity.com//minigame/towerattack*
@@ -19,7 +19,8 @@ var autoBuyAbilities = false;
 var elementalSpecializations = 0;
 
 // How frequent do we check to see if we can upgrade?
-var upgradeManagerFreq = 5000;
+var upgradeManagerPeriod = 500;
+var busyCount = 0;
 
 var survivalTime = 10;
 var autoUpgradeManager, upgradeManagerPrefilter;
@@ -173,7 +174,7 @@ function startAutoUpgradeManager() {
 			cost += data.cost * Math.pow(data.cost_exponential_base, level - level_diff);
 		}
 
-		// recurse for required upgrades
+		// recurse for required upgrades`
 		var required = data.required_upgrade;
 		if (required !== undefined) {
 			var parents = calculateUpgradeTree(required, data.required_upgrade_level || 1);
@@ -275,15 +276,15 @@ function startAutoUpgradeManager() {
 		// check auto damage upgrades
 		gAutoUpgrades.forEach(function(id) {
 			result = calculateUpgradeTree(id);
-			dpg = (scene.m_rgPlayerTechTree.base_dps * result.boost / 10000000000) / result.cost;
+			dpg = 0;
 			/*if (dpg >= best.dpg) {
-				if (result.required !== undefined) id = result.required;
-				best = {
-					id: id,
-					cost: scene.GetUpgradeCost(id),
-					dpg: dpg
-				};
-			}*/
+			 if (result.required !== undefined) id = result.required;
+			 best = {
+			 id: id,
+			 cost: scene.GetUpgradeCost(id),
+			 dpg: dpg
+			 };
+			 }*/
 		});
 
 		// check Lucky Shot
@@ -383,7 +384,7 @@ function startAutoUpgradeManager() {
 				next = bestHealthUpgrade();
 			}
 
-			 else {
+			else {
 				var damage = bestDamageUpgrade();
 				var ability = nextAbilityUpgrade();
 				next = (damage.cost < ability.cost || ability.id === -1) ? damage : ability;
@@ -395,9 +396,9 @@ function startAutoUpgradeManager() {
 				$J(document.getElementById('upgr_' + next.id)).addClass('next_upgrade');
 			}
 			console.log(
-					'%cnext buy: %c%s %c(%s)', 'font-weight:bold', 'color:red',
-					scene.m_rgTuningData.upgrades[next.id].name, 'color:red;font-style:italic',
-					FormatNumberForDisplay(next.cost)
+				'%cnext buy: %c%s %c(%s)', 'font-weight:bold', 'color:red',
+				scene.m_rgTuningData.upgrades[next.id].name, 'color:red;font-style:italic',
+				FormatNumberForDisplay(next.cost)
 			);
 		}
 	};
@@ -414,7 +415,7 @@ function startAutoUpgradeManager() {
 	/********
 	 * MAIN *
 	 ********/
-	// ---------- JS hooks ----------
+		// ---------- JS hooks ----------
 	hook(CSceneGame, 'TryUpgrade', function() {
 		// if it's a valid try, we should reevaluate after the update
 		if (this.m_bUpgradesBusy) {
@@ -489,7 +490,14 @@ function startAutoUpgradeManager() {
 		scene = g_Minigame.CurrentScene();
 
 		// tried to buy upgrade and waiting for reply; don't do anything
-		if (scene.m_bUpgradesBusy) return;
+		if (scene.m_bUpgradesBusy) {
+			busyCount++;
+			if(busyCount < 5){
+				return;
+			}
+			m_bUpgradesBusy = false;
+			busyCount = 0;
+		}
 
 		// no item queued; refresh stats and queue next item
 		if (next.id === -1) {
@@ -512,7 +520,7 @@ function startAutoUpgradeManager() {
 		}
 	}
 
-	autoUpgradeManager = setInterval(upgradeManager, upgradeManagerFreq);
+	autoUpgradeManager = setInterval(upgradeManager, upgradeManagerPeriod);
 
 	console.log("autoUpgradeManager has been started.");
 }
@@ -529,25 +537,25 @@ function getAbilityItemQuantity(abilityID) {
 }
 
 function gameRunning() {
-    return g_Minigame && g_Minigame.CurrentScene() && g_Minigame.CurrentScene().m_bRunning;
+	return g_Minigame && g_Minigame.CurrentScene() && g_Minigame.CurrentScene().m_bRunning;
 }
 
 function tryStart() {
-    if (!gameRunning()) {
-        setTimeout(tryStart, 1000);
-    } else {
-        if (!upgradeManagerPrefilter) {
-            // add prefilter on first run
-            $J.ajaxPrefilter(function() {
-                // this will be defined by the end of the script
-                upgradeManagerPrefilter.apply(this, arguments);
-            });
-        }
-        startAutoUpgradeManager();
-        /*upgradeManager = startAutoUpgradeManager();
-        if (upgradeManagerTimer) window.clearTimeout(upgradeManagerTimer);
-        var upgradeManagerTimer = window.setInterval(upgradeManager, 5000);*/
-    }
+	if (!gameRunning()) {
+		setTimeout(tryStart, 1000);
+	} else {
+		if (!upgradeManagerPrefilter) {
+			// add prefilter on first run
+			$J.ajaxPrefilter(function() {
+				// this will be defined by the end of the script
+				upgradeManagerPrefilter.apply(this, arguments);
+			});
+		}
+		startAutoUpgradeManager();
+		/*upgradeManager = startAutoUpgradeManager();
+		 if (upgradeManagerTimer) window.clearTimeout(upgradeManagerTimer);
+		 var upgradeManagerTimer = window.setInterval(upgradeManager, 5000);*/
+	}
 }
 
 setTimeout(tryStart, 5000);
