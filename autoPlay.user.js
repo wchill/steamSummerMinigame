@@ -542,7 +542,7 @@
 				useMoraleBoosterIfRelevant();
 				//useMetalDetectorIfRelevant();
 				useMaxElementalDmgIfRelevant();
-				tryUsingItem(ABIlITIES.REFLECT_DAMAGE);
+				tryUsingItem(ABILITIES.REFLECT_DAMAGE);
 
 					useClusterBombIfRelevant();
 					useNapalmIfRelevant();
@@ -1267,7 +1267,7 @@
 		//if (tryUsingAbility(ABILITIES.MEDICS, false, true)) {
 		//	advLog('Medics is purchased, cooled down. Trigger it.', 2);
 		//}
-		tryUsingItem(ABIlITIES.REFLECT_DAMAGE);
+		tryUsingItem(ABILITIES.REFLECT_DAMAGE);
 
 		if (level > control.reflectDamageThreshold && tryUsingItem(ABILITIES.REFLECT_DAMAGE)) {
 			advLog('We have reflect damage, cooled down. Trigger it.', 2);
