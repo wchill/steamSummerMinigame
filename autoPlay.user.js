@@ -39,8 +39,8 @@
 	var autoRefreshSecondsCheckLoadedDelay = 30;
 
 	// DO NOT MODIFY
-	var wormHoleConstantUse = false;
-	var wormHoleConstantUseOverride = false;
+	var wormHoleConstantUse = true;
+	var wormHoleConstantUseOverride = true;
 	var isAlreadyRunning = false;
 	var refreshTimer = null;
 	var currentClickRate = clickRate;
@@ -160,6 +160,7 @@
 		ABILITIES.REFLECT_DAMAGE,
 		ABILITIES.FEELING_LUCKY
 	];
+	NUISANCE_ABILITIES = [];
 
 	var BOSS_DISABLED_ABILITIES = [
 		ABILITIES.MORALE_BOOSTER,
@@ -174,6 +175,7 @@
 		ABILITIES.REFLECT_DAMAGE,
 		ABILITIES.THROW_MONEY_AT_SCREEN
 	];
+	BOSS_DISABLED_ABILITIES = [];
 
 	var ENEMY_TYPE = {
 		"SPAWNER": 0,
@@ -744,7 +746,7 @@
 	function refreshPlayerData() {
 		advLog("Refreshing player data", 2);
 
-		disableAbility('25');
+		//disableAbility('25');
 
 		w.g_Server.GetPlayerData(
 			function(rgResult) {
@@ -1216,7 +1218,7 @@
 			// Prevent attack abilities and items if up against a boss or treasure minion
 			var level = getGameLevel();
 			if (targetIsTreasure || (targetIsBoss && (level < control.speedThreshold || level % control.rainingRounds === 0))) {
-				BOSS_DISABLED_ABILITIES.forEach(disableAbility);
+				//BOSS_DISABLED_ABILITIES.forEach(disableAbility);
 			} else {
 				BOSS_DISABLED_ABILITIES.forEach(enableAbility);
 			}
@@ -1230,7 +1232,7 @@
 
 	function useCooldownIfRelevant() {
 		if (getActiveAbilityLaneCount(ABILITIES.DECREASE_COOLDOWNS) > 0) {
-			disableAbility(ABILITIES.DECREASE_COOLDOWNS);
+			//disableAbility(ABILITIES.DECREASE_COOLDOWNS);
 			return;
 		}
 
@@ -1431,7 +1433,7 @@
 	}
 
 	function disableAbility(abilityId) {
-		toggleAbilityVisibility(abilityId, false);
+		toggleAbilityVisibility(abilityId, true);
 	}
 
 	function enableAbility(abilityId) {
@@ -1469,7 +1471,8 @@
 		var level = getGameLevel();
 		var levelmod = level % control.rainingRounds;
 		// Early in the game, or we're a safe distance away from raining rounds.
-		return (level >= 99999999 || (levelmod > 0 && levelmod < control.rainingRounds - control.rainingSafeRounds));
+		return true;
+		//return (level >= 99999999 || (levelmod > 0 && levelmod < control.rainingRounds - control.rainingSafeRounds));
 	}
 
 	function tryUsingAbility(abilityId) {
