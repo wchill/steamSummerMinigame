@@ -87,8 +87,6 @@
 
 	var showedUpdateInfo = getPreferenceBoolean("showedUpdateInfo", false);
 
-	var lane_info = {};
-
 	var UPGRADES = {
 		LIGHT_ARMOR: 0,
 		AUTO_FIRE_CANNON: 1,
@@ -314,12 +312,6 @@
 		};
 		document.querySelector(".game_options").insertBefore(egg, document.querySelector(".leave_game_btn"));
 
-		// Add "players in game" label
-		var titleActivity = document.querySelector('.title_activity');
-		var playersInGame = document.createElement('span');
-		playersInGame.innerHTML = '<span id=\"players_in_game\">0/1500</span>&nbsp;Players in room<br>';
-		titleActivity.insertBefore(playersInGame, titleActivity.firstChild);
-
 		// Fix alignment
 		var activity = document.getElementById("activitylog");
 		activity.style.marginTop = "33px";
@@ -346,8 +338,6 @@
 		options_box.style.marginLeft = "auto";
 		options_box.style.marginRight = "auto";
 
-		var info_box = options_box.cloneNode(true);
-
 		var options1 = document.createElement("div");
 		options1.style["-moz-column-count"] = 3;
 		options1.style["-webkit-column-count"] = 3;
@@ -373,21 +363,6 @@
 		options1.appendChild(makeNumber("setLogLevel", "Change the log level", "25px", logLevel, 0, 5, updateLogLevel));
 
 		options_box.appendChild(options1);
-
-		info_box.innerHTML = "<b>GAME INFO</b><br/>";
-		info_box.className = "info_box";
-		info_box.style.right = "0px";
-		lane_info = document.createElement("div");
-		lane_info.style["-moz-column-count"] = 3;
-		lane_info.style["-webkit-column-count"] = 3;
-		lane_info.style["column-count"] = 3;
-
-		lane_info.appendChild(document.createElement("div"));
-		lane_info.appendChild(document.createElement("div"));
-		lane_info.appendChild(document.createElement("div"));
-
-		info_box.appendChild(lane_info);
-		options_box.parentElement.appendChild(info_box);
 
 		var leave_game_box = document.querySelector(".leave_game_helper");
 		leave_game_box.parentElement.removeChild(leave_game_box);
@@ -418,25 +393,13 @@
 		w.g_Minigame.CurrentScene().TrySpendBadgePoints(w.$J("<a data-type='19' data-cost='1'></a>"), badgePoints % 100 );
 	}
 
-	function updateLaneData() {
-		var element_names = {1:":shelterwildfire:", 2:":waterrune:", 3:":Wisp:", 4:":FateTree:"};
-		for(var i = 0; i < 3; i++) {
-			var element = s().m_rgGameData.lanes[i].element;
-			var abilities = s().m_rgLaneData[i].abilities;
-			if(!abilities) {
-				abilities = {};
-			}
-			var enemies = [];
-			for (var j = 0; j < 4; j++) {
-				var enemy = s().GetEnemy(i, j);
-				if (enemy) {
-					enemies.push(enemy);
-				}
-			}
-			var players = s().m_rgLaneData[i].players;
-			var output = "Lane " + (i+1) + " - <img src=\"http://cdn.steamcommunity.com/economy/emoticon/" + element_names[element] + "\"><br>" + players + " players";
-			lane_info.children[i].innerHTML = output;
-		}
+	function updateStatisticsUI() {
+		var totalPlayers = 0;
+		w.$J.each(s().m_rgLaneData, function(i, lane) {
+			totalPlayers += lane.players;
+			w.$J('#lane' + i + '_player_count').text(lane.players + ' players');
+		});
+		w.$J('#players_in_game').text(totalPlayers + '/1500');
 	}
 
 	function fixActiveCapacityUI() {
@@ -499,7 +462,7 @@
 
 			wormHoleConstantUse = (level % control.rainingRounds === 0) || wormHoleConstantUseOverride;
 
-			updateLaneData();
+			updateStatisticsUI();
 			attemptRespawn();
 			if (wormholeInterval) {
 				w.clearInterval(wormholeInterval);
@@ -556,7 +519,6 @@
 				useReviveIfRelevant(level);
 			}
 
-			updatePlayersInGame();
 
 			if (level !== lastLevel) {
 				lastLevel = level;
@@ -1051,13 +1013,6 @@
 		text.m_easeAlpha = e;
 
 		s().m_rgClickNumbers.push(text);
-	}
-
-	function updatePlayersInGame() {
-		var totalPlayers = s().m_rgLaneData[0].players +
-			s().m_rgLaneData[1].players +
-			s().m_rgLaneData[2].players;
-		document.getElementById("players_in_game").innerHTML = totalPlayers + "/1500";
 	}
 
 	function goToRainingLane() {
@@ -1650,9 +1605,6 @@
 	}, autoRefreshSecondsCheckLoadedDelay * 1000);
 	*/
 
-	// Append gameid to breadcrumbs
-	var breadcrumbs = document.querySelector('.breadcrumbs');
-
 	function countdown(time) {
 		var hours = 0;
 		var minutes = 0;
@@ -1671,39 +1623,33 @@
 		return {hours : hours, minutes : minutes};
 	}
 
-	if (breadcrumbs) {
-		var element = document.createElement('span');
-		element.textContent = ' > ';
-		breadcrumbs.appendChild(element);
-
-		element = document.createElement('span');
-		element.style.color = '#D4E157';
-		element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
-		element.textContent = 'Room ' + w.g_GameID;
-		breadcrumbs.appendChild(element);
-
-		element = document.createElement('span');
-		element.textContent = ' > ';
-		breadcrumbs.appendChild(element);
-
-		element = document.createElement('span');
-		element.style.color = '#FFA07A';
-		element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
-		element.textContent = 'Level: 0, Expected Level: 0, Likely Level: 0';
-		breadcrumbs.appendChild(element);
-		document.ExpectedLevel = element;
-
-		element = document.createElement('span');
-		element.textContent = ' > ';
-		breadcrumbs.appendChild(element);
-
-		element = document.createElement('span');
-		element.style.color = '#9AC0FF';
-		element.style.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
-		element.textContent = 'Remaining Time: 0 hours, 0 minutes.';
-		breadcrumbs.appendChild(element);
-		document.RemainingTime = element;
+	function addBreadcrumb(id, text, css) {
+		if (css && !css.textShadow) {
+			css.textShadow = '1px 1px 0px rgba( 0, 0, 0, 0.3 )';
+		}
+		var $crumb = w.$J('<span class="breadcrumb"> &gt; </span>').append(w.$J('<span id="' + id + '"/>').text(text).css(css));
+		w.$J('.breadcrumbs').remove('.breadcrumb:has(#' + id + ')').append($crumb);
 	}
+
+	w.$J(function OnDomReady() {
+		addBreadcrumb('crumb_game_id', 'Room ' + w.g_GameID, {
+			color: '#D4E157'
+		});
+		addBreadcrumb('crumb_level_predict', 'Level: 0, Expected Level: 0, Likely Level: 0', {
+			color: '#FFA07A'
+		});
+		addBreadcrumb('crumb_time_left', 'Remaining Time: 0 hours, 0 minutes', {
+			color: '#9AC0FF'
+		});
+
+		// More player counts
+		w.$J('#lane0,#lane1,#lane2').each(function(i) {
+			var $l = w.$J(this);
+			$l.remove('#lane' + i + '_player_count').find('.label').after(w.$J('<div id="lane' + i + '_player_count"/>').css({'font-size': '90%', 'white-space': 'nowrap'}));
+		});
+		w.$J('.title_activity:has(#players_in_game)').remove(); // cleanup a previous script
+		w.$J('.title_activity:has(#players_in_lane)').hide().before('<span class="title_activity"><span id="players_in_game">0/1500</span>&nbsp;Players in room</span>');
+	});
 
 	function updateLevelInfoTitle(level)
 	{
@@ -1717,8 +1663,8 @@
 
 		var rem_time = countdown(remaining_time);
 
-		document.ExpectedLevel.textContent = 'Level: ' + w.FormatNumberForDisplay(level, 5) + ', Expected Jump: ' + w.FormatNumberForDisplay(estimateJumps(), 5);
-		document.RemainingTime.textContent = 'Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes.';
+		w.$J('#crumb_level_predict').text('Level: ' + w.FormatNumberForDisplay(level, 5) + ', Expected Jump: ' + w.FormatNumberForDisplay(estimateJumps()));
+		w.$J('#crumb_time_left').text('Remaining Time: ' + rem_time.hours + ' hours, ' + rem_time.minutes + ' minutes');
 	}
 
 	// Helpers to access player stats.
