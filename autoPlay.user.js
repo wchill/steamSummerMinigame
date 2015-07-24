@@ -184,7 +184,25 @@
 		"MINIBOSS": 3,
 		"TREASURE": 4
 	};
-
+    
+    // silence some native logs
+    function _isString(value) {
+        return typeof value == 'string' || (!!value && typeof value === 'object' && Object.prototype.toString.call(value) === '[object String]');
+    }
+    console.nativeLog = console.log;
+    console.log = function() {
+        for(var i = 0, args = new Array(arguments.length); i < args.length; ++i) {
+            args[i] = arguments[i];
+        }
+        
+        var msg = args[0];
+        if(_isString(msg) && msg.startsWith('Got stale data for time')) {
+            return;
+        }
+        console.nativeLog.apply(console, args);
+    };
+    
+    
 	disableParticles();
 
 	function s() {
@@ -1623,7 +1641,7 @@
 
 	function advLog(msg, lvl) {
 		if (lvl <= logLevel) {
-			console.log(msg);
+			console.nativeLog(msg);
 		}
 	}
 
