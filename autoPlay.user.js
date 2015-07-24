@@ -1776,8 +1776,7 @@
 		var trt_oldTooltip = w.fnTooltipUpgradeDesc;
 		w.fnTooltipUpgradeDesc = function(context) {
 			var $context = w.$J(context);
-			var desc = $context.data('desc');
-			var strOut = desc;
+			var strOut = $context.data('desc');
 			var multiplier = parseFloat($context.data('multiplier'));
 			switch ($context.data('upgrade_type')) {
 				case 2: // Type for click damage. All tiers.
