@@ -155,7 +155,7 @@
 		ABILITIES.CRIPPLE_MONSTER,
 		ABILITIES.MAX_ELEMENTAL_DAMAGE,
 		ABILITIES.THROW_MONEY_AT_SCREEN,
-		ABILITIES.TREASURE,
+		//ABILITIES.TREASURE,
 		ABILITIES.STEAL_HEALTH,
 		ABILITIES.REFLECT_DAMAGE,
 		ABILITIES.FEELING_LUCKY
@@ -1383,9 +1383,12 @@
 
 	function useMetalDetectorIfRelevant() {
 		if (triggerAbility(ABILITIES.METAL_DETECTOR)) {
-			// Max Elemental Damage is purchased, cooled down, and needed. Trigger it.
-			advLog('Max Elemental Damage is purchased and cooled down, triggering it.', 2);
-		}
+			// Metal Detector is purchased, cooled down, and needed. Trigger it.
+			advLog('Metal Detector is purchased and cooled down, triggering it.', 2);
+		} else if (tryUsingItem(ABILITIES.TREASURE, false)) {
+			// Treasure is purchased, cooled down, and needed. Trigger it.
+			advLog('Treasure is purchased and cooled down, triggering it.', 2);
+		} 
 	}
 
 
