@@ -322,7 +322,11 @@
 
 		// Fix alignment
 		var activity = document.getElementById("activitylog");
-		activity.style.marginTop = "33px";
+		activity.style.marginTop = "20px";
+
+		// Fix abilities active in lane box size
+		var abilitybox = document.getElementById("activeinlanecontainer");
+		abilitybox.style.height = "200px";
 
 		var newDiv = document.createElement("div");
 		document.getElementsByClassName('pagecontent')[0].insertBefore(newDiv, document.getElementsByClassName('footer_spacer')[0]);
