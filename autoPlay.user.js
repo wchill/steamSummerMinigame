@@ -53,7 +53,8 @@
 		"Wormhole Gaben": "http://i.imgur.com/6BuBgxY.png",
 		"MSG2015": "http://i.imgur.com/zHI6C6X.png",
 		"Matrix Gaben": "http://i.imgur.com/titbsfQ.png",
-		"Praising Intensifies": "http://i.imgur.com/1ynXett.gif"
+		"Praising Intensifies": "http://i.imgur.com/1ynXett.gif",
+		"Chen": "http://i.imgur.com/o9ZQRh6.png"
 	};
 	var goldHelmUI = getPreference("praiseGoldHelmImage", goldHelmURLs["Golden Gaben"]);
 	var fixedUI = "http://i.imgur.com/ieDoLnx.png";
