@@ -1,0 +1,32 @@
+{
+    "env": {
+        "browser": true // jshint:browser=true
+    },
+    "globals": {
+        "GM_info": false
+    },
+    "rules": {
+        "curly": 2, // jshint:curly=true
+        "indent": [2, "tab"],
+        "new-cap": 0, // jshint:newcap=false
+        "no-console": 0, // jshint:devel=true
+        "no-undef": 2, // jshint:undef=true
+        "strict": [2, "function"], // jshint:strict=true
+        // jshint:laxbreak=true
+
+        // defaults manually disabled until a style decision is made
+        "camelcase": 0,
+        "eqeqeq": 0,
+        "key-spacing": 0,
+        "no-alert": 0,
+        "no-eval": 0,
+        "no-mixed-spaces-and-tabs": 0,
+        "no-multi-spaces": 0,
+        "no-shadow": 0,
+        "no-unused-vars": 0,
+        "no-use-before-define": 0,
+        "quotes": 0,
+        "space-infix-ops": 0,
+        "yoda": 0
+    }
+}
